@@ -1,5 +1,5 @@
-import 'package:crypto_app_task/login_screen.dart';
-import 'package:crypto_app_task/onboarding_page.dart';
+import 'package:crypto_app_task/screens/login_registration/login_screen.dart';
+import 'package:crypto_app_task/screens/onboarding/onboarding_page.dart';
 import 'package:flutter/material.dart';
 
 class OnboardingScreen extends StatefulWidget {

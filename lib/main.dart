@@ -1,5 +1,5 @@
-import 'package:crypto_app_task/onboarding_screen.dart';
-import 'package:crypto_app_task/signup_screen.dart';
+import 'package:crypto_app_task/screens/onboarding/onboarding_screen.dart';
+import 'package:crypto_app_task/screens/onboarding/login_registration/signup_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
