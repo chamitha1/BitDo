@@ -12,25 +12,18 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-  // Controllers
-  final _emailController = TextEditingController();
+  TextEditingController? _emailController;
+
   final _passController = TextEditingController();
   final _confirmPassController = TextEditingController();
   final _inviteController = TextEditingController();
 
-  // Email dropdown sizing
-  final GlobalKey _emailFieldKey = GlobalKey();
+  FocusNode? _autocompleteFocusNode;
 
-  // State Variables
   bool _agreedToTerms = false;
   bool _isPasswordVisible = false;
-
-  // Logic States
   bool _isEmailPopulated = false;
   bool _isEmailVerified = false;
-
-  // Theme Color
-  final Color _primaryBlue = const Color(0XFF1D5DE5);
 
   static const List<String> _emailDomains = <String>[
     'gmail.com',
@@ -44,18 +37,10 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   void initState() {
     super.initState();
-
-    _emailController.addListener(() {
-      final nowPopulated = _emailController.text.trim().isNotEmpty;
-      if (nowPopulated != _isEmailPopulated) {
-        setState(() => _isEmailPopulated = nowPopulated);
-      }
-    });
   }
 
   @override
   void dispose() {
-    _emailController.dispose();
     _passController.dispose();
     _confirmPassController.dispose();
     _inviteController.dispose();
@@ -63,17 +48,20 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   void _openOtpSheet() {
-    if (!_isEmailPopulated) return;
+    if (!_isEmailPopulated || _emailController == null) return;
 
+    _autocompleteFocusNode?.unfocus();
     FocusScope.of(context).unfocus();
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      barrierColor: const Color(0xffECEFF5).withOpacity(0.7),
+
+      barrierColor: const Color(0xFFECEFF5).withOpacity(0.7),
+
       builder: (context) => OtpBottomSheet(
-        email: _emailController.text.trim(),
+        email: _emailController!.text.trim(),
         onVerified: () {
           Navigator.pop(context);
           setState(() => _isEmailVerified = true);
@@ -118,57 +106,20 @@ class _SignupScreenState extends State<SignupScreen> {
               const SizedBox(height: 28),
 
               _textLabel("Email"),
-              TextField(
-                controller: _emailController,
-                decoration: _inputDecoration(
-                  hint: "Enter your email",
-                  iconPath: "assets/icons/sign_up/sms.png",
-                  suffix: Padding(
-                    padding: const EdgeInsets.only(
-                      right: 8.0,
-                      top: 8.0,
-                      bottom: 8.0,
-                    ),
-                    child: _verifyButton(
-                      text: "Verify",
-                      isEnabled: _isEmailPopulated,
-                      onPressed: () {
-                        if (_isEmailPopulated) {
-                          // Close keyboard first
-                          FocusScope.of(context).unfocus();
-
-                          // SHOW THE BOTTOM SHEET
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled:
-                                true, // Allows the sheet to rise with keyboard
-                            backgroundColor: Colors
-                                .transparent, // Let the sheet define its own corners
-                            barrierColor: Color(0xffECEFF5).withOpacity(0.7),
-                            builder: (context) => OtpBottomSheet(
-                              email: _emailController
-                                  .text, // Pass the actual email typed
-                              onVerified: () {
-                                // Close the bottom sheet
-                                Navigator.pop(context);
-
-                                // Update state in parent screen
-                                setState(() {
-                                  _isEmailVerified = true;
-                                });
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      "Email Verified Successfully!",
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          );
-                        }
-                      },
-                    ),
+              _emailAutocompleteField(
+                hint: "Enter your email",
+                iconPath: "assets/icons/sign_up/sms.png",
+                suffixWidget: Padding(
+                  padding: const EdgeInsets.only(
+                    right: 8.0,
+                    top: 8.0,
+                    bottom: 8.0,
+                  ),
+                  child: _verifyButton(
+                    text: _isEmailVerified ? "Verified" : "Verify",
+                    isEnabled: _isEmailPopulated,
+                    isVerified: _isEmailVerified,
+                    onPressed: _openOtpSheet,
                   ),
                 ),
               ),
@@ -184,6 +135,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   iconPath: "assets/icons/sign_up/lock.png",
                   suffixIconPath: "assets/icons/sign_up/eye.png",
                   isPassword: true,
+                  enabled: _isEmailVerified,
                 ),
               ),
               const SizedBox(height: 30),
@@ -196,8 +148,9 @@ class _SignupScreenState extends State<SignupScreen> {
                 decoration: _inputDecoration(
                   hint: "Re-Enter Password",
                   iconPath: "assets/icons/sign_up/lock.png",
-                  isPassword: true,
                   suffixIconPath: "assets/icons/sign_up/eye.png",
+                  isPassword: true,
+                  enabled: _isEmailVerified,
                 ),
               ),
               const SizedBox(height: 30),
@@ -209,6 +162,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 decoration: _inputDecoration(
                   hint: "Please Enter Your Code",
                   iconPath: "assets/icons/sign_up/hashtag.png",
+                  enabled: _isEmailVerified,
                 ),
               ),
               const SizedBox(height: 22),
@@ -280,7 +234,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 text: "Sign Up",
                 onPressed: _isEmailVerified && _agreedToTerms
                     ? () {
-                        // sign up logic
+                        // Sign up logic
                       }
                     : () {},
               ),
@@ -327,159 +281,8 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  // ---------- Email Autocomplete Field (Styled) ----------
-  Widget _emailAutocompleteField({
-    required String hint,
-    required String iconPath,
-  }) {
-    return Autocomplete<String>(
-      optionsBuilder: (TextEditingValue value) {
-        final input = value.text.trim();
-        if (input.isEmpty) return const Iterable<String>.empty();
+  // widgets
 
-        final at = input.indexOf('@');
-
-        if (at < 0) {
-          // No '@' typed
-          return _emailDomains.map((d) => '$input@$d');
-        }
-
-        // With '@' typed
-        final local = input.substring(0, at).trim();
-        final typedDomain = input.substring(at + 1).toLowerCase();
-
-        if (local.isEmpty) return const Iterable<String>.empty();
-
-        final matches = _emailDomains.where((d) => d.toLowerCase().startsWith(typedDomain));
-        return matches.map((d) => '$local@$d');
-      },
-
-      onSelected: (selection) {
-        _emailController.text = selection;
-        _emailController.selection = TextSelection.fromPosition(
-          TextPosition(offset: selection.length),
-        );
-        setState(() => _isEmailPopulated = selection.trim().isNotEmpty);
-      },
-
-      fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
-        // IMPORTANT: bind Autocomplete controller to our controller
-        // so Verify reads correct email.
-        if (controller.text != _emailController.text) {
-          controller.text = _emailController.text;
-          controller.selection = TextSelection.fromPosition(
-            TextPosition(offset: controller.text.length),
-          );
-        }
-
-        controller.addListener(() {
-          if (_emailController.text != controller.text) {
-            _emailController.text = controller.text;
-            _emailController.selection = controller.selection;
-          }
-        });
-
-        return Container(
-          key: _emailFieldKey,
-          child: TextField(
-            controller: controller,
-            focusNode: focusNode,
-            keyboardType: TextInputType.emailAddress,
-            textInputAction: TextInputAction.done,
-            decoration: _inputDecoration(
-              hint: hint,
-              iconPath: iconPath,
-              suffix: Padding(
-                padding: const EdgeInsets.only(right: 8.0, top: 8.0, bottom: 8.0),
-                child: _verifyButton(
-                  text: "Verify",
-                  isEnabled: _isEmailPopulated,
-                  onPressed: _openOtpSheet,
-                ),
-              ),
-            ),
-            onSubmitted: (_) => onFieldSubmitted(),
-          ),
-        );
-      },
-
-      optionsViewBuilder: (context, onSelected, options) {
-        // dropdown same width as field
-        double width = MediaQuery.of(context).size.width - 48;
-        final box = _emailFieldKey.currentContext?.findRenderObject() as RenderBox?;
-        if (box != null) width = box.size.width;
-
-        return Align(
-          alignment: Alignment.topLeft,
-          child: Material(
-            color: Colors.transparent,
-            child: Container(
-              width: width,
-              margin: const EdgeInsets.only(top: 6),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFDAE0EE), width: 1),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0XFF343558).withOpacity(0.10),
-                    blurRadius: 18,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 240),
-                  child: ListView.separated(
-                    padding: EdgeInsets.zero,
-                    shrinkWrap: true,
-                    itemCount: options.length,
-                    separatorBuilder: (_, __) => Divider(
-                      height: 1,
-                      thickness: 1,
-                      color: const Color(0xFFDAE0EE).withOpacity(0.7),
-                    ),
-                    itemBuilder: (context, index) {
-                      final opt = options.elementAt(index);
-                      return InkWell(
-                        onTap: () => onSelected(opt),
-                        splashColor: _primaryBlue.withOpacity(0.08),
-                        highlightColor: _primaryBlue.withOpacity(0.06),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.alternate_email, size: 18, color: Color(0XFF717F9A)),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  opt,
-                                  style: const TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontSize: 14.5,
-                                    color: Color(0XFF151E2F),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  // ---------- helper widgets ----------
   Widget _textLabel(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
@@ -494,10 +297,126 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
+  Widget _emailAutocompleteField({
+    required String hint,
+    required String iconPath,
+    required Widget suffixWidget,
+  }) {
+    return Autocomplete<String>(
+      optionsBuilder: (TextEditingValue value) {
+        final raw = value.text;
+        final input = raw.trim();
+
+        if (input.isEmpty) return const Iterable<String>.empty();
+
+        if (_emailDomains.any(
+          (d) => input.toLowerCase() == '${_localPart(input).toLowerCase()}@$d',
+        )) {
+          return const Iterable<String>.empty();
+        }
+
+        final atIndex = input.indexOf('@');
+        if (atIndex < 0) {
+          return _emailDomains.map((d) => '$input@$d');
+        }
+
+        final local = input.substring(0, atIndex);
+        final typedDomain = input.substring(atIndex + 1).toLowerCase();
+
+        if (local.isEmpty) return const Iterable<String>.empty();
+
+        final matches = _emailDomains.where(
+          (d) => d.toLowerCase().startsWith(typedDomain),
+        );
+        return matches.map((d) => '$local@$d');
+      },
+      onSelected: (String selection) {
+        _emailController?.text = selection;
+        _emailController?.selection = TextSelection.fromPosition(
+          TextPosition(offset: selection.length),
+        );
+        setState(() {
+          _isEmailPopulated = true;
+        });
+      },
+      fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+        if (_emailController != controller) {
+          _emailController = controller;
+          _autocompleteFocusNode = focusNode;
+
+          _emailController!.addListener(() {
+            final isPopulated = _emailController!.text.isNotEmpty;
+            if (_isEmailPopulated != isPopulated) {
+              setState(() {
+                _isEmailPopulated = isPopulated;
+              });
+            }
+          });
+        }
+        return TextField(
+          controller: controller,
+          focusNode:
+              focusNode, 
+          keyboardType: TextInputType.emailAddress,
+          textInputAction: TextInputAction.next,
+          decoration: _inputDecoration(
+            hint: hint,
+            iconPath: iconPath,
+            suffixWidget: suffixWidget,
+          ),
+          onSubmitted: (_) => onFieldSubmitted(),
+        );
+      },
+      optionsViewBuilder: (context, onSelected, options) {
+        return Align(
+          alignment: Alignment.topLeft,
+          child: Material(
+            elevation: 4,
+            color: const Color(0XFFF6F9FF),
+            borderRadius: BorderRadius.circular(12),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 220, maxWidth: 340),
+              child: ListView.separated(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                itemCount: options.length,
+                separatorBuilder: (_, _) => const SizedBox.shrink(),
+                itemBuilder: (context, i) {
+                  final opt = options.elementAt(i);
+                  return InkWell(
+                    onTap: () => onSelected(opt),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Text(
+                        opt,
+                        style: const TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 14,
+                          color: Color(0XFF151E2F),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  String _localPart(String emailLike) {
+    final idx = emailLike.indexOf('@');
+    if (idx < 0) return emailLike;
+    return emailLike.substring(0, idx);
+  }
+
   InputDecoration _inputDecoration({
     required String hint,
     required String iconPath,
-    Widget? suffix,
+    Widget? suffixWidget,
     bool isPassword = false,
     bool enabled = true,
     String? suffixIconPath,
@@ -519,7 +438,9 @@ class _SignupScreenState extends State<SignupScreen> {
               padding: const EdgeInsets.only(right: 4.0),
               child: IconButton(
                 onPressed: enabled
-                    ? () => setState(() => _isPasswordVisible = !_isPasswordVisible)
+                    ? () => setState(
+                        () => _isPasswordVisible = !_isPasswordVisible,
+                      )
                     : null,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
@@ -529,12 +450,14 @@ class _SignupScreenState extends State<SignupScreen> {
                     suffixIconPath,
                     width: 20,
                     height: 20,
-                    color: _isPasswordVisible ? const Color.fromARGB(255, 15, 40, 59) : null,
+                    color: _isPasswordVisible
+                        ? const Color.fromARGB(255, 15, 40, 59)
+                        : null,
                   ),
                 ),
               ),
             )
-          : suffix,
+          : suffixWidget,
       filled: true,
       fillColor: MaterialStateColor.resolveWith((states) {
         if (states.contains(MaterialState.disabled)) {
@@ -547,11 +470,18 @@ class _SignupScreenState extends State<SignupScreen> {
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: Color(0xFFDAE0EE), width: 1.0),
       ),
+      disabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFDAE0EE), width: 1.0),
+      ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF1D5DE5), width: 1.5),
+        borderSide: const BorderSide(
+          color: Color.fromARGB(255, 112, 152, 221),
+          width: 1.0,
+        ),
       ),
-      disabledBorder: OutlineInputBorder(
+      border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: Color(0xFFDAE0EE), width: 1.0),
       ),
@@ -571,7 +501,6 @@ class _SignupScreenState extends State<SignupScreen> {
         color: isVerified
             ? const Color(0xff2ECC71)
             : (isEnabled ? null : const Color(0XFFB9C6E2)),
-
         gradient: (isEnabled && !isVerified)
             ? const LinearGradient(
                 begin: Alignment.topCenter,
@@ -579,7 +508,6 @@ class _SignupScreenState extends State<SignupScreen> {
                 colors: [Color(0xFF1D5DE5), Color(0xFF174AB7)],
               )
             : null,
-
         borderRadius: BorderRadius.circular(8),
       ),
       child: ElevatedButton(
@@ -588,25 +516,23 @@ class _SignupScreenState extends State<SignupScreen> {
           shadowColor: Colors.transparent,
           foregroundColor: Colors.white,
           elevation: 0,
-          padding: EdgeInsets.symmetric(horizontal: isVerified ? 8 : 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-
           disabledBackgroundColor: Colors.transparent,
           disabledForegroundColor: Colors.white,
+          padding: EdgeInsets.symmetric(horizontal: isVerified ? 12 : 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
-
         onPressed: (isEnabled && !isVerified) ? onPressed : null,
-
         child: isVerified
             ? Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Image.asset(
                     "assets/icons/sign_up/check_circle.png",
-                    width: 20,
-                    height: 20,
+                    width: 14,
+                    height: 14,
+                    color: Colors.white,
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: 6),
                   Text(
                     text,
                     style: const TextStyle(

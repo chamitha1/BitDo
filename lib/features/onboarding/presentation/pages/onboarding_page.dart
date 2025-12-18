@@ -14,14 +14,12 @@ class OnboardingPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Spacer(flex: 5),
-          // Image area
           Expanded(
             flex: 7,
             child: Image.asset(content.image, fit: BoxFit.contain),
           ),
 
           const Spacer(flex: 1),
-          // Text area
           Text(
             content.subtitle,
             textAlign: TextAlign.center,

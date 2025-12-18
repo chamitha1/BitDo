@@ -1,3 +1,4 @@
+import 'package:BitDo/features/auth/presentation/pages/forgot_password_screen.dart';
 import 'package:BitDo/features/auth/presentation/pages/signup_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -91,7 +92,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: 24,
                     child: Checkbox(
                       value: _rememberMe,
-                      onChanged: (v) => setState(() => _rememberMe = v ?? false),
+                      onChanged: (v) =>
+                          setState(() => _rememberMe = v ?? false),
                       activeColor: _primaryBlue,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(4),
@@ -111,7 +113,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   const Spacer(),
                   GestureDetector(
                     onTap: () {
-                      // TODO: forgot password
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ForgotPasswordScreen(),
+                        ),
+                      );
                     },
                     child: const Text(
                       'Forgot Password?',
@@ -278,14 +285,15 @@ class _LoginScreenState extends State<LoginScreen> {
         final input = raw.trim();
 
         if (input.isEmpty) return const Iterable<String>.empty();
-        if (_emailDomains.any((d) => input.toLowerCase() == '${_localPart(input).toLowerCase()}@$d')) {
+        if (_emailDomains.any(
+          (d) => input.toLowerCase() == '${_localPart(input).toLowerCase()}@$d',
+        )) {
           return const Iterable<String>.empty();
         }
 
         final atIndex = input.indexOf('@');
 
         if (atIndex < 0) {
-          
           if (input.isEmpty) return const Iterable<String>.empty();
           return _emailDomains.map((d) => '$input@$d');
         }
@@ -295,7 +303,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
         if (local.isEmpty) return const Iterable<String>.empty();
 
-        final matches = _emailDomains.where((d) => d.toLowerCase().startsWith(typedDomain));
+        final matches = _emailDomains.where(
+          (d) => d.toLowerCase().startsWith(typedDomain),
+        );
         return matches.map((d) => '$local@$d');
       },
       onSelected: (String selection) {
@@ -315,10 +325,7 @@ class _LoginScreenState extends State<LoginScreen> {
           focusNode: focusNode,
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
-          decoration: _inputDecoration(
-            hint: hint,
-            iconPath: iconPath,
-          ),
+          decoration: _inputDecoration(hint: hint, iconPath: iconPath),
           onSubmitted: (_) => onFieldSubmitted(),
         );
       },
@@ -327,6 +334,7 @@ class _LoginScreenState extends State<LoginScreen> {
           alignment: Alignment.topLeft,
           child: Material(
             elevation: 6,
+            color: const Color(0XFFF6F9FF),
             borderRadius: BorderRadius.circular(12),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 220, maxWidth: 600),
@@ -334,13 +342,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 padding: EdgeInsets.zero,
                 shrinkWrap: true,
                 itemCount: options.length,
-                separatorBuilder: (_, __) => const Divider(height: 1),
+                separatorBuilder: (_, _) => const SizedBox.shrink(),
                 itemBuilder: (context, i) {
                   final opt = options.elementAt(i);
                   return InkWell(
                     onTap: () => onSelected(opt),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 12,
+                      ),
                       child: Text(
                         opt,
                         style: const TextStyle(
@@ -408,7 +419,8 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       suffixIcon: isPassword && suffixIconPath != null
           ? IconButton(
-              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+              onPressed: () =>
+                  setState(() => _obscurePassword = !_obscurePassword),
               icon: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Image.asset(
@@ -479,15 +491,11 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         child: InkWell(
           onTap: () {
-            // TODO: social login
+            // social login
           },
           borderRadius: BorderRadius.circular(12),
           child: Center(
-            child: Image.asset(
-              imagePath,
-              height: 24,
-              fit: BoxFit.contain,
-            ),
+            child: Image.asset(imagePath, height: 24, fit: BoxFit.contain),
           ),
         ),
       ),
