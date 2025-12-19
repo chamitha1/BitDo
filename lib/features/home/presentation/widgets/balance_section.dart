@@ -1,3 +1,4 @@
+import 'package:BitDo/features/wallet/presentation/pages/transaction_history_page.dart';
 import 'package:flutter/material.dart';
 
 class BalanceSection extends StatefulWidget {
@@ -56,17 +57,27 @@ class _BalanceSectionState extends State<BalanceSection> {
                 ),
               ],
             ),
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0xffE8EFFF),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Image.asset(
-                'assets/icons/home/clock.png',
-                width: 24,
-                height: 24,
-                color: Color(0xff151E2F),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TransactionHistoryPage(),
+                  ),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xffE8EFFF),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Image.asset(
+                  'assets/icons/home/clock.png',
+                  width: 24,
+                  height: 24,
+                  color: const Color(0xff151E2F),
+                ),
               ),
             ),
           ],

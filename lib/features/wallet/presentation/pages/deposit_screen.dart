@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/coin_selector_card.dart';
+import 'transaction_history_page.dart';
 import '../widgets/deposit_address_section.dart';
 import '../widgets/friendly_reminder_card.dart';
 
@@ -48,10 +49,20 @@ class DepositScreen extends StatelessWidget {
                       color: Color(0xff151E2F),
                     ),
                   ),
-                  Image.asset(
-                    "assets/icons/deposit/clock.png",
-                    width: 40,
-                    height: 40,
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const TransactionHistoryPage(),
+                        ),
+                      );
+                    },
+                    child: Image.asset(
+                      "assets/icons/deposit/clock.png",
+                      width: 40,
+                      height: 40,
+                    ),
                   ),
                 ],
               ),
