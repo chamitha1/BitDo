@@ -72,7 +72,7 @@ class _OtpBottomSheetState extends State<OtpBottomSheet> {
   @override
   Widget build(BuildContext context) {
     final defaultPinTheme = PinTheme(
-      width: 56,
+      width: 45,
       height: 56,
       textStyle: const TextStyle(
         fontSize: 22,
@@ -135,7 +135,7 @@ class _OtpBottomSheetState extends State<OtpBottomSheet> {
           const SizedBox(height: 32),
 
           Pinput(
-            length: 4,
+            length: 6,
             controller: _pinController,
             defaultPinTheme: defaultPinTheme,
             focusedPinTheme: focusedPinTheme,

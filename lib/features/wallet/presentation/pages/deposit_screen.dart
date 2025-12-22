@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../widgets/coin_selector_card.dart';
 import 'transaction_history_page.dart';
 import '../widgets/deposit_address_section.dart';
@@ -9,6 +10,8 @@ class DepositScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const String depositAddress = "498P4J49pd4784H378DSp49";
+
     return Scaffold(
       backgroundColor: const Color(0xffF6F9FF),
       body: SafeArea(
@@ -79,7 +82,7 @@ class DepositScreen extends StatelessWidget {
                   children: [
                     const CoinSelectorCard(),
                     const SizedBox(height: 16),
-                    const DepositAddressSection(),
+                    const DepositAddressSection(address: depositAddress),
                     const SizedBox(height: 35),
                     const FriendlyReminderCard(),
                     const SizedBox(height: 35),
@@ -116,7 +119,17 @@ class DepositScreen extends StatelessWidget {
                         const SizedBox(width: 16),
                         Expanded(
                           child: InkWell(
-                            onTap: () {},
+                            onTap: () {
+                              Clipboard.setData(
+                                const ClipboardData(text: depositAddress),
+                              );
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Address copied to clipboard"),
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                            },
                             child: Container(
                               height: 52,
                               decoration: BoxDecoration(

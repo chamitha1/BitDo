@@ -1,5 +1,7 @@
+import 'package:BitDo/features/auth/presentation/pages/otp_bottom_sheet.dart';
 import 'package:BitDo/features/wallet/presentation/pages/balance_history_page.dart';
 import 'package:BitDo/features/wallet/presentation/pages/transaction_history_page.dart';
+import 'package:BitDo/features/wallet/presentation/widgets/success_dialog.dart';
 import 'package:flutter/material.dart';
 
 class WithdrawalPage extends StatefulWidget {
@@ -43,38 +45,43 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
   }
 
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _otpController = TextEditingController();
-
-  bool _isCodeSent = false;
 
   @override
   void dispose() {
     _addressController.dispose();
     _amountController.dispose();
     _passwordController.dispose();
-    _otpController.dispose();
     super.dispose();
   }
 
-  void _sendVerificationCode() {
-    setState(() {
-      _isCodeSent = true;
-      //  API here
-    });
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("Code sent to your email")));
-  }
-
   bool _isWithdrawEnabled() {
-    return _otpController.text.length == 6;
+    final amount = double.tryParse(_amountController.text) ?? 0.0;
+    return _addressController.text.isNotEmpty &&
+        amount >= 10 &&
+        _passwordController.text.isNotEmpty;
   }
 
   void _handleWithdraw() {
-    Navigator.pop(context);
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("Withdrawal Successful!")));
+    if (!_isWithdrawEnabled()) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: const Color(0xFF000000).withOpacity(0.4),
+      builder: (context) => OtpBottomSheet(
+        email: "j*n**ha@gmail.com", // Mock email
+        onVerified: () {
+          Navigator.pop(context); // Close OTP Sheet
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            barrierColor: const Color(0xFF000000).withOpacity(0.4),
+            builder: (context) => const SuccessDialog(),
+          );
+        },
+      ),
+    );
   }
 
   @override
@@ -106,6 +113,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
                     const SizedBox(height: 8),
                     TextField(
                       controller: _addressController,
+                      onChanged: (_) => setState(() {}),
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.white,
@@ -306,6 +314,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
                     const SizedBox(height: 8),
                     TextField(
                       controller: _passwordController,
+                      onChanged: (_) => setState(() {}),
                       obscureText: false,
                       decoration: InputDecoration(
                         filled: true,
@@ -343,118 +352,6 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
                     ),
                     const SizedBox(height: 24),
 
-                    if (!_isCodeSent)
-                      SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: OutlinedButton(
-                          onPressed: _sendVerificationCode,
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(
-                              color: Color(0xFF1D5DE5),
-                              width: 2,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            backgroundColor: const Color(0xFFF6F9FF),
-                          ),
-                          child: const Text(
-                            "Send Verification Code",
-                            style: TextStyle(
-                              color: Color(0xFF1D5DE5),
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      )
-                    else
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          TextField(
-                            controller: _otpController,
-                            keyboardType: TextInputType.number,
-                            maxLength: 6,
-                            onChanged: (value) {
-                              setState(() {});
-                            },
-                            textAlign: TextAlign.center,
-                            decoration: InputDecoration(
-                              counterText: "",
-                              filled: true,
-                              fillColor: const Color(0xFFF6F9FF),
-                              hintText: "Enter 6 digit Code",
-                              hintStyle: const TextStyle(
-                                fontFamily: 'Inter',
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                                color: Color(0xFF717F9A),
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                vertical: 16,
-                                horizontal: 16,
-                              ),
-
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: Color(0xFF1D5DE5),
-                                  width: 2,
-                                ),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: Color(0xFF1D5DE5),
-                                  width: 2,
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: Color(0xFF1D5DE5),
-                                  width: 2,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                    const SizedBox(height: 8),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          _isCodeSent
-                              ? "Code sent to your email"
-                              : "We'll send a 6-digit code to your registered email",
-                          style: const TextStyle(
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.w400,
-                            fontSize: 14,
-                            color: Color(0xFF454F63),
-                          ),
-                        ),
-                        if (_isCodeSent)
-                          GestureDetector(
-                            onTap: _sendVerificationCode,
-                            child: const Text(
-                              "Resend Code",
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontWeight: FontWeight.w400,
-                                fontSize: 14,
-                                color: Color(0xFF1D5DE5),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
                     const SizedBox(height: 24),
 
                     Container(
@@ -500,7 +397,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 90),
+                    const SizedBox(height: 130),
                     SizedBox(
                       width: double.infinity,
                       height: 52,
@@ -559,7 +456,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
 
   Widget _buildAppBar(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

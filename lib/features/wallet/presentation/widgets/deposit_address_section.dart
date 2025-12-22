@@ -1,7 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class DepositAddressSection extends StatelessWidget {
-  const DepositAddressSection({super.key});
+  final String address;
+
+  const DepositAddressSection({
+    super.key,
+    required this.address,
+  });
+
+  void _copyToClipboard(BuildContext context) {
+    Clipboard.setData(ClipboardData(text: address));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Address copied to clipboard"),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +40,8 @@ class DepositAddressSection extends StatelessWidget {
           decoration: BoxDecoration(
             boxShadow: [
               BoxShadow(
-                color: Color(0xff000000).withOpacity(0.05),
-                offset: Offset(0, 4),
+                color: const Color(0xff000000).withOpacity(0.05),
+                offset: const Offset(0, 4),
                 blurRadius: 28,
               ),
             ],
@@ -62,7 +78,7 @@ class DepositAddressSection extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        "498P4J49pd4784H378DSp49",
+                        address,
                         style: const TextStyle(
                           fontFamily: 'Inter',
                           fontSize: 14,
@@ -74,9 +90,7 @@ class DepositAddressSection extends StatelessWidget {
                     ),
                     const SizedBox(width: 10),
                     InkWell(
-                      onTap: () {
-                        // Copy action
-                      },
+                      onTap: () => _copyToClipboard(context),
                       child: Image.asset(
                         "assets/icons/deposit/copy.png",
                         width: 20,
