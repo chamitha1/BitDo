@@ -3,6 +3,7 @@ import 'package:BitDo/features/auth/presentation/pages/login_screen.dart';
 import 'package:BitDo/features/auth/presentation/pages/otp_bottom_sheet.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -24,6 +25,7 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _isPasswordVisible = false;
   bool _isEmailPopulated = false;
   bool _isEmailVerified = false;
+  String? _passwordErrorText;
 
   static const List<String> _emailDomains = <String>[
     'gmail.com',
@@ -108,7 +110,7 @@ class _SignupScreenState extends State<SignupScreen> {
               _textLabel("Email"),
               _emailAutocompleteField(
                 hint: "Enter your email",
-                iconPath: "assets/icons/sign_up/sms.png",
+                iconPath: "assets/icons/sign_up/sms.svg",
                 suffixWidget: Padding(
                   padding: const EdgeInsets.only(
                     right: 8.0,
@@ -132,10 +134,15 @@ class _SignupScreenState extends State<SignupScreen> {
                 obscureText: !_isPasswordVisible,
                 decoration: _inputDecoration(
                   hint: "Enter Password",
-                  iconPath: "assets/icons/sign_up/lock.png",
-                  suffixIconPath: "assets/icons/sign_up/eye.png",
+                  iconPath: "assets/icons/sign_up/lock.svg",
+                  suffixIconPath: !_isPasswordVisible
+                      ? "assets/icons/sign_up/eye.svg"
+                      : "assets/icons/sign_up/eye-slash.svg",
                   isPassword: true,
                   enabled: _isEmailVerified,
+                  borderColor: _passwordErrorText != null
+                      ? const Color(0xFFE74C3C)
+                      : null,
                 ),
               ),
               const SizedBox(height: 30),
@@ -147,10 +154,13 @@ class _SignupScreenState extends State<SignupScreen> {
                 obscureText: !_isPasswordVisible,
                 decoration: _inputDecoration(
                   hint: "Re-Enter Password",
-                  iconPath: "assets/icons/sign_up/lock.png",
-                  suffixIconPath: "assets/icons/sign_up/eye.png",
+                  iconPath: "assets/icons/sign_up/lock.svg",
+                  suffixIconPath: !_isPasswordVisible
+                      ? "assets/icons/sign_up/eye.svg"
+                      : "assets/icons/sign_up/eye-slash.svg",
                   isPassword: true,
                   enabled: _isEmailVerified,
+                  errorText: _passwordErrorText,
                 ),
               ),
               const SizedBox(height: 30),
@@ -161,7 +171,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 enabled: _isEmailVerified,
                 decoration: _inputDecoration(
                   hint: "Please Enter Your Code",
-                  iconPath: "assets/icons/sign_up/hashtag.png",
+                  iconPath: "assets/icons/sign_up/hashtag.svg",
                   enabled: _isEmailVerified,
                 ),
               ),
@@ -234,7 +244,15 @@ class _SignupScreenState extends State<SignupScreen> {
                 text: "Sign Up",
                 onPressed: _isEmailVerified && _agreedToTerms
                     ? () {
-                        // Sign up logic
+                        setState(() {
+                          if (_passController.text !=
+                              _confirmPassController.text) {
+                            _passwordErrorText = "Passwords do not match";
+                          } else {
+                            _passwordErrorText = null;
+                            // Sign up logic
+                          }
+                        });
                       }
                     : () {},
               ),
@@ -355,8 +373,7 @@ class _SignupScreenState extends State<SignupScreen> {
         }
         return TextField(
           controller: controller,
-          focusNode:
-              focusNode, 
+          focusNode: focusNode,
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
           decoration: _inputDecoration(
@@ -420,8 +437,25 @@ class _SignupScreenState extends State<SignupScreen> {
     bool isPassword = false,
     bool enabled = true,
     String? suffixIconPath,
+    String? errorText,
+    Color? borderColor,
   }) {
     return InputDecoration(
+      errorText: errorText,
+      errorStyle: const TextStyle(
+        color: Color(0xFFE74C3C),
+        fontSize: 12,
+        fontFamily: 'Inter',
+        fontWeight: FontWeight.w400,
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFE74C3C), width: 1.0),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFE74C3C), width: 1.0),
+      ),
       hintText: hint,
       hintStyle: const TextStyle(
         color: Color(0XFF717F9A),
@@ -431,7 +465,15 @@ class _SignupScreenState extends State<SignupScreen> {
       ),
       prefixIcon: Padding(
         padding: const EdgeInsets.all(12.0),
-        child: Image.asset(iconPath, width: 20, height: 20),
+        child: SvgPicture.asset(
+          iconPath,
+          width: 20,
+          height: 20,
+          colorFilter: const ColorFilter.mode(
+            Color(0XFF717F9A),
+            BlendMode.srcIn,
+          ),
+        ),
       ),
       suffixIcon: isPassword && suffixIconPath != null
           ? Padding(
@@ -446,13 +488,14 @@ class _SignupScreenState extends State<SignupScreen> {
                 constraints: const BoxConstraints(),
                 icon: Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Image.asset(
+                  child: SvgPicture.asset(
                     suffixIconPath,
                     width: 20,
                     height: 20,
-                    color: _isPasswordVisible
-                        ? const Color.fromARGB(255, 15, 40, 59)
-                        : null,
+                    colorFilter: const ColorFilter.mode(
+                      Color(0xff2E3D5B),
+                      BlendMode.srcIn,
+                    ),
                   ),
                 ),
               ),
@@ -468,7 +511,10 @@ class _SignupScreenState extends State<SignupScreen> {
       contentPadding: const EdgeInsets.symmetric(vertical: 12),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFDAE0EE), width: 1.0),
+        borderSide: BorderSide(
+          color: borderColor ?? const Color(0xFFDAE0EE),
+          width: 1.0,
+        ),
       ),
       disabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -476,14 +522,17 @@ class _SignupScreenState extends State<SignupScreen> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(
-          color: Color.fromARGB(255, 112, 152, 221),
+        borderSide: BorderSide(
+          color: borderColor ?? const Color.fromARGB(255, 112, 152, 221),
           width: 1.0,
         ),
       ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFDAE0EE), width: 1.0),
+        borderSide: BorderSide(
+          color: borderColor ?? const Color(0xFFDAE0EE),
+          width: 1.0,
+        ),
       ),
     );
   }

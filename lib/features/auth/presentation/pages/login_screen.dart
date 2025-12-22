@@ -3,6 +3,7 @@ import 'package:BitDo/features/auth/presentation/pages/signup_screen.dart';
 import 'package:BitDo/features/home/presentation/pages/home_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -72,7 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
               _buildLabel('Email'),
               _emailAutocompleteField(
                 hint: 'Enter your email',
-                iconPath: 'assets/icons/login/sms.png',
+                iconPath: 'assets/icons/login/sms.svg',
               ),
               const SizedBox(height: 20),
 
@@ -80,9 +81,11 @@ class _LoginScreenState extends State<LoginScreen> {
               _textField(
                 controller: _passwordController,
                 hint: 'Enter Password',
-                iconPath: 'assets/icons/login/lock.png',
+                iconPath: 'assets/icons/login/lock.svg',
                 isPassword: true,
-                suffixIconPath: 'assets/icons/login/eye.png',
+                suffixIconPath: _obscurePassword
+                    ? 'assets/icons/login/eye.svg'
+                    : 'assets/icons/sign_up/eye-slash.svg',
               ),
               const SizedBox(height: 12),
 
@@ -413,12 +416,15 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       prefixIcon: Padding(
         padding: const EdgeInsets.all(13.5),
-        child: Image.asset(
+        child: SvgPicture.asset(
           iconPath,
           width: 24,
           height: 24,
           fit: BoxFit.contain,
-          color: const Color(0XFF717F9A),
+          colorFilter: const ColorFilter.mode(
+            Color(0XFF717F9A),
+            BlendMode.srcIn,
+          ),
         ),
       ),
       suffixIcon: isPassword && suffixIconPath != null
@@ -427,14 +433,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   setState(() => _obscurePassword = !_obscurePassword),
               icon: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Image.asset(
+                child: SvgPicture.asset(
                   suffixIconPath,
                   width: 20,
                   height: 20,
                   fit: BoxFit.contain,
-                  color: _obscurePassword
-                      ? const Color(0XFF2E3D5B)
-                      : const Color.fromARGB(255, 145, 176, 250),
+                  colorFilter: const ColorFilter.mode(
+                    Color(0XFF2E3D5B),
+                    BlendMode.srcIn,
+                  ),
                 ),
               ),
             )

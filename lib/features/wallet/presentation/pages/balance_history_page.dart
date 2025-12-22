@@ -31,8 +31,8 @@ class BalanceHistoryPage extends StatelessWidget {
                         color: Color(0xff151E2F),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
+                    // const SizedBox(height: 16),
                     ListView.separated(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
@@ -224,11 +224,19 @@ class BalanceHistoryPage extends StatelessWidget {
             children: [
               GestureDetector(
                 onTap: () => Navigator.pop(context),
-                child: Image.asset(
-                  'assets/icons/deposit/arrow_back.png',
-                  width: 24,
-                  height: 24,
-                  color: Color(0x00000000),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFECEFF5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Image.asset(
+                    'assets/icons/deposit/arrow_back.png',
+                    width: 24,
+                    height: 24,
+                  ),
                 ),
               ),
               const SizedBox(width: 40), // Spacer to balance
@@ -249,42 +257,51 @@ class BalanceHistoryPage extends StatelessWidget {
   }
 
   Widget _buildBalanceCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
+    return Stack(
+      alignment: Alignment.topCenter,
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          width: double.infinity,
+          margin: const EdgeInsets.only(top: 24),
+          padding: const EdgeInsets.fromLTRB(20, 44, 20, 20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            children: [
+              _buildBalanceRow("Total", "203,372.478343"),
+              const SizedBox(height: 8),
+              _buildBalanceRow("Available Balance", "432.787774"),
+              const SizedBox(height: 8),
+              _buildBalanceRow("Frozen", "232"),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 14.0),
+                child: Divider(color: Color(0xFFF1F4F9), height: 1),
+              ),
+              _buildBalanceRow("Valuation (USDT)", "203,372.478343"),
+              const SizedBox(height: 8),
+              _buildBalanceRow("Valuation (USD)", "213"),
+            ],
+          ),
+        ),
+        Positioned(
+          top: -12,
+          child: Container(
+            padding: const EdgeInsets.all(0),
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.transparent,
             ),
             child: Image.asset(
               'assets/icons/balance_history/usdt.png',
-              width: 48,
-              height: 48,
+              width: 65,
+              height: 65,
             ),
           ),
-          const SizedBox(height: 20),
-          _buildBalanceRow("Total", "203,372.478343"),
-          const SizedBox(height: 16),
-          _buildBalanceRow("Available Balance", "432.787774"),
-          const SizedBox(height: 16),
-          _buildBalanceRow("Frozen", "232"),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16.0),
-            child: Divider(color: Color(0xFFF1F4F9), height: 1),
-          ),
-          _buildBalanceRow("Valuation (USDT)", "203,372.478343"),
-          const SizedBox(height: 16),
-          _buildBalanceRow("Valuation (USD)", "213"),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

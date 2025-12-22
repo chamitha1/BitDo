@@ -16,29 +16,47 @@ class DepositScreen extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: const BoxDecoration(
-                        color: Color(
-                          0xffECEFF5,
-                        ), 
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Image.asset(
-                          "assets/icons/deposit/arrow_back.png",
-                          width: 20,
-                          height: 20,
-                          color: const Color(0xff151E2F),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: const BoxDecoration(
+                            color: Color(0xffECEFF5),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Image.asset(
+                              "assets/icons/deposit/arrow_back.png",
+                              width: 20,
+                              height: 20,
+                              color: const Color(0xff151E2F),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const TransactionHistoryPage(),
+                            ),
+                          );
+                        },
+                        child: Image.asset(
+                          "assets/icons/deposit/clock.png",
+                          width: 24,
+                          height: 24,
+                        ),
+                      ),
+                    ],
                   ),
                   const Text(
                     "Deposit",
@@ -49,21 +67,6 @@ class DepositScreen extends StatelessWidget {
                       color: Color(0xff151E2F),
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const TransactionHistoryPage(),
-                        ),
-                      );
-                    },
-                    child: Image.asset(
-                      "assets/icons/deposit/clock.png",
-                      width: 40,
-                      height: 40,
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -72,8 +75,7 @@ class DepositScreen extends StatelessWidget {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
                 child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.stretch, 
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const CoinSelectorCard(),
                     const SizedBox(height: 16),

@@ -594,7 +594,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const BalanceHistoryPage(),
+                  builder: (context) => const TransactionHistoryPage(),
                 ),
               );
             },

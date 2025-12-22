@@ -11,6 +11,7 @@ class WalletCard extends StatefulWidget {
 
 class _WalletCardState extends State<WalletCard> {
   String _selectedCurrency = "USD";
+  bool _isObscured = false;
 
   final List<Map<String, String>> _currencies = [
     {'name': 'BTC', 'icon': 'assets/images/home/bitcoin.png'},
@@ -63,43 +64,59 @@ class _WalletCardState extends State<WalletCard> {
             children: [
               RichText(
                 text: TextSpan(
-                  text: "8,489,489.",
-                  style: TextStyle(
+                  text: _isObscured ? "******" : "8,489,489.",
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 28,
                     fontWeight: FontWeight.w600,
                     fontFamily: 'Inter',
                   ),
-                  children: const <TextSpan>[
-                    TextSpan(
-                      text: "32",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'Inter',
-                      ),
-                    ),
-                  ],
+                  children: _isObscured
+                      ? []
+                      : const <TextSpan>[
+                          TextSpan(
+                            text: "32",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              fontFamily: 'Inter',
+                            ),
+                          ),
+                        ],
                 ),
               ),
               const SizedBox(width: 10),
-              Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: Color(0xff4A7DEA),
-                  borderRadius: BorderRadius.circular(24),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _isObscured = !_isObscured;
+                  });
+                },
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: const Color(0xff4A7DEA),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Image.asset(
+                    _isObscured
+                        ? 'assets/icons/login/eye.png'
+                        : 'assets/icons/home/eye_slash.png',
+                    color: Colors.white, // Ensure icon is visible against blue
+                    // Note: 'eye.png' from login folder usually might not be white, tint might be needed or verified.
+                    // The prompt said 'eye icon ... in assets folder'. I found it in login.
+                  ),
                 ),
-                child: Image.asset('assets/icons/home/eye_slash.png'),
               ),
             ],
           ),
           const SizedBox(height: 8),
           Text(
-            "≈16,389.03 NGN",
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
+            _isObscured ? "****" : "≈16,389.03 NGN",
+            style: const TextStyle(
+              color: Colors.white,
               fontSize: 16,
               fontWeight: FontWeight.w500,
               fontFamily: 'Inter',
