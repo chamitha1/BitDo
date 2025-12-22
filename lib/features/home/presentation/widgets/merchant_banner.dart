@@ -10,6 +10,7 @@ class MerchantBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Color(0xffD1DEF9), width: 1.0),
         boxShadow: [
           BoxShadow(
             color: const Color(0xff1D5DE50F).withOpacity(0.06),
