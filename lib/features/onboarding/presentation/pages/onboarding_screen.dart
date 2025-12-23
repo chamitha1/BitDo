@@ -49,18 +49,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               padding: const EdgeInsets.only(right: 20, top: 10),
               child: Align(
                 alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () => _goToLogin(),
-                  child: const Text(
-                    'Skip',
-                    style: TextStyle(
-                      color: Color(0XFF717F9A),
-                      fontSize: 18,
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
+                child: _currentPage == _pages.length - 1
+                        ? const SizedBox(height: 48)
+                        : TextButton(
+                            onPressed: _goToLogin,
+                            child: const Text(
+                              'Skip',
+                              style: TextStyle(
+                                color: Color(0XFF717F9A),
+                                fontSize: 18,
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
               ),
             ),
 
