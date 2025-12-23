@@ -37,7 +37,9 @@
     cupertino_icons: ^1.0.8
     pinput: ^6.0.1
     flutter_svg: ^2.2.3
+    dio: ^5.4.0
 
+    
   dev_dependencies:
     flutter_test:
       sdk: flutter

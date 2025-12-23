@@ -1,3 +1,4 @@
+import 'package:BitDo/config/api_client.dart';
 import 'package:BitDo/features/auth/presentation/pages/forgot_password_screen.dart';
 import 'package:BitDo/features/auth/presentation/pages/signup_screen.dart';
 import 'package:BitDo/features/home/presentation/pages/home_screen.dart';
@@ -150,17 +151,33 @@ class _LoginScreenState extends State<LoginScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: ElevatedButton(
-                  onPressed: () {
-                    final email = (_emailController?.text ?? '').trim();
-                    final pass = _passwordController.text;
+                  onPressed: () async {
+                    // final email = (_emailController?.text ?? '').trim();
+                    // final pass = _passwordController.text;
 
-                    debugPrint('Email: $email');
-                    debugPrint('Pass: $pass');
+                    // debugPrint('Email: $email');
+                    // debugPrint('Pass: $pass');
 
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => HomeScreen()),
-                    );
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(builder: (context) => HomeScreen()),
+                    // );
+
+                    //api call test
+
+                    try {
+                      final response = await ApiClient.dio.post(
+                        '/user/login/sys', // Replace with actual login endpoint from docs
+                        data: {
+                          'loginName': _emailController?.text,
+                          'loginPwd': _passwordController.text,
+                        },
+                      );
+                      print('Login success: ${response.data}');
+                    } catch (e) {
+                      print('Login error: $e');
+                      // Show error message
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
