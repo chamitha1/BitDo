@@ -3,6 +3,7 @@ import 'package:BitDo/config/api_client.dart';
 import 'package:BitDo/core/widgets/gradient_button.dart';
 import 'package:BitDo/features/auth/presentation/pages/login_screen.dart';
 import 'package:BitDo/features/auth/presentation/pages/otp_bottom_sheet.dart';
+import 'package:BitDo/features/home/presentation/pages/home_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -257,6 +258,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             _passwordErrorText = null;
                           }
                         });
+                        if (_passwordErrorText != null) return;
                         if (!_isEmailPopulated ||
                             _emailController.text.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -267,7 +269,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           return;
                         }
                         try {
-                          final token = await (
+                          final token = await signup(
                             email: _emailController.text,
                             smsCode: '8888',
                             loginPwd: _passController.text,
@@ -279,8 +281,8 @@ class _SignupScreenState extends State<SignupScreen> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const LoginScreen(),
-                            ), // Or HomeScreen
+                              builder: (context) => const HomeScreen(),
+                            ),
                           );
                         } catch (e) {
                           ScaffoldMessenger.of(context).showSnackBar(

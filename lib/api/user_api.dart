@@ -36,23 +36,28 @@ Future<LoginScreen> login({
   }
 }
 
-Future<Map<SignupScreen, dynamic>> signup({
+Future<Map<String, dynamic>> signup({
   required String email,
   required String smsCode,
   required String loginPwd,
   String? inviteCode,
 }) async {
   try {
-    final res = await ApiClient.dio.post(
-      'cuser/public/register_by_email',
-      data: {
-        'email': email,
-        'smsCode': smsCode,
-        'inviteCode': inviteCode,
-        'loginPwd': loginPwd,
-      },
+    final Map<String, dynamic> data = {
+      'email': email,
+      'smsCode': smsCode,
+      'loginPwd': loginPwd,
+    };
+
+    if (inviteCode != null && inviteCode.isNotEmpty) {
+      data['inviteCode'] = inviteCode;
+    }
+
+    final response = await ApiClient.dio.post(
+      '/cuser/public/register_by_email',
+      data: data,
     );
-    return res.data;
+    return response.data as Map<String, dynamic>;
   } catch (e) {
     print(e);
     rethrow;
