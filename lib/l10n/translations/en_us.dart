@@ -122,6 +122,22 @@ const enUS = {
       'Please ensure that the deposit network you select matches the network you chose when withdrawing. Otherwise, it may result in financial losses',
   '充币网络': 'Deposit network',
   '选择充币网络': 'Please Select Deposit Network',
+  '请输入邮箱': 'Please enter your email',
+  '请输入有效邮箱': 'Please enter a valid email',
+  '请输入密码': 'Please enter password',
+  '密码至少6位': 'Password must be at least 6 characters',
+  '登录失败': 'Login failed',
+  '请检查账号或网络后重试': 'Please check your account or network and try again',
+  '欢迎回来登录': 'Welcome Back to Sign in',
+  '您的账户通过加密登录和高级身份验证保护。':'Your account is protected with encrypted login and advanced authentication.',
+  '邮箱': 'Email',
+  '请输入您的邮箱': 'Enter your email',
+  '密码': 'Password',
+  '请输入登录密码': 'Enter Password',
+  '记住我': 'Remind me',
+  '或继续使用': 'or continue with',
+  '没有账号？': "Don't have an account? ",
+  '条款与条件': 'Terms & Condition',
 
   /// 积分兑换
   '积分兑换': 'Swap Tbay Points to USDT',
@@ -368,7 +384,7 @@ const enUS = {
   '[自定义]': '[Customize]',
 
   // 登录 注册
-  '请输入密码': 'Please enter password',
+//   '请输入密码': 'Please enter password',
   '登  录': 'Log in',
   '忘记密码？': 'Forgot password?',
   'Tbay快捷登录': 'Tbay',
