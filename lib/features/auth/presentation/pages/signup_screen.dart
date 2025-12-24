@@ -1,5 +1,4 @@
 import 'package:BitDo/api/user_api.dart';
-import 'package:BitDo/config/api_client.dart';
 import 'package:BitDo/constants/sms_constants.dart';
 import 'package:BitDo/core/widgets/gradient_button.dart';
 import 'package:BitDo/features/auth/presentation/pages/login_screen.dart';
@@ -22,6 +21,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final _passController = TextEditingController();
   final _confirmPassController = TextEditingController();
   final _inviteController = TextEditingController();
+
   final userApi = UserApi();
 
   FocusNode? _autocompleteFocusNode;
@@ -30,7 +30,12 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _isPasswordVisible = false;
   bool _isEmailPopulated = false;
   bool _isEmailVerified = false;
+
+  String? _emailErrorText;
   String? _passwordErrorText;
+
+  bool _sendingOtp = false;
+  bool _signingUp = false;
 
   static const List<String> _emailDomains = <String>[
     'gmail.com',
@@ -41,10 +46,24 @@ class _SignupScreenState extends State<SignupScreen> {
     'live.com',
   ];
 
+  final RegExp _emailRegex = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
+
   @override
   void initState() {
     super.initState();
     _emailController = TextEditingController();
+
+    _emailController.addListener(() {
+      final t = _emailController.text.trim();
+      final populated = t.isNotEmpty;
+      if (_isEmailPopulated != populated) {
+        setState(() => _isEmailPopulated = populated);
+      }
+
+      if (_isEmailVerified && populated) {
+        setState(() => _isEmailVerified = false);
+      }
+    });
   }
 
   @override
@@ -56,28 +75,105 @@ class _SignupScreenState extends State<SignupScreen> {
     super.dispose();
   }
 
-  void _openOtpSheet() {
-    if (!_isEmailPopulated) return;
+  void _toast(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
 
-    userApi.sendOtp(email: _emailController.text).then((success) {
-      print(success);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('OTP sent to your email!')));
-      _autocompleteFocusNode?.unfocus();
-      FocusScope.of(context).unfocus();
+  bool _validateEmailLocal() {
+    final email = _emailController.text.trim();
+    if (email.isEmpty) {
+      setState(() => _emailErrorText = "Please enter your email");
+      return false;
+    }
+    if (!_emailRegex.hasMatch(email)) {
+      setState(() => _emailErrorText = "Invalid email format");
+      return false;
+    }
+    setState(() => _emailErrorText = null);
+    return true;
+  }
+
+  bool _validatePasswordsLocal() {
+    final pass = _passController.text.trim();
+    final confirm = _confirmPassController.text.trim();
+
+    if (pass.isEmpty) {
+      setState(() => _passwordErrorText = "Please enter password");
+      return false;
+    }
+    if (pass.length < 6) {
+      setState(() => _passwordErrorText = "Password must be at least 6 characters");
+      return false;
+    }
+    if (confirm.isEmpty) {
+      setState(() => _passwordErrorText = "Please confirm password");
+      return false;
+    }
+    if (confirm != pass) {
+      setState(() => _passwordErrorText = "Passwords do not match");
+      return false;
+    }
+
+    setState(() => _passwordErrorText = null);
+    return true;
+  }
+
+  Future<void> _openOtpSheet() async {
+    if (_sendingOtp) return;
+
+    FocusScope.of(context).unfocus();
+    _autocompleteFocusNode?.unfocus();
+
+    if (!_validateEmailLocal()) return;
+
+    final email = _emailController.text.trim();
+
+    setState(() => _sendingOtp = true);
+
+    try {
+      final success = await userApi.sendOtp(
+        email: email,
+        bizType: SmsBizType.register,
+      );
+
+      if (!mounted) return;
+
+      if (!success) {
+        _toast("Failed to send OTP. Please try again.");
+        return;
+      }
+
+      _toast("OTP sent to your email!");
 
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
-
         barrierColor: const Color(0xFFECEFF5).withOpacity(0.7),
-
         builder: (context) => OtpBottomSheet(
           email: _emailController.text.trim(),
           otpLength: 6,
           bizType: SmsBizType.register,
+
+          // ✅ API verify here (replace with your real endpoint)
+          onVerifyPin: (pin) async {
+            // return await userApi.verifyOtp(
+            //   email: _emailController.text.trim(),
+            //   bizType: SmsBizType.register,
+            //   smsCode: pin,
+            // );
+
+            return true; // TEMP
+          },
+
+          // ✅ resend api
+          onResend: () async {
+            return await userApi.sendOtp(
+              email: _emailController.text.trim(),
+              bizType: SmsBizType.register,
+            );
+          },
+
           onVerified: () {
             Navigator.pop(context);
             setState(() => _isEmailVerified = true);
@@ -86,10 +182,59 @@ class _SignupScreenState extends State<SignupScreen> {
             );
           },
         ),
-      ).catchError((e) {
-        print(e);
-      });
-    });
+      );
+
+    } catch (e) {
+      if (!mounted) return;
+      _toast("OTP send failed: $e");
+    } finally {
+      if (mounted) setState(() => _sendingOtp = false);
+    }
+  }
+
+  Future<void> _onSignup() async {
+    if (_signingUp) return;
+
+    FocusScope.of(context).unfocus();
+
+    if (!_validateEmailLocal()) return;
+
+    if (!_isEmailVerified) {
+      _toast("Please verify your email first");
+      return;
+    }
+    if (!_validatePasswordsLocal()) return;
+    if (!_agreedToTerms) {
+      _toast("Please read and accept Terms & Privacy");
+      return;
+    }
+
+    setState(() => _signingUp = true);
+
+    try {
+      final token = await userApi.signup(
+        email: _emailController.text.trim(),
+        smsCode: "8888",
+        loginPwd: _passController.text.trim(),
+        inviteCode: _inviteController.text.trim().isEmpty
+            ? null
+            : _inviteController.text.trim(),
+      );
+
+      print('Signup success! Token: $token');
+
+      if (!mounted) return;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      _toast("Signup failed: $e");
+    } finally {
+      if (mounted) setState(() => _signingUp = false);
+    }
   }
 
   @override
@@ -135,8 +280,8 @@ class _SignupScreenState extends State<SignupScreen> {
                     bottom: 8.0,
                   ),
                   child: _verifyButton(
-                    text: _isEmailVerified ? "Verified" : "Verify",
-                    isEnabled: _isEmailPopulated,
+                    text: _isEmailVerified ? "Verified" : (_sendingOtp ? "Sending..." : "Verify"),
+                    isEnabled: _isEmailPopulated && !_sendingOtp,
                     isVerified: _isEmailVerified,
                     onPressed: _openOtpSheet,
                   ),
@@ -149,6 +294,9 @@ class _SignupScreenState extends State<SignupScreen> {
                 controller: _passController,
                 enabled: _isEmailVerified,
                 obscureText: !_isPasswordVisible,
+                onChanged: (_) {
+                  if (_passwordErrorText != null) _validatePasswordsLocal();
+                },
                 decoration: _inputDecoration(
                   hint: "Enter Password",
                   iconPath: "assets/icons/sign_up/lock.svg",
@@ -169,6 +317,9 @@ class _SignupScreenState extends State<SignupScreen> {
                 controller: _confirmPassController,
                 enabled: _isEmailVerified,
                 obscureText: !_isPasswordVisible,
+                onChanged: (_) {
+                  if (_passwordErrorText != null) _validatePasswordsLocal();
+                },
                 decoration: _inputDecoration(
                   hint: "Re-Enter Password",
                   iconPath: "assets/icons/sign_up/lock.svg",
@@ -258,49 +409,9 @@ class _SignupScreenState extends State<SignupScreen> {
               const SizedBox(height: 24),
 
               GradientButton(
-                text: "Sign Up",
-                onPressed: _isEmailVerified && _agreedToTerms
-                    ? () async {
-                        setState(() {
-                          if (_passController.text !=
-                              _confirmPassController.text) {
-                            _passwordErrorText = "Passwords do not match";
-                          } else {
-                            _passwordErrorText = null;
-                          }
-                        });
-                        if (_passwordErrorText != null) return;
-                        if (!_isEmailPopulated ||
-                            _emailController.text.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Please enter your email'),
-                            ),
-                          );
-                          return;
-                        }
-                        try {
-                          final token = await userApi.signup(
-                            email: _emailController.text,
-                            smsCode: '8888',
-                            loginPwd: _passController.text,
-                            inviteCode: _inviteController.text.isEmpty
-                                ? null
-                                : _inviteController.text,
-                          );
-                          print('Signup success! Token: $token');
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const HomeScreen(),
-                            ),
-                          );
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Signup failed: $e')),
-                          );
-                        }
-                      }
+                text: _signingUp ? "Signing Up..." : "Sign Up",
+                onPressed: (_isEmailVerified && _agreedToTerms && !_signingUp)
+                    ? _onSignup
                     : () {},
               ),
 
@@ -369,9 +480,7 @@ class _SignupScreenState extends State<SignupScreen> {
   }) {
     return Autocomplete<String>(
       optionsBuilder: (TextEditingValue value) {
-        final raw = value.text;
-        final input = raw.trim();
-
+        final input = value.text.trim();
         if (input.isEmpty) return const Iterable<String>.empty();
 
         if (_emailDomains.any(
@@ -387,12 +496,9 @@ class _SignupScreenState extends State<SignupScreen> {
 
         final local = input.substring(0, atIndex);
         final typedDomain = input.substring(atIndex + 1).toLowerCase();
-
         if (local.isEmpty) return const Iterable<String>.empty();
 
-        final matches = _emailDomains.where(
-          (d) => d.toLowerCase().startsWith(typedDomain),
-        );
+        final matches = _emailDomains.where((d) => d.toLowerCase().startsWith(typedDomain));
         return matches.map((d) => '$local@$d');
       },
       onSelected: (String selection) {
@@ -402,31 +508,29 @@ class _SignupScreenState extends State<SignupScreen> {
         );
         setState(() {
           _isEmailPopulated = true;
+          _emailErrorText = null;
         });
       },
       fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
         if (_emailController != controller) {
           _emailController = controller;
           _autocompleteFocusNode = focusNode;
-
-          _emailController.addListener(() {
-            final isPopulated = _emailController.text.isNotEmpty;
-            if (_isEmailPopulated != isPopulated) {
-              setState(() {
-                _isEmailPopulated = isPopulated;
-              });
-            }
-          });
         }
+
         return TextField(
           controller: controller,
           focusNode: focusNode,
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
+          onChanged: (_) {
+            // live validate but only show if previously error
+            if (_emailErrorText != null) _validateEmailLocal();
+          },
           decoration: _inputDecoration(
             hint: hint,
             iconPath: iconPath,
             suffixWidget: suffixWidget,
+            errorText: _emailErrorText,
           ),
           onSubmitted: (_) => onFieldSubmitted(),
         );
@@ -527,9 +631,7 @@ class _SignupScreenState extends State<SignupScreen> {
               padding: const EdgeInsets.only(right: 4.0),
               child: IconButton(
                 onPressed: enabled
-                    ? () => setState(
-                        () => _isPasswordVisible = !_isPasswordVisible,
-                      )
+                    ? () => setState(() => _isPasswordVisible = !_isPasswordVisible)
                     : null,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),

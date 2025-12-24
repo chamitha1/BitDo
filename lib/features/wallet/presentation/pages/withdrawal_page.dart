@@ -71,11 +71,22 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
       backgroundColor: Colors.transparent,
       barrierColor: const Color(0xFF000000).withOpacity(0.4),
       builder: (context) => OtpBottomSheet(
-        email: "j*n**ha@gmail.com", 
+        email: "johnha@gmail.com", // replace with logged-in email
         otpLength: 6,
         bizType: SmsBizType.withdraw,
+
+        onVerifyPin: (pin) async {
+          // return await walletApi.verifyWithdrawOtp(smsCode: pin);
+          return true; // TEMP
+        },
+
+        onResend: () async {
+          // return await walletApi.sendWithdrawOtp();
+          return true; // TEMP
+        },
+
         onVerified: () {
-          Navigator.pop(context); 
+          Navigator.pop(context);
           showDialog(
             context: context,
             barrierDismissible: false,

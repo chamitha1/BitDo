@@ -132,26 +132,33 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             context: context,
                             isScrollControlled: true,
                             backgroundColor: Colors.transparent,
-
-                            barrierColor: const Color(
-                              0xFFECEFF5,
-                            ).withOpacity(0.7),
-
+                            barrierColor: const Color(0xFFECEFF5).withOpacity(0.7),
                             builder: (context) => OtpBottomSheet(
-                              email: _emailController!.text,
+                              email: _emailController.text.trim(),
                               otpLength: 6,
                               bizType: SmsBizType.forgetPwd,
+
+                              onVerifyPin: (pin) async {
+                                // return await userApi.verifyOtp(
+                                //   email: _emailController.text.trim(),
+                                //   bizType: SmsBizType.forgetPwd,
+                                //   smsCode: pin,
+                                // );
+                                return true; // TEMP
+                              },
+
+                              onResend: () async {
+                                return await userApi.sendOtp(
+                                  email: _emailController.text.trim(),
+                                  bizType: SmsBizType.forgetPwd,
+                                );
+                              },
+
                               onVerified: () {
                                 Navigator.pop(context);
-                                setState(() {
-                                  _isEmailVerified = true;
-                                });
+                                setState(() => _isEmailVerified = true);
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      "Email Verified Successfully!",
-                                    ),
-                                  ),
+                                  const SnackBar(content: Text("Email Verified Successfully!")),
                                 );
                               },
                             ),

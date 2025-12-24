@@ -5,16 +5,27 @@ import 'package:pinput/pinput.dart';
 
 class OtpBottomSheet extends StatefulWidget {
   final String email;
+  final int otpLength;
+  final SmsBizType bizType;
+
+  /// ✅ REQUIRED: parent provides OTP validation (API)
+  final Future<bool> Function(String pin) onVerifyPin;
+
+  /// ✅ called when verification is successful
   final VoidCallback onVerified;
+
+  /// ✅ optional: parent provides resend OTP (API)
+  final Future<bool> Function()? onResend;
 
   const OtpBottomSheet({
     super.key,
     required this.email,
+    required this.bizType,
+    required this.onVerifyPin,
     required this.onVerified,
-    this.otpLength = 6, required SmsBizType bizType,
+    this.onResend,
+    this.otpLength = 6,
   });
-
-  final int otpLength;
 
   @override
   State<OtpBottomSheet> createState() => _OtpBottomSheetState();
@@ -22,14 +33,18 @@ class OtpBottomSheet extends StatefulWidget {
 
 class _OtpBottomSheetState extends State<OtpBottomSheet> {
   final TextEditingController _pinController = TextEditingController();
+
   int _secondsRemaining = 35;
   Timer? _timer;
   bool _canResend = false;
 
+  bool _isVerifying = false;
+  bool _isResending = false;
+
   @override
   void initState() {
     super.initState();
-    startTimer();
+    _startTimer();
   }
 
   @override
@@ -39,12 +54,16 @@ class _OtpBottomSheetState extends State<OtpBottomSheet> {
     super.dispose();
   }
 
-  void startTimer() {
+  void _startTimer() {
+    _timer?.cancel();
     setState(() {
       _secondsRemaining = 35;
       _canResend = false;
     });
+
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) return;
+
       setState(() {
         if (_secondsRemaining > 0) {
           _secondsRemaining--;
@@ -62,14 +81,79 @@ class _OtpBottomSheetState extends State<OtpBottomSheet> {
 
     final name = parts[0];
     final domain = parts[1];
-
     if (name.length <= 2) return widget.email;
 
     final firstLetter = name.substring(0, 1);
     final lastLetter = name.substring(name.length - 1);
     final stars = '*' * (name.length - 2);
-
     return '$firstLetter$stars$lastLetter@$domain';
+  }
+
+  Future<void> _verify() async {
+    final pin = _pinController.text.trim();
+
+    if (pin.length != widget.otpLength) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter valid OTP")),
+      );
+      return;
+    }
+
+    setState(() => _isVerifying = true);
+
+    try {
+      final ok = await widget.onVerifyPin(pin);
+      if (!mounted) return;
+
+      if (ok) {
+        widget.onVerified();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Invalid OTP, please try again.")),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("OTP verification failed: $e")),
+      );
+    } finally {
+      if (mounted) setState(() => _isVerifying = false);
+    }
+  }
+
+  Future<void> _resend() async {
+    if (!_canResend || _isResending) return;
+
+    setState(() => _isResending = true);
+
+    try {
+      if (widget.onResend != null) {
+        final ok = await widget.onResend!();
+        if (!mounted) return;
+
+        if (ok) {
+          _startTimer();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("OTP resent successfully.")),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Failed to resend OTP. Try again.")),
+          );
+        }
+      } else {
+        // no resend api passed
+        _startTimer();
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Resend failed: $e")),
+      );
+    } finally {
+      if (mounted) setState(() => _isResending = false);
+    }
   }
 
   @override
@@ -112,7 +196,6 @@ class _OtpBottomSheetState extends State<OtpBottomSheet> {
             width: 64,
           ),
           const SizedBox(height: 24),
-
           const Text(
             "Enter Verification Code",
             style: TextStyle(
@@ -123,7 +206,6 @@ class _OtpBottomSheetState extends State<OtpBottomSheet> {
             ),
           ),
           const SizedBox(height: 8),
-
           Text(
             "Verification code has been send to\n$_obfuscatedEmail",
             textAlign: TextAlign.center,
@@ -142,10 +224,9 @@ class _OtpBottomSheetState extends State<OtpBottomSheet> {
             controller: _pinController,
             defaultPinTheme: defaultPinTheme,
             focusedPinTheme: focusedPinTheme,
-            pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
             showCursor: true,
-            onCompleted: (pin) {},
           ),
+
           const SizedBox(height: 32),
 
           SizedBox(
@@ -161,10 +242,7 @@ class _OtpBottomSheetState extends State<OtpBottomSheet> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: ElevatedButton(
-                onPressed: () {
-                  //correct pin
-                  widget.onVerified();
-                },
+                onPressed: _isVerifying ? null : _verify,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.transparent,
                   shadowColor: Colors.transparent,
@@ -172,14 +250,20 @@ class _OtpBottomSheetState extends State<OtpBottomSheet> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
-                  "Verify",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
+                child: _isVerifying
+                    ? const SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text(
+                        "Verify",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
               ),
             ),
           ),
@@ -199,14 +283,9 @@ class _OtpBottomSheetState extends State<OtpBottomSheet> {
                 ),
               ),
               GestureDetector(
-                onTap: _canResend
-                    ? () {
-                        //resend pin
-                        startTimer();
-                      }
-                    : null,
+                onTap: (_canResend && !_isResending) ? _resend : null,
                 child: Text(
-                  "Resend OTP",
+                  _isResending ? "Resending..." : "Resend OTP",
                   style: TextStyle(
                     color: _canResend ? const Color(0xff6545D0) : Colors.grey,
                     fontWeight: FontWeight.w400,
