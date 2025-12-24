@@ -15,6 +15,7 @@ class ForgotPasswordScreen extends StatefulWidget {
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _passController = TextEditingController();
   final _confirmPassController = TextEditingController();
+  final userApi = UserApi();
 
   late TextEditingController _emailController;
 
@@ -117,7 +118,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
                         setState(() => _isSendingOtp = true);
 
-                        final bool response = await sendOtp(
+                        final bool response = await userApi.sendOtp(
                           email: _emailController.text.trim(),
                           bizType: SmsBizType.forgetPwd,
                         );
@@ -138,7 +139,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
                             builder: (context) => OtpBottomSheet(
                               email: _emailController!.text,
-                              otpLength: 4,
+                              otpLength: 6,
                               bizType: SmsBizType.forgetPwd,
                               onVerified: () {
                                 Navigator.pop(context);

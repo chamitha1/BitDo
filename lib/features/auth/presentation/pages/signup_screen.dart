@@ -22,6 +22,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final _passController = TextEditingController();
   final _confirmPassController = TextEditingController();
   final _inviteController = TextEditingController();
+  final userApi = UserApi();
 
   FocusNode? _autocompleteFocusNode;
 
@@ -58,7 +59,7 @@ class _SignupScreenState extends State<SignupScreen> {
   void _openOtpSheet() {
     if (!_isEmailPopulated) return;
 
-    sendOtp(email: _emailController.text).then((success) {
+    userApi.sendOtp(email: _emailController.text).then((success) {
       print(success);
       ScaffoldMessenger.of(
         context,
@@ -75,7 +76,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
         builder: (context) => OtpBottomSheet(
           email: _emailController.text.trim(),
-          otpLength: 4,
+          otpLength: 6,
           bizType: SmsBizType.register,
           onVerified: () {
             Navigator.pop(context);
@@ -279,7 +280,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           return;
                         }
                         try {
-                          final token = await signup(
+                          final token = await userApi.signup(
                             email: _emailController.text,
                             smsCode: '8888',
                             loginPwd: _passController.text,

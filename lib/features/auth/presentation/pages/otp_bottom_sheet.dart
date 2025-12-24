@@ -11,7 +11,7 @@ class OtpBottomSheet extends StatefulWidget {
     super.key,
     required this.email,
     required this.onVerified,
-    this.otpLength = 4, required SmsBizType bizType,
+    this.otpLength = 6, required SmsBizType bizType,
   });
 
   final int otpLength;

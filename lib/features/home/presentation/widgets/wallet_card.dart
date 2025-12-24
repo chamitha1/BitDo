@@ -1,6 +1,8 @@
+import 'package:BitDo/models/account_detail_res.dart';
 import 'package:flutter/material.dart';
 import '../../../wallet/presentation/pages/deposit_screen.dart';
 import '../../../wallet/presentation/pages/withdrawal_page.dart';
+import 'package:BitDo/api/account_api.dart';
 
 class WalletCard extends StatefulWidget {
   const WalletCard({super.key});
@@ -12,6 +14,16 @@ class WalletCard extends StatefulWidget {
 class _WalletCardState extends State<WalletCard> {
   String _selectedCurrency = "USD";
   bool _isObscured = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchBalance();
+  }
+
+  AccountDetailAssetRes? _balanceData; //API response
+  bool _isLoading = false;
+  String? _errorMessage; //  error feedback
 
   final List<Map<String, String>> _currencies = [
     {'name': 'BTC', 'icon': 'assets/images/home/bitcoin.png'},
@@ -62,30 +74,44 @@ class _WalletCardState extends State<WalletCard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              RichText(
-                text: TextSpan(
-                  text: _isObscured ? "******" : "8,489,489.",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Inter',
-                  ),
-                  children: _isObscured
-                      ? []
-                      : const <TextSpan>[
-                          TextSpan(
-                            text: "32",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                              fontFamily: 'Inter',
+              if (_isLoading)
+                const CircularProgressIndicator(
+                  color: Colors.white,
+                ) // ← CHANGE: Show loading
+              else if (_errorMessage != null)
+                Text(
+                  'Error: $_errorMessage', // ← CHANGE: Show error
+                  style: const TextStyle(color: Colors.red, fontSize: 16),
+                )
+              else
+                RichText(
+                  text: TextSpan(
+                    text: _isObscured
+                        ? "******"
+                        : "${_balanceData?.totalAmount.split('.').first ?? '0'}.",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Inter',
+                    ),
+                    children: _isObscured
+                        ? []
+                        : <TextSpan>[
+                            TextSpan(
+                              text:
+                                  _balanceData?.totalAmount.split('.').last ??
+                                  '00',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                fontFamily: 'Inter',
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                  ),
                 ),
-              ),
               const SizedBox(width: 10),
               GestureDetector(
                 onTap: () {
@@ -104,15 +130,18 @@ class _WalletCardState extends State<WalletCard> {
                     _isObscured
                         ? 'assets/icons/login/eye.png'
                         : 'assets/icons/home/eye_slash.png',
-                    color: Colors.white, 
+                    color: Colors.white,
                   ),
                 ),
               ),
             ],
           ),
+
           const SizedBox(height: 8),
           Text(
-            _isObscured ? "****" : "≈16,389.03 NGN",
+            _isObscured
+                ? "****"
+                : "≈${_balanceData?.totalAsset ?? '0.00'} ${_balanceData?.totalAssetCurrency ?? 'NGN'}",
             style: const TextStyle(
               color: Colors.white,
               fontSize: 16,
@@ -160,6 +189,30 @@ class _WalletCardState extends State<WalletCard> {
     );
   }
 
+  Future<void> _fetchBalance() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final res = await AccountApi.getBalanceAccount(
+        assetCurrency: _selectedCurrency, // Use selected currency
+      );
+
+      print("Total Amount: ${res.totalAmount}");
+      print("Total Asset: ${res.totalAsset}");
+      print("Account List length: ${res.accountList.length}");
+
+      setState(() => _balanceData = res);
+    } catch (e) {
+      print("Fetch Balance ERROR!- $e");
+      setState(() => _errorMessage = e.toString());
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
   Widget _buildCurrencyDropdown() {
     return PopupMenuButton<String>(
       offset: const Offset(0, 40),
@@ -174,6 +227,7 @@ class _WalletCardState extends State<WalletCard> {
         setState(() {
           _selectedCurrency = value;
         });
+        _fetchBalance();
       },
       itemBuilder: (context) => _currencies.map((currency) {
         return PopupMenuItem<String>(
