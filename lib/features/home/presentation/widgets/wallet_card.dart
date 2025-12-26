@@ -1,12 +1,8 @@
-import 'package:BitDo/models/account_detail_res.dart';
+import 'package:BitDo/features/home/presentation/controllers/balance_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../wallet/presentation/pages/deposit_screen.dart';
 import '../../../wallet/presentation/pages/withdrawal_page.dart';
-import 'package:BitDo/api/account_api.dart';
-import 'package:BitDo/core/storage/storage_service.dart';
-import 'package:BitDo/features/auth/presentation/controllers/user_controller.dart';
-import 'package:BitDo/core/storage/storage_service.dart';
 
 class WalletCard extends StatefulWidget {
   const WalletCard({super.key});
@@ -16,26 +12,13 @@ class WalletCard extends StatefulWidget {
 }
 
 class _WalletCardState extends State<WalletCard> {
-  String _selectedCurrency = "USD";
+  // Use Get.put to ensure the controller is created if it doesn't exist yet,
+  // or Get.find if it's already in memory.
+  // Since we want to share this, we should probably put it in the bindings or use Get.put(..., permanent: true) if needed.
+  // For now, Get.put() is safe; if it's already there, it returns the instance.
+  final BalanceController controller = Get.put(BalanceController());
+  
   bool _isObscured = false;
-  late String _userName;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchBalance();
-  }
-
-  AccountDetailAssetRes? _balanceData; //API response
-  bool _isLoading = false;
-  String? _errorMessage; //  error feedback
-
-  final List<Map<String, String>> _currencies = [
-    {'name': 'BTC', 'icon': 'assets/images/home/bitcoin.png'},
-    {'name': 'USDT-TRC20', 'icon': 'assets/images/home/usdt.png'},
-    {'name': 'BNB', 'icon': 'assets/images/home/binance.png'},
-    {'name': 'Tron', 'icon': 'assets/images/home/tron.png'},
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +29,6 @@ class _WalletCardState extends State<WalletCard> {
         borderRadius: BorderRadius.circular(24),
         gradient: const LinearGradient(
           begin: Alignment.topCenter,
-
           end: Alignment.bottomCenter,
           colors: [Color(0xff1D5DE5), Color(0xff174AB7)],
         ),
@@ -72,88 +54,11 @@ class _WalletCardState extends State<WalletCard> {
                   fontFamily: 'Inter',
                 ),
               ),
-              _buildCurrencyDropdown(),
+              Obx(() => _buildCurrencyDropdown()),
             ],
           ),
           const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (_isLoading)
-                const CircularProgressIndicator(
-                  color: Colors.white,
-                ) // ← CHANGE: Show loading
-              else if (_errorMessage != null)
-                Text(
-                  'Error: $_errorMessage', // ← CHANGE: Show error
-                  style: const TextStyle(color: Colors.red, fontSize: 16),
-                )
-              else
-                RichText(
-                  text: TextSpan(
-                    text: _isObscured
-                        ? "******"
-                        : "${_balanceData?.totalAmount.split('.').first ?? '0'}.",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Inter',
-                    ),
-                    children: _isObscured
-                        ? []
-                        : <TextSpan>[
-                            TextSpan(
-                              text:
-                                  _balanceData?.totalAmount.split('.').last ??
-                                  '00',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
-                                fontFamily: 'Inter',
-                              ),
-                            ),
-                          ],
-                  ),
-                ),
-              const SizedBox(width: 10),
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _isObscured = !_isObscured;
-                  });
-                },
-                child: Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: const Color(0xff4A7DEA),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Image.asset(
-                    _isObscured
-                        ? 'assets/icons/login/eye.png'
-                        : 'assets/icons/home/eye_slash.png',
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 8),
-          Text(
-            _isObscured
-                ? "****"
-                : "≈${_balanceData?.totalAsset ?? '0.00'} ${_balanceData?.totalAssetCurrency ?? 'NGN'}",
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              fontFamily: 'Inter',
-            ),
-          ),
+          _buildBalanceContent(),
           const SizedBox(height: 24),
 
           Row(
@@ -194,44 +99,111 @@ class _WalletCardState extends State<WalletCard> {
     );
   }
 
-  Future<void> _fetchBalance() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final res = await AccountApi.getBalanceAccount(
-        assetCurrency:
-            await StorageService.getCurrency(), 
-      );
-
-      print("Total Amount: ${res.totalAmount}");
-      print("Total Asset: ${res.totalAsset}");
-      print("Account List length: ${res.accountList.length}");
-
-      setState(() {
-        _balanceData = res;
-      });
-
-      if (res.accountList.isNotEmpty) {
-        final accNum = res.accountList.first.accountNumber;
-        await StorageService.saveAccountNumber(accNum);
-
-        // Update reactive state
-        try {
-          Get.find<UserController>().setUserName(accNum);
-        } catch (_) {}
+  Widget _buildBalanceContent() {
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return const Center(
+          child: CircularProgressIndicator(color: Colors.white),
+        );
       }
-    } catch (e) {
-      print("Fetch Balance ERROR!- $e");
-      setState(() => _errorMessage = e.toString());
-    } finally {
-      setState(() => _isLoading = false);
-    }
+      
+      if (controller.errorMessage.value.isNotEmpty) {
+        return Text(
+          'Error: ${controller.errorMessage.value}',
+          style: const TextStyle(color: Colors.red, fontSize: 16),
+        );
+      }
+
+      final asset = controller.selectedAsset;
+      // Fallback values if no asset selected or data empty
+      // If we have data but asset is null, it means logic issue or empty list
+      
+      final totalAmount = asset?.totalAmount ?? '0.00';
+      final totalAsset = asset?.totalAsset ?? '0.00';
+      final totalAssetCurrency = asset?.totalAssetCurrency ?? 'USDT'; // approximate currency
+
+      return Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              RichText(
+                text: TextSpan(
+                  text: _isObscured
+                      ? "******"
+                      : "${totalAmount.split('.').first}.",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Inter',
+                  ),
+                  children: _isObscured
+                      ? []
+                      : <TextSpan>[
+                          TextSpan(
+                            text: totalAmount.contains('.') 
+                                ? totalAmount.split('.').last 
+                                : '00',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              fontFamily: 'Inter',
+                            ),
+                          ),
+                        ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _isObscured = !_isObscured;
+                  });
+                },
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: const Color(0xff4A7DEA),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Image.asset(
+                    _isObscured
+                        ? 'assets/icons/login/eye.png'
+                        : 'assets/icons/home/eye_slash.png',
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _isObscured
+                ? "****"
+                : "≈$totalAsset $totalAssetCurrency",
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Inter',
+            ),
+          ),
+        ],
+      );
+    });
   }
 
   Widget _buildCurrencyDropdown() {
+    if (controller.balanceData.value == null || 
+        controller.balanceData.value!.accountList.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final currencies = controller.balanceData.value!.accountList;
+
     return PopupMenuButton<String>(
       offset: const Offset(0, 40),
       shape: RoundedRectangleBorder(
@@ -242,20 +214,17 @@ class _WalletCardState extends State<WalletCard> {
       shadowColor: const Color(0x0F555555),
       color: Colors.white,
       onSelected: (value) {
-        setState(() {
-          _selectedCurrency = value;
-        });
-        _fetchBalance();
+        controller.onChangeCurrency(value);
       },
-      itemBuilder: (context) => _currencies.map((currency) {
+      itemBuilder: (context) => currencies.map((currency) {
         return PopupMenuItem<String>(
-          value: currency['name'],
+          value: currency.currency,
           child: Row(
             children: [
-              Image.asset(currency['icon']!, width: 24, height: 24),
+              _buildNetworkImage(currency.icon),
               const SizedBox(width: 8),
               Text(
-                currency['name']!,
+                currency.currency,
                 style: const TextStyle(
                   fontWeight: FontWeight.w500,
                   fontSize: 14,
@@ -270,14 +239,14 @@ class _WalletCardState extends State<WalletCard> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: Color(0xff4A7DEA),
+          color: const Color(0xff4A7DEA),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              _selectedCurrency,
+              controller.selectedCurrency.value,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 12,
@@ -293,6 +262,42 @@ class _WalletCardState extends State<WalletCard> {
           ],
         ),
       ),
+    );
+  }
+  
+  Widget _buildNetworkImage(String url) {
+    if (url.isEmpty || !url.startsWith('http')) {
+      // Fallback for local assets or empty
+      // Logic from legacy: try mapping specific names to assets if needed, 
+      // but if the API returns icons we should use them.
+      // If it's a local path from the old dummy list, handle it? 
+      // The API returns urls usually. If empty, show generic.
+       return Container(
+        width: 24,
+        height: 24,
+        decoration: const BoxDecoration(
+          color: Color(0xFFF0F0F0),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(Icons.currency_bitcoin, size: 16, color: Colors.grey),
+      );
+    }
+    
+    return Image.network(
+      url,
+      width: 24,
+      height: 24,
+      errorBuilder: (context, error, stackTrace) {
+        return Container(
+          width: 24,
+          height: 24,
+          decoration: const BoxDecoration(
+            color: Color(0xFFF0F0F0),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.error_outline, size: 16, color: Colors.grey),
+        );
+      },
     );
   }
 

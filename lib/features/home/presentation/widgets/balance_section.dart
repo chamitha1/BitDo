@@ -1,9 +1,7 @@
+import 'package:BitDo/features/home/presentation/controllers/balance_controller.dart';
 import 'package:BitDo/features/wallet/presentation/pages/balance_history_page.dart';
-import 'package:BitDo/features/wallet/presentation/pages/transaction_history_page.dart';
 import 'package:flutter/material.dart';
-import 'package:BitDo/api/account_api.dart';
-import 'package:BitDo/models/account_detail_res.dart';
-import 'package:BitDo/core/storage/storage_service.dart';
+import 'package:get/get.dart';
 
 class BalanceSection extends StatefulWidget {
   const BalanceSection({super.key});
@@ -13,16 +11,10 @@ class BalanceSection extends StatefulWidget {
 }
 
 class _BalanceSectionState extends State<BalanceSection> {
+  // Use Get.put to retrieve the shared controller
+  final BalanceController controller = Get.put(BalanceController());
+  
   bool _hideSmallAssets = false;
-  AccountDetailAssetRes? _balanceData;
-  bool _isLoading = true;
-  String? _errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchBalance();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,38 +95,40 @@ class _BalanceSectionState extends State<BalanceSection> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Column(
-            children: [
-              if (_isLoading)
-                const Center(child: CircularProgressIndicator())
-              else if (_errorMessage != null)
-                Center(
-                  child: Column(
-                    children: [
-                      Text(
-                        "Error: $_errorMessage",
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                      TextButton(
-                        onPressed: _fetchBalance,
-                        child: const Text("Retry"),
-                      ),
-                    ],
-                  ),
-                )
-              else if (_balanceData != null)
-                ..._buildAssetList(),
-            ],
-          ),
+          child: Obx(() {
+            if (controller.isLoading.value) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (controller.errorMessage.value.isNotEmpty) {
+              return Center(
+                child: Column(
+                  children: [
+                    Text(
+                      "Error: ${controller.errorMessage.value}",
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                    TextButton(
+                      onPressed: controller.fetchBalance,
+                      child: const Text("Retry"),
+                    ),
+                  ],
+                ),
+              );
+            } else if (controller.balanceData.value != null) {
+              return Column(
+                children: _buildAssetList(),
+              );
+            }
+            return const SizedBox.shrink();
+          }),
         ),
       ],
     );
   }
 
   List<Widget> _buildAssetList() {
-    if (_balanceData == null) return [];
+    if (controller.balanceData.value == null) return [];
 
-    final list = _balanceData!.accountList.where((item) {
+    final list = controller.balanceData.value!.accountList.where((item) {
       if (_hideSmallAssets) {
         return item.microFlag != '1';
       }
@@ -174,7 +168,7 @@ class _BalanceSectionState extends State<BalanceSection> {
   }
 
   Widget _buildNetworkImage(String url) {
-    if (url.isEmpty) {
+    if (url.isEmpty || !url.startsWith('http')) {
       return Container(
         width: 24,
         height: 24,
@@ -201,26 +195,6 @@ class _BalanceSectionState extends State<BalanceSection> {
         );
       },
     );
-  }
-
-  Future<void> _fetchBalance() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final res = await AccountApi.getBalanceAccount(
-        assetCurrency: await StorageService.getCurrency(),
-      );
-      
-      print("balance res : $res");
-      _balanceData = res;
-    } catch (e) {
-      setState(() => _errorMessage = e.toString());
-    } finally {
-      setState(() => _isLoading = false);
-    }
   }
 
   Widget _assetItem({
