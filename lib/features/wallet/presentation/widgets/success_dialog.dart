@@ -1,10 +1,21 @@
 import 'package:BitDo/features/wallet/presentation/pages/balance_history_page.dart';
-import 'package:BitDo/features/wallet/presentation/pages/transaction_history_page.dart';
+import 'package:BitDo/features/home/presentation/pages/home_screen.dart';
+import 'package:BitDo/models/jour.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 
 class SuccessDialog extends StatelessWidget {
-  const SuccessDialog({super.key});
+  final String symbol;
+  final String accountNumber;
+  final Jour? newTransaction;
+
+  const SuccessDialog({
+    super.key,
+    required this.symbol,
+    required this.accountNumber,
+    this.newTransaction,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +31,9 @@ class SuccessDialog extends StatelessWidget {
             Align(
               alignment: Alignment.topRight,
               child: GestureDetector(
-                onTap: () => Navigator.pop(context),
+                onTap: () {
+                   Get.until((route) => Get.currentRoute == '/HomeScreen' || route.isFirst);
+                },
                 child: const Icon(
                   Icons.close,
                   color: Color(0xFF9EA3AE), 
@@ -63,12 +76,14 @@ class SuccessDialog extends StatelessWidget {
               height: 50,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.pop(context); 
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const BalanceHistoryPage(),
-                    ),
+                  Get.back(); 
+                  Get.to(
+                    () => const BalanceHistoryPage(),
+                    arguments: {
+                      'symbol': symbol,
+                      'accountNumber': accountNumber,
+                      'newTransaction': newTransaction,
+                    },
                   );
                 },
                 style: ElevatedButton.styleFrom(

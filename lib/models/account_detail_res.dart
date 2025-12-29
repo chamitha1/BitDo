@@ -41,4 +41,30 @@ class AccountDetailAssetRes {
   }
 
   Map<String, dynamic> toJson() => _$AccountDetailAssetResToJson(this);
+
+  AccountDetailAssetRes copyWith({
+    String? totalAmount,
+    String? totalAmountCurrency,
+    String? totalAsset,
+    String? totalAssetCurrency,
+    String? lockTotalAmount,
+    String? lockTotalAmountCurrency,
+    String? microAmount,
+    String? microAmountCurrency,
+    num? yesterdayIncomeUsdt,
+    List<AccountDetailAssetInnerItem>? accountList,
+  }) {
+    return AccountDetailAssetRes()
+      ..totalAmount = totalAmount ?? this.totalAmount
+      ..totalAmountCurrency = totalAmountCurrency ?? this.totalAmountCurrency
+      ..totalAsset = totalAsset ?? this.totalAsset
+      ..totalAssetCurrency = totalAssetCurrency ?? this.totalAssetCurrency
+      ..lockTotalAmount = lockTotalAmount ?? this.lockTotalAmount
+      ..lockTotalAmountCurrency =
+          lockTotalAmountCurrency ?? this.lockTotalAmountCurrency
+      ..microAmount = microAmount ?? this.microAmount
+      ..microAmountCurrency = microAmountCurrency ?? this.microAmountCurrency
+      ..yesterdayIncomeUsdt = yesterdayIncomeUsdt ?? this.yesterdayIncomeUsdt
+      ..accountList = accountList ?? this.accountList;
+  }
 }

@@ -54,4 +54,52 @@ class AccountDetailAssetInnerItem {
   }
 
   Map<String, dynamic> toJson() => _$AccountDetailAssetInnerItemToJson(this);
+
+  AccountDetailAssetInnerItem copyWith({
+    String? accountNumber,
+    String? type,
+    String? currency,
+    String? cname,
+    String? ename,
+    String? address,
+    String? totalAmount,
+    String? usableAmount,
+    String? icon,
+    String? pic1,
+    String? microFlag,
+    String? frozenAmount,
+    String? lockAmount,
+    String? scalpFlag,
+    String? amountUsdt,
+    String? totalAsset,
+    String? totalAssetCurrency,
+    String? lockAmountUsdt,
+    String? lockTotalAsset,
+    String? lockTotalAssetCurrency,
+    String? precision,
+  }) {
+    return AccountDetailAssetInnerItem()
+      ..accountNumber = accountNumber ?? this.accountNumber
+      ..type = type ?? this.type
+      ..currency = currency ?? this.currency
+      ..cname = cname ?? this.cname
+      ..ename = ename ?? this.ename
+      ..address = address ?? this.address
+      ..totalAmount = totalAmount ?? this.totalAmount
+      ..usableAmount = usableAmount ?? this.usableAmount
+      ..icon = icon ?? this.icon
+      ..pic1 = pic1 ?? this.pic1
+      ..microFlag = microFlag ?? this.microFlag
+      ..frozenAmount = frozenAmount ?? this.frozenAmount
+      ..lockAmount = lockAmount ?? this.lockAmount
+      ..scalpFlag = scalpFlag ?? this.scalpFlag
+      ..amountUsdt = amountUsdt ?? this.amountUsdt
+      ..totalAsset = totalAsset ?? this.totalAsset
+      ..totalAssetCurrency = totalAssetCurrency ?? this.totalAssetCurrency
+      ..lockAmountUsdt = lockAmountUsdt ?? this.lockAmountUsdt
+      ..lockTotalAsset = lockTotalAsset ?? this.lockTotalAsset
+      ..lockTotalAssetCurrency =
+          lockTotalAssetCurrency ?? this.lockTotalAssetCurrency
+      ..precision = precision ?? this.precision;
+  }
 }

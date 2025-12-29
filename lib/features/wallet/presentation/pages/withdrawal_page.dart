@@ -123,7 +123,11 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
             context: context,
             barrierDismissible: false,
             barrierColor: const Color(0xFF000000).withOpacity(0.4),
-            builder: (context) => const SuccessDialog(),
+            builder: (context) => SuccessDialog(
+              symbol: widget.symbol,
+              accountNumber: widget.accountNumber,
+              newTransaction: controller.lastWithdrawTransaction.value,
+            ),
           );
         },
       ),
@@ -567,18 +571,20 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
           ),
           GestureDetector(
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const TransactionHistoryPage(),
-                  settings: RouteSettings(
-                    arguments: {
-                      'symbol': widget.symbol,
-                      'accountNumber': widget.accountNumber,
-                    },
+              if (mounted) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TransactionHistoryPage(),
+                    settings: RouteSettings(
+                      arguments: {
+                        'symbol': widget.symbol,
+                        'accountNumber': widget.accountNumber,
+                      },
+                    ),
                   ),
-                ),
-              );
+                );
+              }
             },
             child: Image.asset(
               'assets/icons/withdrawal/clock.png',

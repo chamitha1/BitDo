@@ -101,4 +101,25 @@ class UserApi {
       return false;
     }
   }
+  // Bind Trade Password
+  Future<Map<String, dynamic>> bindTradePwd({
+    required String email,
+    required String smsCode,
+    required String tradePwd,
+  }) async {
+    try {
+      final response = await ApiClient.dio.post(
+        '/core/v1/user/bind_tradePwd',
+        data: {
+          'email': email,
+          'smsCode': smsCode,
+          'tradePwd': tradePwd,
+        },
+      );
+      return response.data as Map<String, dynamic>;
+    } catch (e) {
+      print("Bind Trade Password error: $e");
+      rethrow;
+    }
+  }
 }

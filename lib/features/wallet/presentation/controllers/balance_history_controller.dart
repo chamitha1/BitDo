@@ -4,6 +4,7 @@ import 'package:BitDo/models/account_detail_res.dart';
 import 'package:BitDo/models/jour.dart';
 import 'package:BitDo/models/account_detail_asset_inner_item.dart';
 import 'package:BitDo/models/page_info.dart';
+import 'package:BitDo/features/home/presentation/controllers/balance_controller.dart';
 
 class BalanceHistoryController extends GetxController {
   var currentTab = 0.obs; // 0: All, 1: Deposits, 2: Withdrawals
@@ -69,6 +70,16 @@ class BalanceHistoryController extends GetxController {
   Future<void> _fetchBalance() async {
     try {
       print("Fetching balance (all assets)...");
+      // Use BalanceController data if available (supports optimistic updates)
+      if (Get.isRegistered<BalanceController>()) {
+        final mainController = Get.find<BalanceController>();
+        if (mainController.balanceData.value != null) {
+             print("Using BalanceController data (Optimistic)");
+             accountDetail.value = mainController.balanceData.value;
+             return; // Return early to avoid overwriting with potentially stale API data
+        }
+      }
+
       // Call without assetCurrency to get all assets.
       final res = await AccountApi.getBalanceAccount();
       print("Balance fetched successfully: ${res.totalAmount}");
@@ -98,17 +109,27 @@ class BalanceHistoryController extends GetxController {
       print("Transactions fetched. Count: ${res.list.length}");
 
       var filteredList = res.list;
+      
+      final args = Get.arguments;
+      if (args != null && args is Map && args.containsKey('newTransaction') && pageNum == 1) {
+         final newTx = args['newTransaction'] as Jour?;
+         if (newTx != null) {
+            print("Inserting optimistic transaction");
+            // Add to the START of the list
+            filteredList = [newTx, ...filteredList];
+         }
+      }
 
       if (currentTab.value == 1) {
         // Deposit
-        filteredList = res.list.where((item) {
+        filteredList = filteredList.where((item) {
           final pre = double.tryParse(item.preAmount ?? '0') ?? 0;
           final post = double.tryParse(item.postAmount ?? '0') ?? 0;
           return post > pre || item.bizType == '1';
         }).toList();
       } else if (currentTab.value == 2) {
         // Withdraw
-        filteredList = res.list.where((item) {
+        filteredList = filteredList.where((item) {
           final pre = double.tryParse(item.preAmount ?? '0') ?? 0;
           final post = double.tryParse(item.postAmount ?? '0') ?? 0;
           return post < pre || item.bizType == '2';
@@ -119,7 +140,7 @@ class BalanceHistoryController extends GetxController {
         "Filtered count for tab ${currentTab.value}: ${filteredList.length}",
       );
 
-      if (res.list.isEmpty) {
+      if (filteredList.isEmpty && res.list.isEmpty) {
         isEnd = true;
       } else {
         if (pageNum == 1) {

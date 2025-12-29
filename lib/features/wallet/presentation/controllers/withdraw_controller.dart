@@ -6,6 +6,10 @@ import 'package:get/get.dart';
 import 'package:BitDo/api/user_api.dart';
 import 'package:BitDo/constants/sms_constants.dart';
 import 'package:BitDo/core/storage/storage_service.dart';
+import 'package:BitDo/features/auth/presentation/pages/bind_trade_pwd_sheet.dart';
+import 'package:BitDo/features/home/presentation/controllers/balance_controller.dart';
+import 'package:BitDo/features/wallet/presentation/widgets/success_dialog.dart';
+import 'package:BitDo/models/jour.dart';
 
 class WithdrawController extends GetxController {
   final TextEditingController addrController = TextEditingController();
@@ -20,6 +24,7 @@ class WithdrawController extends GetxController {
   var note = ''.obs;
   var symbol = ''.obs;
   var accountNumber = ''.obs;
+  var lastWithdrawTransaction = Rxn<Jour>();
 
   @override
   void onInit() {
@@ -97,10 +102,37 @@ class WithdrawController extends GetxController {
       return true;
     } catch (e) {
       print("Withdraw check error: $e");
+      
+   
+      final errorMsg = e.toString().toLowerCase();
+      if (errorMsg.contains("password") && (errorMsg.contains("set") || errorMsg.contains("bind") || errorMsg.contains("empty"))) {
+         _showBindTradePwdSheet();
+      } else {
+         Get.snackbar("Error", "Check failed: ${e.toString()}");
+      }
       return false;
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void _showBindTradePwdSheet() async {
+    final email = await StorageService.getUserName();
+    if (email == null) {
+      Get.snackbar("Error", "Please login again");
+      return;
+    }
+    
+    Get.bottomSheet(
+      BindTradePwdSheet(
+        email: email,
+        onSuccess: () {
+           // 
+        },
+      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+    );
   }
 
   void updateAddressFromScan(String scannedCode) {
@@ -164,7 +196,32 @@ class WithdrawController extends GetxController {
         "googleSecret": googleSecret,
       });
 
-      Get.snackbar("Success", "Withdrawal application submitted successfully");
+      // Dynamic Balance Update
+      try {
+        final currentBalance = double.tryParse(availableAmount.value.replaceAll(',', '')) ?? 0.0;
+        final withdrawAmount = double.tryParse(amount) ?? 0.0;
+        final newBalance = currentBalance - withdrawAmount;
+        availableAmount.value = newBalance.toStringAsFixed(8); // Keep precision
+        
+        // Refresh global balance
+        if (Get.isRegistered<BalanceController>()) {
+          Get.find<BalanceController>().updateOptimisticBalance(symbol.value, withdrawAmount);
+        }
+      } catch (e) {
+        print("Error updating local balance: $e");
+      }
+
+      final newTx = Jour(
+        id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
+        amount: amount,
+        bizType: '2', // Withdraw
+        currency: symbol.value,
+        createTime: DateTime.now().millisecondsSinceEpoch,
+        remark: 'Processing',
+        accountNumber: accountNumber.value,
+      );
+
+      lastWithdrawTransaction.value = newTx;
       return true;
     } catch (e) {
       print("Create withdraw error: $e");

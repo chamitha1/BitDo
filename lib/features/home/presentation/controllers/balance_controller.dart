@@ -77,4 +77,27 @@ class BalanceController extends GetxController {
       selectedCurrency.value = newCurrency;
     }
   }
+
+  void updateOptimisticBalance(String currency, double amountToMinus) {
+    if (balanceData.value == null) return;
+
+    final updatedList = balanceData.value!.accountList.map((item) {
+      if (item.currency == currency) {
+        final currentAmount = double.tryParse(item.usableAmount) ?? 0.0;
+        final newAmount = currentAmount - amountToMinus;
+        
+        //  update totalAmount
+        final currentTotal = double.tryParse(item.totalAmount) ?? 0.0;
+        final newTotal = currentTotal - amountToMinus;
+
+        return item.copyWith(
+          usableAmount: newAmount.toStringAsFixed(8),
+          totalAmount: newTotal.toStringAsFixed(8),
+        );
+      }
+      return item;
+    }).toList();
+
+    balanceData.value = balanceData.value!.copyWith(accountList: updatedList);
+  }
 }

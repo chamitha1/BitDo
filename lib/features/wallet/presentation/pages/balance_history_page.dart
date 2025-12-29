@@ -1,5 +1,6 @@
 import 'package:BitDo/features/wallet/presentation/controllers/balance_history_controller.dart';
 import 'package:BitDo/models/jour.dart';
+import 'package:BitDo/features/home/presentation/pages/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -89,7 +90,7 @@ class BalanceHistoryPage extends GetView<BalanceHistoryController> {
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => Navigator.pop(context),
+            onTap: () => Get.until((route) => Get.currentRoute == '/HomeScreen' || route.isFirst),
             child: Image.asset(
               'assets/icons/deposit/arrow_back.png',
               width: 24,
