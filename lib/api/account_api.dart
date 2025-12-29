@@ -74,6 +74,54 @@ class AccountApi {
     }
   }
 
+  static Future<WithdrawRuleDetailRes> getWithdrawRuleDetail(
+    String symbol,
+  ) async {
+    try {
+      final res = await ApiClient.dio.post(
+        '/core/v1/withdraw_rule/detail_front',
+        data: {"symbol": symbol},
+      );
+      final resData = res.data as Map<String, dynamic>;
+      if (resData['code'] == 200 || resData['code'] == '200') {
+         if (resData['data'] == null) {
+          print("Warning: Withdrawal rules for $symbol are NULL");
+          return WithdrawRuleDetailRes(
+            withdrawRule: "No withdrawal rules found for this asset.",
+            minAmount: "0",
+            withdrawFee: "0",
+          );
+        }
+        return WithdrawRuleDetailRes.fromJson(resData['data']);
+      } else {
+        throw Exception('API Error: ${resData['errorMsg']}');
+      }
+    } catch (e) {
+      print("getWithdrawRuleDetail error: $e");
+      rethrow;
+    }
+  }
+
+  /// 📝TODO
+  static Future<void> withdrawCheck(Map<String, dynamic> params) async {
+    try {
+      await ApiClient.dio.post('/core/v1/withdraw/check', data: params);
+    } catch (e) {
+      print("withdrawCheck error: $e");
+      rethrow;
+    }
+  }
+
+  /// 📝TODO
+  static Future<void> createWithdraw(Map<String, dynamic> params) async {
+    try {
+      await ApiClient.dio.post('/core/v1/withdraw/create', data: params);
+    } catch (e) {
+      print("createWithdraw error: $e");
+      rethrow;
+    }
+  }
+
   //📝TODO
   static Future<void> createBankCard(Map<String, dynamic> params) async {
     // try {
@@ -301,7 +349,7 @@ class AccountApi {
   static Future<Account> getDetailAccount(String currency) async {
     try {
       final res = await ApiClient.dio.post(
-        '/account/detailByUser',
+        '/core/v1/account/detailByUser',
         data: {'accountType': '4', 'currency': currency},
       );
       return Account.fromJson(res.data['data']);
@@ -439,42 +487,6 @@ class AccountApi {
   // }
 
   ///
-
-  // /// /📝TODO
-  static Future<WithdrawRuleDetailRes> getWithdrawRuleDetail(
-    String symbol,
-  ) async {
-    try {
-      final res = await ApiClient.dio.post(
-        '/withdraw_rule/detail_front',
-        data: {"symbol": symbol},
-      );
-      return WithdrawRuleDetailRes.fromJson(res.data['data']);
-    } catch (e) {
-      print("getWithdrawRuleDetail error: $e");
-      rethrow;
-    }
-  }
-
-  /// 📝TODO
-  static Future<void> withdrawCheck(Map<String, dynamic> params) async {
-    try {
-      await ApiClient.dio.post('/withdraw/check', data: params);
-    } catch (e) {
-      print("withdrawCheck error: $e");
-      rethrow;
-    }
-  }
-
-  /// 📝TODO
-  static Future<void> createWithdraw(Map<String, dynamic> params) async {
-    try {
-      await ApiClient.dio.post('/withdraw/create', data: params);
-    } catch (e) {
-      print("createWithdraw error: $e");
-      rethrow;
-    }
-  }
 
   /// 📝TODO
   // static Future<PageInfo<WithdrawPageRes>> getWithdrawPageList(

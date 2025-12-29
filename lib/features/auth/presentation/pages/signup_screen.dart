@@ -7,6 +7,7 @@ import 'package:BitDo/features/home/presentation/pages/home_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:BitDo/core/storage/storage_service.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -215,7 +216,7 @@ class _SignupScreenState extends State<SignupScreen> {
     setState(() => _signingUp = true);
 
     try {
-      final token = await userApi.signup(
+      final resData = await userApi.signup(
         email: _emailController.text.trim(),
         smsCode: _verifiedOtp ?? "", // Use captured OTP
         loginPwd: _passController.text.trim(),
@@ -224,14 +225,24 @@ class _SignupScreenState extends State<SignupScreen> {
             : _inviteController.text.trim(),
       );
 
-      print('Signup success! Token: $token');
+      print('Signup response: $resData');
 
-      if (!mounted) return;
+      if (resData['code'] == 200 || resData['code'] == '200') {
+         final tokenData = resData['data'] as Map<String, dynamic>;
+         final token = tokenData['token'] as String? ?? '';
+         
+         await StorageService.saveToken(token);
+         await StorageService.saveUserName(_emailController.text.trim());
+         
+         if (!mounted) return;
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
+         Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+         );
+      } else {
+        _toast("Signup failed: ${resData['errorMsg']}");
+      }
     } catch (e) {
       if (!mounted) return;
       _toast("Signup failed: $e");

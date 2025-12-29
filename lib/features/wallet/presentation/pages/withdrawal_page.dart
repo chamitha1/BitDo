@@ -1,24 +1,45 @@
 import 'package:BitDo/constants/sms_constants.dart';
 import 'package:BitDo/features/auth/presentation/pages/otp_bottom_sheet.dart';
+import 'package:BitDo/features/wallet/presentation/controllers/withdraw_controller.dart';
 import 'package:BitDo/features/wallet/presentation/pages/balance_history_page.dart';
 import 'package:BitDo/features/wallet/presentation/pages/transaction_history_page.dart';
 import 'package:BitDo/features/wallet/presentation/widgets/success_dialog.dart';
+import 'package:BitDo/core/storage/storage_service.dart';
 import 'package:flutter/material.dart';
+import 'package:BitDo/features/wallet/presentation/pages/qr_scanner_page.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:get/get.dart';
 
 class WithdrawalPage extends StatefulWidget {
-  const WithdrawalPage({super.key});
+  final String symbol;
+  final String accountNumber;
+
+  const WithdrawalPage({
+    super.key,
+    required this.symbol,
+    required this.accountNumber,
+  });
 
   @override
   State<WithdrawalPage> createState() => _WithdrawalPageState();
 }
 
 class _WithdrawalPageState extends State<WithdrawalPage> {
-  final TextEditingController _addressController = TextEditingController();
-  final TextEditingController _amountController = TextEditingController();
+  // final TextEditingController _addressController = TextEditingController(); 
+  // final TextEditingController _amountController = TextEditingController(); 
+  final WithdrawController controller = Get.put(WithdrawController());
 
   double _fee = 0.00;
   bool _isWithdrawAll = false;
+  bool _isPasswordObscure = true;
   final double _balance = 543488384.94;
+
+  @override
+  void initState() {
+    super.initState();
+    controller.setArgs(widget.symbol, widget.accountNumber);
+  }
 
   void _calculateFee(String value) {
     setState(() {
@@ -35,54 +56,65 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
     setState(() {
       _isWithdrawAll = !_isWithdrawAll;
       if (_isWithdrawAll) {
-        double maxAmount = _balance;
-        _amountController.text = maxAmount.toStringAsFixed(2);
+        double maxAmount =
+            double.tryParse(
+              controller.availableAmount.value.replaceAll(',', ''),
+            ) ??
+            0.0;
+
+        controller.amountController.text = maxAmount.toString();
+        _fee = maxAmount * 0.05;
+        controller.amountController.text = maxAmount.toString();
         _fee = maxAmount * 0.05;
       } else {
-        _amountController.clear();
+        controller.amountController.clear();
         _fee = 0.00;
       }
     });
   }
 
-  final TextEditingController _passwordController = TextEditingController();
+  // final TextEditingController _passwordController = TextEditingController();
 
   @override
   void dispose() {
-    _addressController.dispose();
-    _amountController.dispose();
-    _passwordController.dispose();
     super.dispose();
   }
 
   bool _isWithdrawEnabled() {
-    final amount = double.tryParse(_amountController.text) ?? 0.0;
-    return _addressController.text.isNotEmpty &&
+    final amount = double.tryParse(controller.amountController.text) ?? 0.0;
+    return controller.addrController.text.isNotEmpty &&
         amount >= 10 &&
-        _passwordController.text.isNotEmpty;
+        controller.tradeController.text.isNotEmpty;
   }
 
-  void _handleWithdraw() {
+  void _handleWithdraw() async {
     if (!_isWithdrawEnabled()) return;
+
+    if (!await controller.beforeSend()) return;
+
+    if (!await controller.sendOtp()) return;
+
+    final email = await StorageService.getUserName() ?? '';
+
+    if (!mounted) return;
 
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true,
+      isScrollControlled: true, 
       backgroundColor: Colors.transparent,
       barrierColor: const Color(0xFF000000).withOpacity(0.4),
       builder: (context) => OtpBottomSheet(
-        email: "johnha@gmail.com", // replace with logged-in email
+        email: email,
         otpLength: 6,
         bizType: SmsBizType.withdraw,
 
         onVerifyPin: (pin) async {
-          // return await walletApi.verifyWithdrawOtp(smsCode: pin);
-          return true; // TEMP
+           controller.emailController.text = pin;
+           return await controller.onApplyTap();
         },
 
         onResend: () async {
-          // return await walletApi.sendWithdrawOtp();
-          return true; // TEMP
+          return await controller.sendOtp();
         },
 
         onVerified: () {
@@ -126,7 +158,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
                     ),
                     const SizedBox(height: 8),
                     TextField(
-                      controller: _addressController,
+                      controller: controller.addrController, 
                       onChanged: (_) => setState(() {}),
                       decoration: InputDecoration(
                         filled: true,
@@ -176,8 +208,22 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
                               ),
                             ),
                             GestureDetector(
-                              onTap: () {
-                                // Scan logic
+                              onTap: () async {
+                                var status = await Permission.camera.request();
+                                if (status.isGranted) {
+                                  final result = await Get.to(() => const QrScannerPage());
+                                  if (result != null && result is String) {
+                                    controller.updateAddressFromScan(result);
+                                  }
+                                } else if (status.isPermanentlyDenied) {
+                                  openAppSettings();
+                                } else {
+                                  Get.snackbar(
+                                    "Permission Denied",
+                                    "Camera permission is required to scan QR codes.",
+                                    snackPosition: SnackPosition.BOTTOM,
+                                  );
+                                }
                               },
                               child: Padding(
                                 padding: const EdgeInsets.only(
@@ -211,20 +257,22 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
                             color: Color(0xFF2E3D5B),
                           ),
                         ),
-                        const Text(
-                          "=543,488.384 USDT",
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.w400,
-                            fontSize: 14,
-                            color: Color(0xFF2E3D5B),
+                        Obx(
+                          () => Text(
+                            "= ${controller.availableAmount.value}",
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontWeight: FontWeight.w400,
+                              fontSize: 14,
+                              color: Color(0xFF2E3D5B),
+                            ),
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
                     TextField(
-                      controller: _amountController,
+                      controller: controller.amountController, 
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
@@ -327,9 +375,9 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
                     ),
                     const SizedBox(height: 8),
                     TextField(
-                      controller: _passwordController,
+                      controller: controller.tradeController, 
                       onChanged: (_) => setState(() {}),
-                      obscureText: false,
+                      obscureText: _isPasswordObscure,
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.white,
@@ -360,6 +408,23 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(
                             color: Color(0xFF1D5DE5),
+                          ),
+                        ),
+                        suffixIcon: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _isPasswordObscure = !_isPasswordObscure;
+                            });
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: SvgPicture.asset(
+                              _isPasswordObscure
+                                  ? 'assets/icons/forgot_password/eye-slash.svg'
+                                  : 'assets/icons/forgot_password/eye.svg',
+                              width: 20,
+                              height: 20,
+                            ),
                           ),
                         ),
                       ),

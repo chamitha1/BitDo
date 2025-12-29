@@ -12,12 +12,9 @@ class WalletCard extends StatefulWidget {
 }
 
 class _WalletCardState extends State<WalletCard> {
-  // Use Get.put to ensure the controller is created if it doesn't exist yet,
-  // or Get.find if it's already in memory.
-  // Since we want to share this, we should probably put it in the bindings or use Get.put(..., permanent: true) if needed.
-  // For now, Get.put() is safe; if it's already there, it returns the instance.
+
   final BalanceController controller = Get.put(BalanceController());
-  
+
   bool _isObscured = false;
 
   @override
@@ -86,7 +83,10 @@ class _WalletCardState extends State<WalletCard> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const WithdrawalPage(),
+                        builder: (context) => WithdrawalPage(
+                          symbol: controller.selectedAsset?.currency ?? '',
+                          accountNumber: controller.selectedAsset?.accountNumber ?? '',
+                        ),
                       ),
                     );
                   },
@@ -106,7 +106,7 @@ class _WalletCardState extends State<WalletCard> {
           child: CircularProgressIndicator(color: Colors.white),
         );
       }
-      
+
       if (controller.errorMessage.value.isNotEmpty) {
         return Text(
           'Error: ${controller.errorMessage.value}',
@@ -115,12 +115,11 @@ class _WalletCardState extends State<WalletCard> {
       }
 
       final asset = controller.selectedAsset;
-      // Fallback values if no asset selected or data empty
-      // If we have data but asset is null, it means logic issue or empty list
-      
+    
       final totalAmount = asset?.totalAmount ?? '0.00';
       final totalAsset = asset?.totalAsset ?? '0.00';
-      final totalAssetCurrency = asset?.totalAssetCurrency ?? 'USDT'; // approximate currency
+      final totalAssetCurrency =
+          asset?.totalAssetCurrency ?? 'USDT'; 
 
       return Column(
         children: [
@@ -142,8 +141,8 @@ class _WalletCardState extends State<WalletCard> {
                       ? []
                       : <TextSpan>[
                           TextSpan(
-                            text: totalAmount.contains('.') 
-                                ? totalAmount.split('.').last 
+                            text: totalAmount.contains('.')
+                                ? totalAmount.split('.').last
                                 : '00',
                             style: const TextStyle(
                               color: Colors.white,
@@ -181,9 +180,7 @@ class _WalletCardState extends State<WalletCard> {
           ),
           const SizedBox(height: 8),
           Text(
-            _isObscured
-                ? "****"
-                : "≈$totalAsset $totalAssetCurrency",
+            _isObscured ? "****" : "≈$totalAsset $totalAssetCurrency",
             style: const TextStyle(
               color: Colors.white,
               fontSize: 16,
@@ -197,7 +194,7 @@ class _WalletCardState extends State<WalletCard> {
   }
 
   Widget _buildCurrencyDropdown() {
-    if (controller.balanceData.value == null || 
+    if (controller.balanceData.value == null ||
         controller.balanceData.value!.accountList.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -264,15 +261,11 @@ class _WalletCardState extends State<WalletCard> {
       ),
     );
   }
-  
+
   Widget _buildNetworkImage(String url) {
     if (url.isEmpty || !url.startsWith('http')) {
-      // Fallback for local assets or empty
-      // Logic from legacy: try mapping specific names to assets if needed, 
-      // but if the API returns icons we should use them.
-      // If it's a local path from the old dummy list, handle it? 
-      // The API returns urls usually. If empty, show generic.
-       return Container(
+    
+      return Container(
         width: 24,
         height: 24,
         decoration: const BoxDecoration(
@@ -282,7 +275,7 @@ class _WalletCardState extends State<WalletCard> {
         child: const Icon(Icons.currency_bitcoin, size: 16, color: Colors.grey),
       );
     }
-    
+
     return Image.network(
       url,
       width: 24,
