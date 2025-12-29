@@ -1,10 +1,23 @@
+import 'package:BitDo/features/wallet/presentation/controllers/balance_history_controller.dart';
+import 'package:BitDo/models/jour.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 
-class BalanceHistoryPage extends StatelessWidget {
+class Routes {
+  static const withdrawal = '/withdrawal';
+  static const deposit = '/deposit';
+}
+
+class BalanceHistoryPage extends GetView<BalanceHistoryController> {
   const BalanceHistoryPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    if (!Get.isRegistered<BalanceHistoryController>()) {
+      Get.put(BalanceHistoryController());
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF6F9FF),
       body: SafeArea(
@@ -28,29 +41,37 @@ class BalanceHistoryPage extends StatelessWidget {
                         fontFamily: 'Inter',
                         fontWeight: FontWeight.w500,
                         fontSize: 18,
-                        color: Color(0xff151E2F),
+                        color: Color(0xFF151E2F),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    // const SizedBox(height: 16),
-                    ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: 4,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        final isReceive = index == 0 || index == 3;
-                        return _buildTransactionItem(
-                          isReceive: isReceive,
-                          date: "12 Dec 2025, 11:10 am",
-                          amount: isReceive
-                              ? "+73,364.84 USDT"
-                              : "-73,364.84 USDT",
-                          fee: "Advertising Fee",
+                    const SizedBox(height: 16),
+                    _buildFilterTabs(),
+                    const SizedBox(height: 16),
+                    Obx(() {
+                      if (controller.isLoading.value &&
+                          controller.transactions.isEmpty) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (controller.transactions.isEmpty) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(20.0),
+                            child: Text("No transactions found"),
+                          ),
                         );
-                      },
-                    ),
+                      }
+                      return ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: controller.transactions.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final tx = controller.transactions[index];
+                          return _buildTransactionItem(tx);
+                        },
+                      );
+                    }),
                   ],
                 ),
               ),
@@ -62,12 +83,241 @@ class BalanceHistoryPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTransactionItem({
-    required bool isReceive,
-    required String date,
-    required String amount,
-    required String fee,
+  Widget _buildAppBar(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Image.asset(
+              'assets/icons/deposit/arrow_back.png',
+              width: 24,
+              height: 24,
+            ),
+          ),
+          const SizedBox(width: 12),
+          const Text(
+            "Balance & History",
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontWeight: FontWeight.w600,
+              fontSize: 18,
+              color: Color(0xFF151E2F),
+            ),
+          ),
+          const Spacer(),
+          GestureDetector(
+            onTap: () => controller.refreshData(),
+            child: SvgPicture.asset(
+              'assets/icons/balance_history/refresh-circle.svg',
+              width: 24,
+              height: 24,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBalanceCard() {
+    return Obx(() {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Image.asset(
+                  'assets/icons/balance_history/usdt.png',
+                  width: 44,
+                  height: 44,
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  "USDT",
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                    color: Color(0xFF151E2F),
+                  ),
+                ),
+                const Spacer(),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    const Text(
+                      "Total Balance",
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w400,
+                        fontSize: 14,
+                        color: Color(0xFF151E2F),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      controller.totalBalance,
+                      style: const TextStyle(
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w600,
+                        fontSize: 20,
+                        color: Color(0xFF151E2F),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildInfoColumn("Valuation (USDT)", controller.valuationUsdt),
+                _buildInfoColumn(
+                  "Frozen",
+                  controller.frozen,
+                  crossAlign: CrossAxisAlignment.end,
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8F9FC),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildInfoColumn(
+                    "Valuation (USDT)",
+                    controller.valuationUsdt,
+                  ),
+                  _buildInfoColumn(
+                    "Valuation (Local)",
+                    controller.valuationOther,
+                    crossAlign: CrossAxisAlignment.end,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget _buildInfoColumn(
+    String label,
+    String value, {
+    CrossAxisAlignment crossAlign = CrossAxisAlignment.start,
   }) {
+    return Column(
+      crossAxisAlignment: crossAlign,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontFamily: 'Inter',
+            fontWeight: FontWeight.w400,
+            fontSize: 14,
+            color: Color(0xFF151E2F),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            fontFamily: 'Inter',
+            fontWeight: FontWeight.w500,
+            fontSize: 16,
+            color: Color(0xFF151E2F),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFilterTabs() {
+    return Row(
+      children: [
+        _buildTabButton(0, "All"),
+        const SizedBox(width: 12),
+        _buildTabButton(1, "Deposits"),
+        const SizedBox(width: 12),
+        _buildTabButton(2, "Withdrawals"),
+      ],
+    );
+  }
+
+  Widget _buildTabButton(int index, String text) {
+    return Obx(() {
+      final isSelected = controller.currentTab.value == index;
+      return GestureDetector(
+        onTap: () => controller.changeTab(index),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? const Color(0xFF1D5DE5)
+                : const Color(0xFFECEFF5),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: const Color(0xFF555555).withOpacity(0.06),
+                      blurRadius: 8,
+                      offset: const Offset(0, 0),
+                    ),
+                  ]
+                : [],
+          ),
+          child: Text(
+            text,
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
+              color: isSelected ? Colors.white : const Color(0xFF717F9A),
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildTransactionItem(Jour tx) {
+    // 1=Deposit, 2=Withdraw
+    final isDeposit = tx.bizType == '1';
+
+    final amountColor = isDeposit
+        ? const Color(0xFF00C087)
+        : const Color(0xFFFF4D4F);
+    final iconBg = isDeposit
+        ? const Color(0xFFEAF9F0)
+        : const Color(0xFFFDECEB);
+    final iconColor = isDeposit
+        ? const Color(0xFF40A372)
+        : const Color(0xFFE74C3C);
+    final iconAsset = isDeposit
+        ? 'assets/icons/balance_history/card_receive.png'
+        : 'assets/icons/balance_history/card_send.png';
+
+    // Format amount sign
+    final amountPrefix = isDeposit ? "+" : "-";
+    final amountStr = "$amountPrefix${tx.amount ?? '0.00'}";
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -79,32 +329,21 @@ class BalanceHistoryPage extends StatelessWidget {
           Container(
             width: 40,
             height: 40,
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: isReceive
-                  ? const Color(0xFFEAF9F0)
-                  : const Color(0xFFFDECEB),
+              color: iconBg,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Image.asset(
-              isReceive
-                  ? 'assets/icons/balance_history/card_receive.png'
-                  : 'assets/icons/balance_history/card_send.png',
-              width: 24,
-              height: 24,
-              color: isReceive
-                  ? const Color(0xFF40A372)
-                  : const Color(0xFFE74C3C),
-            ),
+            child: Image.asset(iconAsset, color: iconColor),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "Cooder",
-                  style: TextStyle(
+                Text(
+                  isDeposit ? "Deposit" : "Withdraw",
+                  style: const TextStyle(
                     fontFamily: 'Inter',
                     fontWeight: FontWeight.w500,
                     fontSize: 14,
@@ -113,12 +352,18 @@ class BalanceHistoryPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  date,
+                  tx.createTime != null
+                      ? DateTime.fromMillisecondsSinceEpoch(
+                          tx.createTime is int
+                              ? tx.createTime
+                              : int.tryParse(tx.createTime.toString()) ?? 0,
+                        ).toString().split('.')[0]
+                      : '',
                   style: const TextStyle(
                     fontFamily: 'Inter',
                     fontWeight: FontWeight.w400,
                     fontSize: 12,
-                    color: Color(0xFF151E2F),
+                    color: Color(0xFF717F9A),
                   ),
                 ),
               ],
@@ -128,26 +373,25 @@ class BalanceHistoryPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                amount,
+                amountStr,
                 style: TextStyle(
                   fontFamily: 'Inter',
                   fontWeight: FontWeight.w500,
                   fontSize: 14,
-                  color: isReceive
-                      ? const Color(0xFF40A372)
-                      : const Color(0xFFE74C3C),
+                  color: amountColor,
                 ),
               ),
               const SizedBox(height: 4),
-              Text(
-                fee,
-                style: const TextStyle(
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w400,
-                  fontSize: 12,
-                  color: Color(0xFF454F63),
+              if (tx.remark != null && tx.remark!.isNotEmpty)
+                Text(
+                  tx.remark!,
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w400,
+                    fontSize: 12,
+                    color: Color(0xFF717F9A),
+                  ),
                 ),
-              ),
             ],
           ),
         ],
@@ -164,13 +408,15 @@ class BalanceHistoryPage extends StatelessWidget {
             child: SizedBox(
               height: 56,
               child: OutlinedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Get.toNamed(Routes.withdrawal);
+                },
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Color(0xFF1D5DE5), width: 2),
+                  side: const BorderSide(color: Color(0xFF1D5DE5), width: 1.5),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  backgroundColor: const Color(0xFFF6F9FF),
+                  backgroundColor: Colors.white,
                 ),
                 child: const Text(
                   "Withdraw",
@@ -189,12 +435,15 @@ class BalanceHistoryPage extends StatelessWidget {
             child: SizedBox(
               height: 56,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Get.toNamed(Routes.deposit);
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1D5DE5),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
+                  elevation: 0,
                 ),
                 child: const Text(
                   "Deposit",
@@ -210,124 +459,6 @@ class BalanceHistoryPage extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildAppBar(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFECEFF5),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Image.asset(
-                    'assets/icons/deposit/arrow_back.png',
-                    width: 24,
-                    height: 24,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 40), 
-            ],
-          ),
-          const Text(
-            "Balance & History",
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontWeight: FontWeight.w600,
-              fontSize: 18,
-              color: Color(0xFF151E2F),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBalanceCard() {
-    return Stack(
-      alignment: Alignment.topCenter,
-      clipBehavior: Clip.none,
-      children: [
-        Container(
-          width: double.infinity,
-          margin: const EdgeInsets.only(top: 24),
-          padding: const EdgeInsets.fromLTRB(20, 44, 20, 20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            children: [
-              _buildBalanceRow("Total", "203,372.478343"),
-              const SizedBox(height: 8),
-              _buildBalanceRow("Available Balance", "432.787774"),
-              const SizedBox(height: 8),
-              _buildBalanceRow("Frozen", "232"),
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 14.0),
-                child: Divider(color: Color(0xFFF1F4F9), height: 1),
-              ),
-              _buildBalanceRow("Valuation (USDT)", "203,372.478343"),
-              const SizedBox(height: 8),
-              _buildBalanceRow("Valuation (USD)", "213"),
-            ],
-          ),
-        ),
-        Positioned(
-          top: -12,
-          child: Container(
-            padding: const EdgeInsets.all(0),
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.transparent,
-            ),
-            child: Image.asset(
-              'assets/icons/balance_history/usdt.png',
-              width: 65,
-              height: 65,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBalanceRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontFamily: 'Inter',
-            fontWeight: FontWeight.w400,
-            fontSize: 14,
-            color: Color(0xFF454F63),
-          ),
-        ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontFamily: 'Inter',
-            fontWeight: FontWeight.w500,
-            fontSize: 16,
-            color: Color(0xFF151E2F),
-          ),
-        ),
-      ],
     );
   }
 }

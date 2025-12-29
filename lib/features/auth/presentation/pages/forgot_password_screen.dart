@@ -146,7 +146,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                 //   bizType: SmsBizType.forgetPwd,
                                 //   smsCode: pin,
                                 // );
-                                return true; // TEMP
+                                return true; 
                               },
 
                               onResend: () async {

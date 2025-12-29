@@ -571,6 +571,12 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => const TransactionHistoryPage(),
+                  settings: RouteSettings(
+                    arguments: {
+                      'symbol': widget.symbol,
+                      'accountNumber': widget.accountNumber,
+                    },
+                  ),
                 ),
               );
             },

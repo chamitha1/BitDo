@@ -2,16 +2,23 @@ import 'package:BitDo/config/api_client.dart';
 import 'package:BitDo/models/account.dart';
 import 'package:BitDo/models/account_detail_res.dart';
 import 'package:BitDo/models/chain_symbol_list_res.dart';
+import 'package:BitDo/models/withdraw_page_res.dart';
 import 'package:BitDo/models/withdraw_rule_detail_res.dart';
+import 'package:BitDo/models/page_info.dart';
+import 'package:BitDo/models/jour.dart';
 
 class AccountApi {
   static Future<AccountDetailAssetRes> getBalanceAccount({
-    required String assetCurrency,
+    String? assetCurrency,
   }) async {
     try {
+      final Map<String, dynamic> data = {'accountType': '4'};
+      if (assetCurrency != null) {
+        data['assetCurrency'] = assetCurrency;
+      }
       final res = await ApiClient.dio.post(
         '/core/v1/account/balance_account',
-        data: {'accountType': '4', 'assetCurrency': assetCurrency},
+        data: data,
       );
       print("Get Balance Response ${res.data}");
 
@@ -84,7 +91,7 @@ class AccountApi {
       );
       final resData = res.data as Map<String, dynamic>;
       if (resData['code'] == 200 || resData['code'] == '200') {
-         if (resData['data'] == null) {
+        if (resData['data'] == null) {
           print("Warning: Withdrawal rules for $symbol are NULL");
           return WithdrawRuleDetailRes(
             withdrawRule: "No withdrawal rules found for this asset.",
@@ -359,18 +366,21 @@ class AccountApi {
     }
   }
 
-  // /// 📝TODO
-  // static Future<PageInfo<Jour>> getJourPageList(
-  //   Map<String, dynamic> params,
-  // ) async {
-  //   // try {
-  //   //   final res = await HttpUtil.post('/core/v1/jour/my/page', params);
-  //   //   return PageInfo.fromJson<Jour>(res, Jour.fromJson);
-  //   // } catch (e) {
-  //   //   e.printError();
-  //   //   rethrow;
-  //   // }
-  // }
+  static Future<PageInfo<Jour>> getJourPageList(
+    Map<String, dynamic> params,
+  ) async {
+    try {
+      final res = await ApiClient.dio.post(
+        '/core/v1/jour/my/page',
+        data: params,
+      );
+      // Assuming res.data is the JSON map
+      return PageInfo<Jour>.fromJson(res.data, Jour.fromJson);
+    } catch (e) {
+      print("getJourPageList error: $e");
+      rethrow;
+    }
+  }
 
   // /// 📝TODO
   // static Future<JourFrontDetail> getJourDetail(String id) async {
@@ -489,26 +499,21 @@ class AccountApi {
   ///
 
   /// 📝TODO
-  // static Future<PageInfo<WithdrawPageRes>> getWithdrawPageList(
-  //   Map<String, dynamic> params,
-  // ) async {
-  //   // try {
-  //   //   final res = await HttpUtil.post('/core/v1/withdraw/page_front', params);
-  //   //   return PageInfo.fromJson<WithdrawPageRes>(res, WithdrawPageRes.fromJson);
-  //   // } catch (e) {
-  //   //   e.printError();
-  //   //   rethrow;
-  //   // }
-  // }
-
-  // ///📝TODO
-  // static Future<WithdrawDetailRes> getWithdrawDetail(String id) async {
-  //   // try {
-  //   //   final res = await HttpUtil.post('/core/v1/withdraw/detail_front/$id');
-  //   //   return WithdrawDetailRes.fromJson(CommonUtils.removeNullKeys(res));
-  //   // } catch (e) {
-  //   //   e.printError();
-  //   //   rethrow;
-  //   // }
-  // }
+  static Future<PageInfo<WithdrawPageRes>> getWithdrawPageList(
+    Map<String, dynamic> params,
+  ) async {
+    try {
+      final res = await ApiClient.dio.post(
+        '/core/v1/withdraw/page_front',
+        data: params,
+      );
+      return PageInfo<WithdrawPageRes>.fromJson(
+        res.data,
+        WithdrawPageRes.fromJson,
+      );
+    } catch (e) {
+      print("getWithdrawPageList error: $e");
+      rethrow;
+    }
+  }
 }

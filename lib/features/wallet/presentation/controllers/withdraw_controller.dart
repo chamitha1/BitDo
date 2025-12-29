@@ -60,7 +60,7 @@ class WithdrawController extends GetxController {
       availableAmount.value = accountRes.usableAmount?.toString() ?? '0.00';
     } catch (e) {
       print("Error fetching withdraw init data: $e");
-     
+
       note.value = "Unable to load withdrawal details. Please try again later.";
     } finally {
       isLoading.value = false;
@@ -97,8 +97,6 @@ class WithdrawController extends GetxController {
       return true;
     } catch (e) {
       print("Withdraw check error: $e");
-      // Error handling usually done by generic interceptor or here.
-      // Get.snackbar("Error", "Check failed: $e");
       return false;
     } finally {
       isLoading.value = false;
@@ -154,7 +152,6 @@ class WithdrawController extends GetxController {
       Get.snackbar("Error", "Please enter email verification code");
       return false;
     }
-
 
     try {
       isLoading.value = true;

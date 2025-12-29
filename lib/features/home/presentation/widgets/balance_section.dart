@@ -11,7 +11,6 @@ class BalanceSection extends StatefulWidget {
 }
 
 class _BalanceSectionState extends State<BalanceSection> {
-  // Use Get.put to retrieve the shared controller
   final BalanceController controller = Get.put(BalanceController());
   
   bool _hideSmallAssets = false;
@@ -64,12 +63,22 @@ class _BalanceSectionState extends State<BalanceSection> {
             ),
             GestureDetector(
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const BalanceHistoryPage(),
-                  ),
-                );
+                final asset = controller.selectedAsset ?? 
+                            (controller.balanceData.value?.accountList.isNotEmpty == true 
+                                ? controller.balanceData.value!.accountList.first 
+                                : null);
+                
+                if (asset != null) {
+                  Get.to(
+                    () => const BalanceHistoryPage(),
+                    arguments: {
+                      'accountNumber': asset.accountNumber,
+                      'symbol': asset.currency,
+                    },
+                  );
+                } else {
+                  Get.snackbar("Error", "No asset selected");
+                }
               },
               child: Container(
                 padding: const EdgeInsets.all(8),
