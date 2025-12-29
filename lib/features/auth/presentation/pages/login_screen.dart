@@ -69,7 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final response = await ApiClient.dio.post(
-        '/cuser/public/login',
+        '/core/v1/cuser/public/login',
         data: {
           'loginName': _emailController?.text.trim(),
           'loginPwd': _passwordController.text,

@@ -13,7 +13,7 @@ class UserApi {
   }) async {
     try {
       final response = await ApiClient.dio.post(
-        '/cuser/public/login',
+        '/core/v1/cuser/public/login',
         data: {'loginName': loginName, 'loginPwd': loginPwd},
       );
       return response.data;
@@ -42,7 +42,7 @@ class UserApi {
       }
 
       final response = await ApiClient.dio.post(
-        '/cuser/public/register_by_email',
+        '/core/v1/cuser/public/register_by_email',
         data: data,
       );
       return response.data as Map<String, dynamic>;
@@ -59,7 +59,7 @@ class UserApi {
   }) async {
     try {
       final response = await ApiClient.dio.post(
-        '/sms_out/permission_none/email_code',
+        '/core/v1/sms_out/permission_none/email_code',
         data: {'email': email, 'bizType': bizType.value},
       );
 
