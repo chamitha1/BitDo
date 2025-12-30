@@ -55,9 +55,7 @@ class BalanceController extends GetxController {
         final accNum = res.accountList.first.accountNumber;
         await StorageService.saveAccountNumber(accNum);
 
-        if (Get.isRegistered<UserController>()) {
-          Get.find<UserController>().setUserName(accNum);
-        }
+        
       }
     } catch (e) {
       print("BalanceController Error: $e");

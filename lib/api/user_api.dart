@@ -4,6 +4,7 @@ import 'package:BitOwi/features/auth/presentation/pages/signup_screen.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get_utils/src/extensions/dynamic_extensions.dart';
 import 'package:BitOwi/constants/sms_constants.dart';
+import 'package:BitOwi/models/user_model.dart';
 
 class UserApi {
   //Login API
@@ -116,6 +117,26 @@ class UserApi {
       return response.data as Map<String, dynamic>;
     } catch (e) {
       print("Bind Trade Password error: $e");
+      rethrow;
+    }
+  }
+
+  // Get User Info
+  static Future<User> getUserInfo() async {
+    try {
+      final response = await ApiClient.dio.post("/core/v1/cuser/my");
+      final responseData = response.data as Map<String, dynamic>;
+      
+      if (responseData['code'] == 200 || responseData['code'] == '200') {
+         final userData = responseData['data'] as Map<String, dynamic>;
+         if (userData['nickname'] != null) {
+           userData['nickname'] = userData['nickname'].toString();
+         }
+         return User.fromJson(userData);
+      }
+      throw Exception(responseData['errorMsg'] ?? 'Unknown error');
+    } catch (e) {
+      e.printError();
       rethrow;
     }
   }

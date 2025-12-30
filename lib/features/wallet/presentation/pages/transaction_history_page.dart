@@ -45,7 +45,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
@@ -66,6 +66,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                       ),
                     ),
                   ),
+                  const SizedBox(width: 12),
                   const Text(
                     "History",
                     style: TextStyle(
@@ -75,6 +76,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                       color: Color(0xff151E2F),
                     ),
                   ),
+                  const Spacer(),
                   Image.asset(
                     "assets/icons/home/headphones.png",
                     width: 40,

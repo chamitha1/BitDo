@@ -543,14 +543,14 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
             width: 32,
             height: 32,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              color: Color(0xffECEFF5),
+              color: Color(0xffF6F9FF),
             ),
             child: GestureDetector(
               onTap: () => Navigator.pop(context),
@@ -561,7 +561,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
               ),
             ),
           ),
-
+          const SizedBox(width: 12),
           const Text(
             "Blockchain Address",
             style: TextStyle(
@@ -571,6 +571,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
               color: Color(0xFF151E2F),
             ),
           ),
+          const Spacer(),
           GestureDetector(
             onTap: () {
               if (mounted) {
