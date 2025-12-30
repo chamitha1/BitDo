@@ -1,7 +1,9 @@
-import 'package:BitOwi/features/auth/presentation/pages/login_screen.dart';
 import 'package:BitOwi/features/onboarding/models/onboarding_content.dart';
 import 'package:BitOwi/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:flutter/material.dart';
+import 'package:BitOwi/core/storage/storage_service.dart';
+import 'package:BitOwi/config/routes.dart';
+import 'package:get/get.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -52,7 +54,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 child: _currentPage == _pages.length - 1
                     ? const SizedBox(height: 48)
                     : TextButton(
-                        onPressed: _goToLogin,
+                        onPressed: _goToSignUp,
                         child: const Text(
                           'Skip',
                           style: TextStyle(
@@ -120,7 +122,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     if (_currentPage == _pages.length - 1) {
-                      _goToLogin();
+                      _goToSignUp();
                     } else {
                       _controller.nextPage(
                         duration: const Duration(milliseconds: 300),
@@ -154,10 +156,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  void _goToLogin() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-    );
+  void _goToSignUp() {
+    StorageService.saveOnboardingComplete();
+    Get.offAllNamed(Routes.signup);
   }
 }

@@ -87,6 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
         await StorageService.saveToken(token);
 
         await StorageService.saveUserName(_emailController?.text.trim() ?? '');
+        await StorageService.saveRememberMe(_rememberMe);
         print('Token saved: $token');
 
         if (!mounted) return;

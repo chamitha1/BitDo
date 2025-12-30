@@ -14,11 +14,7 @@ class StorageService {
   }
 
   //set user token
-  static Future<bool> saveToken(String token) async {
-    if (_prefs == null) await init();
-    print("SAVING TOKEN : $token ");
-    return await _prefs!.setString(userToken, token);
-  }
+
 
   //get user token
   static Future<String?> getToken() async {
@@ -107,5 +103,58 @@ class StorageService {
     await _prefs!.remove(tempWithdrawAddr);
     await _prefs!.remove(tempWithdrawAmount);
     await _prefs!.remove(tempWithdrawPwd);
+  }
+  static const String hasCompletedOnboardingKey = 'has_completed_onboarding';
+  static const String tokenTimestampKey = 'token_timestamp';
+
+  // Save Onboarding Complete
+  static Future<bool> saveOnboardingComplete() async {
+    if (_prefs == null) await init();
+    return await _prefs!.setBool(hasCompletedOnboardingKey, true);
+  }
+
+  // Get Onboarding Status
+  static Future<bool> hasCompletedOnboarding() async {
+    if (_prefs == null) await init();
+    return _prefs!.getBool(hasCompletedOnboardingKey) ?? false;
+  }
+
+  // Save Token with Timestamp
+  static Future<bool> saveToken(String token) async {
+    if (_prefs == null) await init();
+    print("SAVING TOKEN : $token ");
+    await _prefs!.setInt(tokenTimestampKey, DateTime.now().millisecondsSinceEpoch);
+    return await _prefs!.setString(userToken, token);
+  }
+
+  // Check if Token is Valid (7 days)
+  static Future<bool> isTokenValid() async {
+    if (_prefs == null) await init();
+    final timestamp = _prefs!.getInt(tokenTimestampKey);
+    if (timestamp == null) return false;
+
+    final savedTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
+    final daysDifference = DateTime.now().difference(savedTime).inDays;
+    
+    // Check if token is older than 7 days
+    if (daysDifference >= 7) {
+      await removeToken(); 
+      return false;
+    }
+    return true;
+  }
+
+  static const String isRememberMeKey = 'is_remember_me';
+
+  // Save Remember Me
+  static Future<bool> saveRememberMe(bool value) async {
+    if (_prefs == null) await init();
+    return await _prefs!.setBool(isRememberMeKey, value);
+  }
+
+  // Get Remember Me
+  static Future<bool> getRememberMe() async {
+    if (_prefs == null) await init();
+    return _prefs!.getBool(isRememberMeKey) ?? false;
   }
 }
