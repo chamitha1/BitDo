@@ -3,6 +3,7 @@ import 'package:BitDo/models/account.dart';
 import 'package:BitDo/models/account_detail_res.dart';
 import 'package:BitDo/models/chain_symbol_list_res.dart';
 import 'package:BitDo/models/withdraw_page_res.dart';
+import 'package:BitDo/models/withdraw_request.dart';
 import 'package:BitDo/models/withdraw_rule_detail_res.dart';
 import 'package:BitDo/models/page_info.dart';
 import 'package:BitDo/models/jour.dart';
@@ -112,7 +113,16 @@ class AccountApi {
   /// 📝TODO
   static Future<void> withdrawCheck(Map<String, dynamic> params) async {
     try {
-      await ApiClient.dio.post('/core/v1/withdraw/check', data: params);
+      final res = await ApiClient.dio.post(
+        '/core/v1/withdraw/check',
+        data: params,
+      );
+      final resData = res.data as Map<String, dynamic>;
+      if (resData['code'] != 200 && resData['code'] != '200') {
+        throw Exception(
+          resData['errorMsg'] ?? resData['msg'] ?? 'Check failed',
+        );
+      }
     } catch (e) {
       print("withdrawCheck error: $e");
       rethrow;
@@ -122,9 +132,68 @@ class AccountApi {
   /// 📝TODO
   static Future<void> createWithdraw(Map<String, dynamic> params) async {
     try {
-      await ApiClient.dio.post('/core/v1/withdraw/create', data: params);
+      final res = await ApiClient.dio.post(
+        '/core/v1/withdraw/create',
+        data: params,
+      );
+      final resData = res.data as Map<String, dynamic>;
+      if (resData['code'] == 200 || resData['code'] == '200') {
+        // Success
+        return;
+      } else {
+        throw Exception(
+          resData['errorMsg'] ?? resData['msg'] ?? 'Withdrawal failed',
+        );
+      }
     } catch (e) {
       print("createWithdraw error: $e");
+      rethrow;
+    }
+  }
+
+  static Future<PageInfo<WithdrawPageRes>> getWithdrawPageList(
+    Map<String, dynamic> params,
+  ) async {
+    try {
+      final res = await ApiClient.dio.post(
+        '/core/v1/withdraw/page_front',
+        data: params,
+      );
+      return PageInfo<WithdrawPageRes>.fromJson(
+        res.data,
+        WithdrawPageRes.fromJson,
+      );
+    } catch (e) {
+      print("getWithdrawPageList error: $e");
+      rethrow;
+    }
+  }
+
+  static Future<Account> getDetailAccount(String currency) async {
+    try {
+      final res = await ApiClient.dio.post(
+        '/core/v1/account/detailByUser',
+        data: {'accountType': '4', 'currency': currency},
+      );
+      return Account.fromJson(res.data['data']);
+    } catch (e) {
+      print("getDetailAccount error: $e");
+      rethrow;
+    }
+  }
+
+  static Future<PageInfo<Jour>> getJourPageList(
+    Map<String, dynamic> params,
+  ) async {
+    try {
+      final res = await ApiClient.dio.post(
+        '/core/v1/jour/my/page',
+        data: params,
+      );
+      // Assuming res.data is the JSON map
+      return PageInfo<Jour>.fromJson(res.data, Jour.fromJson);
+    } catch (e) {
+      print("getJourPageList error: $e");
       rethrow;
     }
   }
@@ -352,36 +421,6 @@ class AccountApi {
   //   // }
   // }
 
-  /// 📝TODO
-  static Future<Account> getDetailAccount(String currency) async {
-    try {
-      final res = await ApiClient.dio.post(
-        '/core/v1/account/detailByUser',
-        data: {'accountType': '4', 'currency': currency},
-      );
-      return Account.fromJson(res.data['data']);
-    } catch (e) {
-      print("getDetailAccount error: $e");
-      rethrow;
-    }
-  }
-
-  static Future<PageInfo<Jour>> getJourPageList(
-    Map<String, dynamic> params,
-  ) async {
-    try {
-      final res = await ApiClient.dio.post(
-        '/core/v1/jour/my/page',
-        data: params,
-      );
-      // Assuming res.data is the JSON map
-      return PageInfo<Jour>.fromJson(res.data, Jour.fromJson);
-    } catch (e) {
-      print("getJourPageList error: $e");
-      rethrow;
-    }
-  }
-
   // /// 📝TODO
   // static Future<JourFrontDetail> getJourDetail(String id) async {
   //   try {
@@ -495,25 +534,4 @@ class AccountApi {
   //   //   rethrow;
   //   // }
   // }
-
-  ///
-
-  /// 📝TODO
-  static Future<PageInfo<WithdrawPageRes>> getWithdrawPageList(
-    Map<String, dynamic> params,
-  ) async {
-    try {
-      final res = await ApiClient.dio.post(
-        '/core/v1/withdraw/page_front',
-        data: params,
-      );
-      return PageInfo<WithdrawPageRes>.fromJson(
-        res.data,
-        WithdrawPageRes.fromJson,
-      );
-    } catch (e) {
-      print("getWithdrawPageList error: $e");
-      rethrow;
-    }
-  }
 }

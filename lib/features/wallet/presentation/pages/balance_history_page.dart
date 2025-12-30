@@ -1,14 +1,12 @@
 import 'package:BitDo/features/wallet/presentation/controllers/balance_history_controller.dart';
 import 'package:BitDo/models/jour.dart';
 import 'package:BitDo/features/home/presentation/pages/home_screen.dart';
+import 'package:BitDo/features/wallet/presentation/pages/withdrawal_page.dart';
+import 'package:BitDo/features/wallet/presentation/pages/deposit_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
-class Routes {
-  static const withdrawal = '/withdrawal';
-  static const deposit = '/deposit';
-}
 
 class BalanceHistoryPage extends GetView<BalanceHistoryController> {
   const BalanceHistoryPage({super.key});
@@ -317,7 +315,9 @@ class BalanceHistoryPage extends GetView<BalanceHistoryController> {
 
     // Format amount sign
     final amountPrefix = isDeposit ? "+" : "-";
-    final amountStr = "$amountPrefix${tx.amount ?? '0.00'}";
+    double val = double.tryParse(tx.transAmount?.replaceAll(',', '') ?? '0') ?? 0.0;
+    if (val < 0) val = -val;
+    final amountStr = "$amountPrefix${val.toStringAsFixed(2)}";
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -353,11 +353,11 @@ class BalanceHistoryPage extends GetView<BalanceHistoryController> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  tx.createTime != null
+                  tx.createDatetime != null
                       ? DateTime.fromMillisecondsSinceEpoch(
-                          tx.createTime is int
-                              ? tx.createTime
-                              : int.tryParse(tx.createTime.toString()) ?? 0,
+                          tx.createDatetime is int
+                              ? tx.createDatetime
+                              : int.tryParse(tx.createDatetime.toString()) ?? 0,
                         ).toString().split('.')[0]
                       : '',
                   style: const TextStyle(
@@ -410,7 +410,14 @@ class BalanceHistoryPage extends GetView<BalanceHistoryController> {
               height: 56,
               child: OutlinedButton(
                 onPressed: () {
-                  Get.toNamed(Routes.withdrawal);
+                  if (controller.symbol != null && controller.accountNumber != null) {
+                    Get.to(() => WithdrawalPage(
+                      symbol: controller.symbol!,
+                      accountNumber: controller.accountNumber!,
+                    ));
+                  } else {
+                     Get.snackbar("Error", "Account details missing");
+                  }
                 },
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: Color(0xFF1D5DE5), width: 1.5),
@@ -437,7 +444,7 @@ class BalanceHistoryPage extends GetView<BalanceHistoryController> {
               height: 56,
               child: ElevatedButton(
                 onPressed: () {
-                  Get.toNamed(Routes.deposit);
+                  Get.to(() => const DepositScreen());
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1D5DE5),

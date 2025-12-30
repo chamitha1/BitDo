@@ -18,22 +18,11 @@ class HomeHeader extends StatelessWidget {
           backgroundColor: Color(0xffD9D9D9),
         ),
         const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Obx(() => Text(
-            //   "Hi, ${controller.userName.value}",
-            //   style: const TextStyle(
-            //     fontSize: 24,
-            //     fontWeight: FontWeight.w700,
-            //     color: Color(0XFF332C3B),
-            //     fontFamily: 'Inter',
-            //   ),
-            // )),
-            Obx(() => SizedBox(
-              // adjust width to fit your layout (you can change 180/200/etc.)
-              width: MediaQuery.of(context).size.width * 0.55,
-              child: Text(
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Obx(() => Text(
                 "Hi, ${controller.userName.value}",
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -43,33 +32,33 @@ class HomeHeader extends StatelessWidget {
                   color: Color(0XFF332C3B),
                   fontFamily: 'Inter',
                 ),
-              ),
-            )),
-            RichText(
-              text: const TextSpan(
-                text: 'Welcome to  ',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w400,
-                  fontSize: 14,
-                  color: Color(0xff83869D),
-                ),
-                children: <TextSpan>[
-                  TextSpan(
-                    text: 'BitOwi',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      color: Color(0xff151E2F),
-                    ),
+              )),
+              RichText(
+                text: const TextSpan(
+                  text: 'Welcome to  ',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w400,
+                    fontSize: 14,
+                    color: Color(0xff83869D),
                   ),
-                ],
+                  children: <TextSpan>[
+                    TextSpan(
+                      text: 'BitOwi',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Color(0xff151E2F),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-        const Spacer(),
+        const SizedBox(width: 8),
         _headerIconButton("assets/icons/home/notification.png"),
         const SizedBox(width: 12),
         _headerIconButton("assets/icons/home/headphones.png"),

@@ -112,7 +112,7 @@ class UserApi {
         '/core/v1/user/bind_tradePwd',
         data: {
           'email': email,
-          'smsCode': smsCode,
+          'smsCaptcha': smsCode,
           'tradePwd': tradePwd,
         },
       );

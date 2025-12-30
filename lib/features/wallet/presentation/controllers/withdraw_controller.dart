@@ -9,6 +9,7 @@ import 'package:BitDo/core/storage/storage_service.dart';
 import 'package:BitDo/features/auth/presentation/pages/bind_trade_pwd_sheet.dart';
 import 'package:BitDo/features/home/presentation/controllers/balance_controller.dart';
 import 'package:BitDo/features/wallet/presentation/widgets/success_dialog.dart';
+import 'package:BitDo/models/withdraw_request.dart';
 import 'package:BitDo/models/jour.dart';
 
 class WithdrawController extends GetxController {
@@ -51,11 +52,11 @@ class WithdrawController extends GetxController {
     try {
       isLoading.value = true;
 
-      // 1. Fetch Rules
+      // Fetch Rules
       print("Fetching rules for ${symbol.value}...");
       final ruleRes = await AccountApi.getWithdrawRuleDetail(symbol.value);
 
-      // 2. Fetch Account Balance
+      // Fetch Account Balance
       print("Fetching details for ${symbol.value}...");
       final accountRes = await AccountApi.getDetailAccount(symbol.value);
 
@@ -75,7 +76,7 @@ class WithdrawController extends GetxController {
   Future<bool> beforeSend() async {
     final payCardNo = addrController.text.trim();
     final amount = amountController.text.trim();
-    final tradePwd = tradeController.text.trim();
+    final tradePwd = tradeController.text.trim(); 
 
     if (payCardNo.isEmpty) {
       Get.snackbar("Error", "Please enter withdrawal address or scan QR");
@@ -91,48 +92,8 @@ class WithdrawController extends GetxController {
       return false;
     }
 
-    try {
-      isLoading.value = true;
-      await AccountApi.withdrawCheck({
-        "accountNumber": accountNumber.value,
-        "amount": amount,
-        "payCardNo": payCardNo,
-        "tradePwd": tradePwd,
-      });
-      return true;
-    } catch (e) {
-      print("Withdraw check error: $e");
-      
-   
-      final errorMsg = e.toString().toLowerCase();
-      if (errorMsg.contains("password") && (errorMsg.contains("set") || errorMsg.contains("bind") || errorMsg.contains("empty"))) {
-         _showBindTradePwdSheet();
-      } else {
-         Get.snackbar("Error", "Check failed: ${e.toString()}");
-      }
-      return false;
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  void _showBindTradePwdSheet() async {
-    final email = await StorageService.getUserName();
-    if (email == null) {
-      Get.snackbar("Error", "Please login again");
-      return;
-    }
-    
-    Get.bottomSheet(
-      BindTradePwdSheet(
-        email: email,
-        onSuccess: () {
-           // 
-        },
-      ),
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-    );
+    await StorageService.saveTempWithdrawData(payCardNo, amount, tradePwd);
+    return true;
   }
 
   void updateAddressFromScan(String scannedCode) {
@@ -141,71 +102,93 @@ class WithdrawController extends GetxController {
     }
   }
 
-  Future<bool> sendOtp() async {
+  Future<bool> sendOtp({SmsBizType type = SmsBizType.bindTradePwd}) async {
     final email = await StorageService.getUserName();
-    if (email == null || email.isEmpty) {
-      Get.snackbar("Error", "User email not found. Please login again.");
-      return false;
-    }
+    if (email == null) return false;
 
     try {
-      final success = await UserApi().sendOtp(
+      final res = await UserApi().sendOtp(
         email: email,
-        bizType: SmsBizType.withdraw,
+        bizType: type,
       );
-      return success;
+      if (res) {
+        Get.snackbar("Success", "OTP sent successfully");
+        return true;
+      } else {
+        Get.snackbar("Error", "Failed to send OTP");
+        return false;
+      }
     } catch (e) {
-      print("Send OTP error: $e");
-      Get.snackbar("Error", "Failed to send OTP: $e");
+      Get.snackbar("Error", "Error sending OTP: $e");
       return false;
     }
   }
 
-  Future<bool> onApplyTap() async {
-    final payCardNo = addrController.text.trim();
-    final amount = amountController.text.trim();
-    final tradePwd = tradeController.text.trim();
-    final smsCaptcha = emailController.text.trim();
-    final googleSecret = googleController.text.trim();
-
-    if (payCardNo.isEmpty) {
-      Get.snackbar("Error", "Please enter withdrawal address");
-      return false;
-    }
-    if (amount.isEmpty) {
-      Get.snackbar("Error", "Please enter amount");
-      return false;
-    }
-    if (tradePwd.isEmpty) {
-      Get.snackbar("Error", "Please enter transaction password");
-      return false;
-    }
-    if (smsCaptcha.isEmpty) {
-      Get.snackbar("Error", "Please enter email verification code");
-      return false;
-    }
-
+  Future<bool> finalizeWithdrawal(String otp) async {
+    isLoading.value = true;
     try {
-      isLoading.value = true;
-      await AccountApi.createWithdraw({
-        "accountNumber": accountNumber.value,
-        "amount": amount,
-        "payCardNo": payCardNo,
-        "tradePwd": tradePwd,
-        "smsCaptcha": smsCaptcha,
-        "googleSecret": googleSecret,
-      });
+      // Retrieve saved data
+      final tempData = await StorageService.getTempWithdrawData();
+      final savedAddr = tempData['addr'];
+      final savedAmount = tempData['amount'];
+      final savedPwd = tempData['pwd'];
 
-      // Dynamic Balance Update
+      if (savedAddr == null || savedAmount == null || savedPwd == null) {
+        Get.snackbar("Error", "Session expired. Please try again.");
+        return false;
+      }
+
+      print("Finalizing Withdrawal: Bind Password First...");
+      
+      final email = await StorageService.getUserName();
+      if (email == null) {
+          throw Exception("User email not found");
+      }
+
+      // Bind Trade Password
+      final bindRes = await UserApi().bindTradePwd(
+        email: email,
+        smsCode: otp,
+        tradePwd: savedPwd,
+      );
+      
+      print("Bind Password Response: $bindRes");
+
+      if (bindRes['code'] != 200 && bindRes['code'] != '200' && bindRes['errorCode'] != 'Success' && bindRes['errorCode'] != 'SUCCESS') {
+         throw Exception("Bind Password Failed: ${bindRes['msg'] ?? bindRes['errorMsg'] ?? 'Unknown error'}");
+      }
+      print("Bind Password Success. Creating Withdrawal...");
+
+      // Create Withdrawal
+      final params = {
+        "accountNumber": accountNumber.value,
+        "amount": savedAmount,
+        "payCardNo": savedAddr,
+        "tradePwd": savedPwd,
+        "smsCaptcha": otp,
+        "googleSecret": googleController.text.trim(),
+        // "currency": symbol.value, 
+        // "bizType": '2',          
+        // "bizCategory": 'withdraw', 
+      };
+
+      await AccountApi.createWithdraw(params);
+
+      await StorageService.clearTempWithdrawData();
+      
+      //  Balance Update
       try {
-        final currentBalance = double.tryParse(availableAmount.value.replaceAll(',', '')) ?? 0.0;
-        final withdrawAmount = double.tryParse(amount) ?? 0.0;
+        final currentBalance =
+            double.tryParse(availableAmount.value.replaceAll(',', '')) ?? 0.0;
+        final withdrawAmount = double.tryParse(savedAmount) ?? 0.0;
         final newBalance = currentBalance - withdrawAmount;
-        availableAmount.value = newBalance.toStringAsFixed(8); // Keep precision
-        
-        // Refresh global balance
+        availableAmount.value = newBalance.toStringAsFixed(8);
+
         if (Get.isRegistered<BalanceController>()) {
-          Get.find<BalanceController>().updateOptimisticBalance(symbol.value, withdrawAmount);
+          Get.find<BalanceController>().updateOptimisticBalance(
+            symbol.value,
+            withdrawAmount,
+          );
         }
       } catch (e) {
         print("Error updating local balance: $e");
@@ -213,23 +196,36 @@ class WithdrawController extends GetxController {
 
       final newTx = Jour(
         id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
-        amount: amount,
-        bizType: '2', // Withdraw
+        transAmount: "-$savedAmount",
+        bizType: '2',
         currency: symbol.value,
-        createTime: DateTime.now().millisecondsSinceEpoch,
+        createDatetime: DateTime.now().millisecondsSinceEpoch,
+        bizNote: 'Processing',
+        bizCategory: 'withdraw',
         remark: 'Processing',
         accountNumber: accountNumber.value,
+        status: 'Processing',
       );
 
       lastWithdrawTransaction.value = newTx;
       return true;
+
     } catch (e) {
-      print("Create withdraw error: $e");
-      Get.snackbar("Error", "Withdrawal failed: $e");
+      print("Finalize withdrawal error: $e");
+      Get.snackbar("Error", "$e");
       return false;
     } finally {
       isLoading.value = false;
     }
+  }
+
+  // Deprecated onApplyTap - kept empty or removed. 
+  // We'll rename it to avoid confusion or remove it if not overridden.
+  // Since the UI calls it via OtpBottomSheet, we should update the UI call in WithdrawalPage.
+  // But for now, let's leave a stub or just rely on finalizeWithdrawal being called.
+  Future<bool> onApplyTap() async {
+    // This should not be called directly anymore in the new flow
+    return false; 
   }
 
   void setAddress(String address) {

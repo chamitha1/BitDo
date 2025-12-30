@@ -110,7 +110,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
 
         onVerifyPin: (pin) async {
            controller.emailController.text = pin;
-           return await controller.onApplyTap();
+           return await controller.finalizeWithdrawal(pin);
         },
 
         onResend: () async {

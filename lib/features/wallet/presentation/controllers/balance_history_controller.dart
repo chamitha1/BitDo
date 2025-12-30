@@ -4,6 +4,7 @@ import 'package:BitDo/models/account_detail_res.dart';
 import 'package:BitDo/models/jour.dart';
 import 'package:BitDo/models/account_detail_asset_inner_item.dart';
 import 'package:BitDo/models/page_info.dart';
+import 'package:BitDo/models/withdraw_page_res.dart';
 import 'package:BitDo/features/home/presentation/controllers/balance_controller.dart';
 
 class BalanceHistoryController extends GetxController {
@@ -27,7 +28,7 @@ class BalanceHistoryController extends GetxController {
     print("BalanceHistoryController onInit - Args: $args");
     if (args != null && args is Map) {
       accountNumber = args['accountNumber'];
-      symbol = args['symbol']; // e.g., "USDT"
+      symbol = args['symbol'];
     }
     refreshData();
   }
@@ -70,13 +71,12 @@ class BalanceHistoryController extends GetxController {
   Future<void> _fetchBalance() async {
     try {
       print("Fetching balance (all assets)...");
-      // Use BalanceController data if available (supports optimistic updates)
       if (Get.isRegistered<BalanceController>()) {
         final mainController = Get.find<BalanceController>();
         if (mainController.balanceData.value != null) {
-             print("Using BalanceController data (Optimistic)");
-             accountDetail.value = mainController.balanceData.value;
-             return; // Return early to avoid overwriting with potentially stale API data
+          print("Using BalanceController data (Optimistic)");
+          accountDetail.value = mainController.balanceData.value;
+          return;
         }
       }
 
@@ -90,67 +90,80 @@ class BalanceHistoryController extends GetxController {
   }
 
   Future<void> _fetchTransactions() async {
-    final Map<String, dynamic> params = {
-      "pageNum": pageNum,
-      "pageSize": pageSize,
-      // "currency": symbol,
-    };
-
-    if (accountNumber != null) {
-      params['accountNumber'] = accountNumber;
-    } else {
-      print("Warning: accountNumber is null in _fetchTransactions");
-    }
-
-    print("Fetching transactions with params: $params");
-
     try {
-      final PageInfo<Jour> res = await AccountApi.getJourPageList(params);
-      print("Transactions fetched. Count: ${res.list.length}");
+      if (currentTab.value == 2) {
+        // Withdraw Tab
+        final params = {"pageNum": pageNum, "pageSize": pageSize};
+        print("Fetching Withdrawals with params: $params");
 
-      var filteredList = res.list;
-      
-      final args = Get.arguments;
-      if (args != null && args is Map && args.containsKey('newTransaction') && pageNum == 1) {
-         final newTx = args['newTransaction'] as Jour?;
-         if (newTx != null) {
-            print("Inserting optimistic transaction");
-            // Add to the START of the list
-            filteredList = [newTx, ...filteredList];
-         }
-      }
+        final PageInfo<WithdrawPageRes> res =
+            await AccountApi.getWithdrawPageList(params);
+        print("Withdrawals fetched. Count: ${res.list.length}");
 
-      if (currentTab.value == 1) {
-        // Deposit
-        filteredList = filteredList.where((item) {
-          final pre = double.tryParse(item.preAmount ?? '0') ?? 0;
-          final post = double.tryParse(item.postAmount ?? '0') ?? 0;
-          return post > pre || item.bizType == '1';
+        // Map WithdrawPageRes to Jour
+        final List<Jour> mappedList = res.list.map((w) {
+          return Jour(
+            id: w.id,
+            userId: w.userId,
+            bizType: '2', // set as Withdraw
+            transAmount: w.actualAmount,
+            currency: w.currency,
+            createDatetime: w.createDatetime,
+            remark: "Withdraw",
+            status: w.status,
+          );
         }).toList();
-      } else if (currentTab.value == 2) {
-        // Withdraw
-        filteredList = filteredList.where((item) {
-          final pre = double.tryParse(item.preAmount ?? '0') ?? 0;
-          final post = double.tryParse(item.postAmount ?? '0') ?? 0;
-          return post < pre || item.bizType == '2';
-        }).toList();
-      }
 
-      print(
-        "Filtered count for tab ${currentTab.value}: ${filteredList.length}",
-      );
-
-      if (filteredList.isEmpty && res.list.isEmpty) {
-        isEnd = true;
+        handleResponse(mappedList, res.isEnd);
       } else {
-        if (pageNum == 1) {
-          transactions.assignAll(filteredList);
-        } else {
-          transactions.addAll(filteredList);
+        // All (0) or Deposit (1)
+        final Map<String, dynamic> params = {
+          "pageNum": pageNum,
+          "pageSize": pageSize,
+          "bizCategory": '',
+          "type": '0',
+        };
+
+        if (accountNumber != null) {
+          params['accountNumber'] = accountNumber;
         }
-        if (res.list.length < pageSize) {
-          isEnd = true;
+
+        print(
+          "Fetching Transactions (Tab: ${currentTab.value}) with params: $params",
+        );
+
+        final PageInfo<Jour> res = await AccountApi.getJourPageList(params);
+        print("Jour fetched. Count: ${res.list.length}");
+
+        List<Jour> processedList = res.list
+            .map((item) {
+              String finalBizType = item.bizType ?? '';
+
+              if (finalBizType == 'amount change' || finalBizType.isEmpty) {
+                final double amount =
+                    double.tryParse(item.transAmount ?? '0') ?? 0;
+                if (amount > 0) {
+                  finalBizType = '1'; // as Deposit
+                } else if (amount < 0) {
+                  finalBizType = '2'; // as Withdraw
+                }
+                return item.copyWith(bizType: finalBizType);
+              }
+              return item;
+            })
+            .cast<Jour>()
+            .toList();
+
+        //Tab Filter
+        if (currentTab.value == 1) {
+          processedList = processedList
+              .where((item) => item.bizType == '1')
+              .toList();
         }
+
+        //Tab 0 shows everything from getJourPageList
+
+        handleResponse(processedList, res.isEnd);
       }
     } catch (e) {
       print("Error fetching transactions: $e");
@@ -158,7 +171,21 @@ class BalanceHistoryController extends GetxController {
     }
   }
 
-  // Helper getters for UI
+  void handleResponse(List<Jour> fetchedList, bool end) {
+    if (fetchedList.isEmpty && pageNum == 1) {
+      isEnd = true;
+    } else {
+      if (pageNum == 1) {
+        transactions.assignAll(fetchedList);
+      } else {
+        transactions.addAll(fetchedList);
+      }
+      if (end) {
+        isEnd = true;
+      }
+    }
+  }
+
   AccountDetailAssetInnerItem? get _currentAssetItem {
     if (accountDetail.value == null) {
       print("DEBUG: accountDetail.value is null");

@@ -84,10 +84,10 @@ class _LoginScreenState extends State<LoginScreen> {
         final tokenData = data['data'] as Map<String, dynamic>;
         final token =
             tokenData['token'] as String? ??
-            ''; // Extract from data['data']['token']
+            ''; 
 
         await StorageService.saveToken(token);
-        // Save the login name (email) for subsequent operations like OTP
+        
         await StorageService.saveUserName(_emailController?.text.trim() ?? '');
         print('Token saved: $token');
 

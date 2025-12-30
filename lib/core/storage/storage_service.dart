@@ -80,4 +80,32 @@ class StorageService {
     final String? value = prefs.getString(symbol);
     return value ?? 'USDT'; // Default to USDT
   }
+
+  //Temporary Storage for Withdrawal Flow ---
+  static const String tempWithdrawAddr = 'temp_withdraw_addr';
+  static const String tempWithdrawAmount = 'temp_withdraw_amount';
+  static const String tempWithdrawPwd = 'temp_withdraw_pwd';
+
+  static Future<void> saveTempWithdrawData(String addr, String amount, String pwd) async {
+    if (_prefs == null) await init();
+    await _prefs!.setString(tempWithdrawAddr, addr);
+    await _prefs!.setString(tempWithdrawAmount, amount);
+    await _prefs!.setString(tempWithdrawPwd, pwd);
+  }
+
+  static Future<Map<String, String?>> getTempWithdrawData() async {
+    if (_prefs == null) await init();
+    return {
+      'addr': _prefs!.getString(tempWithdrawAddr),
+      'amount': _prefs!.getString(tempWithdrawAmount),
+      'pwd': _prefs!.getString(tempWithdrawPwd),
+    };
+  }
+
+  static Future<void> clearTempWithdrawData() async {
+    if (_prefs == null) await init();
+    await _prefs!.remove(tempWithdrawAddr);
+    await _prefs!.remove(tempWithdrawAmount);
+    await _prefs!.remove(tempWithdrawPwd);
+  }
 }

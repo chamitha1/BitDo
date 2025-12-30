@@ -226,8 +226,8 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                item.amount != null 
-                    ? "+${item.amount} ${item.currency ?? ''}"
+                item.transAmount != null 
+                    ? "+${item.transAmount} ${item.currency ?? ''}"
                     : "+0 ${item.currency ?? ''}",
                 style: const TextStyle(
                   fontSize: 16,
@@ -266,11 +266,11 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                   overflow: TextOverflow.ellipsis,
               )),
               Text(
-                item.createTime != null 
+                item.createDatetime != null 
                     ? DateTime.fromMillisecondsSinceEpoch(
-                        item.createTime is int 
-                           ? item.createTime 
-                           : int.tryParse(item.createTime.toString()) ?? 0
+                        item.createDatetime is int 
+                           ? item.createDatetime 
+                           : int.tryParse(item.createDatetime.toString()) ?? 0
                       ).toString().split('.')[0]
                     : "",
                 style: const TextStyle(
@@ -291,7 +291,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
     Color statusColor = const Color(0xff151E2F);
     Color statusBg = const Color(0xffF6F9FF);
     
-    if (item.status == '2' || item.status == '5') { // Failed/Rejected?
+    if (item.status == '2' || item.status == '5') {
         statusColor = const Color(0xffFF5252);
         statusBg = const Color(0xffFFEBEE);
     } else if (item.status == '6') { // Completed
