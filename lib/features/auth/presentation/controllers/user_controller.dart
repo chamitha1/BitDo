@@ -1,11 +1,14 @@
 import 'package:BitOwi/core/storage/storage_service.dart';
 import 'package:BitOwi/api/user_api.dart';
 import 'package:get/get.dart';
+import 'package:BitOwi/models/user_model.dart';
 
 class UserController extends GetxController {
   static UserController get to => Get.find();
 
   final userName = 'User'.obs;
+  // Expose full user object
+  final Rx<User?> user = Rx<User?>(null);
 
   @override
   void onInit() {
@@ -16,16 +19,14 @@ class UserController extends GetxController {
   Future<void> loadUser() async {
     // Fetch latest user info from API
     try {
-      final user = await UserApi.getUserInfo();
+      final fetchedUser = await UserApi.getUserInfo();
+      user.value = fetchedUser;
 
-      if (user.nickname != null && user.nickname!.isNotEmpty) {
-        setUserName(user.nickname!);
-      } else if (user.realName != null && user.realName!.isNotEmpty) {
-        setUserName(user.realName!);
+      if (fetchedUser.nickname != null && fetchedUser.nickname!.isNotEmpty) {
+        setUserName(fetchedUser.nickname!);
+      } else if (fetchedUser.realName != null && fetchedUser.realName!.isNotEmpty) {
+        setUserName(fetchedUser.realName!);
       }
-      // else if (user.loginName != null && user.loginName!.isNotEmpty) {
-      //   setUserName(user.loginName!);
-      // }
     } catch (e) {
       print('Error fetching user info: $e');
     }

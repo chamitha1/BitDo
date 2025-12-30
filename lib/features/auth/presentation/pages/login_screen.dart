@@ -92,7 +92,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
         if (!mounted) return;
 
-        Get.put(UserController());
+        // Refresh user data in the global controller
+        await UserController.to.loadUser();
         Get.offAll(() => const HomeScreen());
       } else {
         throw 'Login failed: ${data['errorMsg'] ?? 'Unknown'}';

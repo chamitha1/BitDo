@@ -32,9 +32,6 @@ class AppPages {
     GetPage(
       name: Routes.login,
       page: () => const LoginScreen(),
-      binding: BindingsBuilder(() {
-        Get.put(UserController());
-      }),
     ),
     GetPage(
       name: Routes.signup,
@@ -44,7 +41,6 @@ class AppPages {
       name: Routes.home,
       page: () => const HomeScreen(),
       binding: BindingsBuilder(() {
-         Get.put(UserController());
          Get.put(BalanceController()); 
       }),
     ),

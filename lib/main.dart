@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'features/onboarding/presentation/pages/onboarding_screen.dart';
 import 'l10n/translations.dart';
 import 'config/routes.dart';
+import 'features/auth/presentation/controllers/user_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +33,9 @@ class BitOwi extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
 
+      initialBinding: BindingsBuilder(() {
+        Get.put(UserController(), permanent: true);
+      }),
       home: null,
       initialRoute: Routes.splash,
       getPages: AppPages.routes,

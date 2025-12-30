@@ -1,5 +1,6 @@
 import 'package:BitOwi/config/routes.dart';
 import 'package:BitOwi/core/storage/storage_service.dart';
+import 'package:BitOwi/features/auth/presentation/controllers/user_controller.dart';
 import 'package:get/get.dart';
 
 class SplashController extends GetxController {
@@ -28,6 +29,8 @@ class SplashController extends GetxController {
       // Check Token Expiry (7 days)
       bool isValid = await StorageService.isTokenValid();
       if (isValid) {
+        // Refresh user data globally before entering Home
+        await UserController.to.loadUser();
         Get.offAllNamed(Routes.home);
         return;
       } else {
