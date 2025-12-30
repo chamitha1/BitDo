@@ -429,7 +429,7 @@ class BalanceHistoryPage extends GetView<BalanceHistoryController> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  backgroundColor: Colors.white,
+                  backgroundColor: Color(0xffF6F9FF),
                 ),
                 child: const Text(
                   "Withdraw",

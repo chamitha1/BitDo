@@ -140,4 +140,15 @@ class UserApi {
       rethrow;
     }
   }
+
+  // Log Out
+  static Future<void> logOff() async {
+    try {
+      final response = await ApiClient.dio.get("/core/v1/cuser/logOut");
+      print("Logout Response: ${response.data}");
+    } catch (e) {
+      e.printError();
+      rethrow;
+    }
+  }
 }

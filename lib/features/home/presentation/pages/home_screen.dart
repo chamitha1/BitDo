@@ -5,6 +5,7 @@ import '../widgets/merchant_banner.dart';
 import '../widgets/tab_section.dart';
 import '../widgets/balance_section.dart';
 import '../widgets/home_bottom_nav_bar.dart';
+import '../../../../features/profile/presentation/pages/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,23 +23,35 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: const Color(0XFFF6F9FF),
 
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const HomeHeader(),
-              const SizedBox(height: 20),
-              const WalletCard(),
-              const SizedBox(height: 20),
-              const MerchantBanner(),
-              const SizedBox(height: 24),
-              const TabSection(),
-              const SizedBox(height: 24),
-              const BalanceSection(),
-              const SizedBox(height: 20),
-            ],
-          ),
+        child: IndexedStack(
+          index: _navIndex,
+          children: [
+            // Index 0: Home
+            SingleChildScrollView(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const HomeHeader(),
+                  const SizedBox(height: 20),
+                  const WalletCard(),
+                  const SizedBox(height: 20),
+                  const MerchantBanner(),
+                  const SizedBox(height: 24),
+                  const TabSection(),
+                  const SizedBox(height: 24),
+                  const BalanceSection(),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+             // Index 1: P2P (Placeholder)
+            const Center(child: Text("P2P Page")),
+            // Index 2: Order (Placeholder)
+            const Center(child: Text("Order Page")),
+             // Index 3: Profile
+            const ProfileScreen(),
+          ],
         ),
       ),
 

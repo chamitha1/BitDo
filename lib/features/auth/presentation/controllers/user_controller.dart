@@ -34,4 +34,18 @@ class UserController extends GetxController {
   Future<void> setUserName(String name) async {
     userName.value = name;
   }
+
+  Future<void> logout() async {
+    try {
+      await UserApi.logOff();
+      
+    } catch (e) {
+      print("Logout API failed: $e");
+    } finally {
+      // Clear data regardless of API success
+      await StorageService.removeToken();
+      // Navigate to login
+      Get.offAllNamed('/login');
+    }
+  }
 }
