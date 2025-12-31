@@ -114,11 +114,12 @@ class _WalletCardState extends State<WalletCard> {
         );
       }
 
-      final asset = controller.selectedAsset;
-
-      final totalAmount = asset?.usableAmount ?? '0.00';
+      final asset = controller.homeAssetData.value;
+      
+      final totalAmount = asset?.totalAmount ?? '0.00';
+      
       final totalAsset = asset?.totalAsset ?? '0.00';
-      final totalAssetCurrency = asset?.totalAssetCurrency ?? 'USDT';
+      final totalAssetCurrency = asset?.totalAssetCurrency ?? 'USD';
 
       return Column(
         children: [
@@ -193,13 +194,6 @@ class _WalletCardState extends State<WalletCard> {
   }
 
   Widget _buildCurrencyDropdown() {
-    if (controller.balanceData.value == null ||
-        controller.balanceData.value!.accountList.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    final currencies = controller.balanceData.value!.accountList;
-
     return PopupMenuButton<String>(
       offset: const Offset(0, 40),
       shape: RoundedRectangleBorder(
@@ -212,23 +206,17 @@ class _WalletCardState extends State<WalletCard> {
       onSelected: (value) {
         controller.onChangeCurrency(value);
       },
-      itemBuilder: (context) => currencies.map((currency) {
+      itemBuilder: (context) => controller.coinList.map((currency) {
         return PopupMenuItem<String>(
-          value: currency.currency,
-          child: Row(
-            children: [
-              _buildNetworkImage(currency.icon),
-              const SizedBox(width: 8),
-              Text(
-                currency.currency,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 14,
-                  fontFamily: 'Inter',
-                  color: Color(0xff151E2F),
-                ),
-              ),
-            ],
+          value: currency,
+          child: Text(
+            currency,
+            style: const TextStyle(
+               fontWeight: FontWeight.w500,
+               fontSize: 14,
+               fontFamily: 'Inter',
+               color: Color(0xff151E2F),
+            ),
           ),
         );
       }).toList(),

@@ -10,7 +10,6 @@ import 'package:BitOwi/models/jour.dart';
 import 'package:BitOwi/models/jour_front_detail.dart';
 import 'package:BitOwi/models/withdraw_detail_res.dart';
 
-
 class AccountApi {
   static Future<AccountDetailAssetRes> getBalanceAccount({
     String? assetCurrency,
@@ -118,27 +117,27 @@ class AccountApi {
       final res = await ApiClient.dio.post(
         '/core/v1/withdraw/detail_front/$id',
       );
-      print("Raw Withdraw Detail Response (Dio): ${res.data}"); 
-      
+      print("Raw Withdraw Detail Response (Dio): ${res.data}");
+
       var data = res.data;
       if (data is Map) {
-         if (data.containsKey('data')) {
-            data = data['data'];
-         }
+        if (data.containsKey('data')) {
+          data = data['data'];
+        }
       }
-      
+
       if (data == null) {
-         print("Warning: Withdraw detail data is null");
-         return WithdrawDetailRes(
-            id: id, 
-            userId: '', 
-            amount: '0', 
-            actualAmount: '0', 
-            fee: '0', 
-            currency: '', 
-            status: '', 
-            createDatetime: ''
-         );
+        print("Warning: Withdraw detail data is null");
+        return WithdrawDetailRes(
+          id: id,
+          userId: '',
+          amount: '0',
+          actualAmount: '0',
+          fee: '0',
+          currency: '',
+          status: '',
+          createDatetime: '',
+        );
       }
 
       final cleanData = _removeNullKeys(Map<String, dynamic>.from(data));
@@ -455,14 +454,26 @@ class AccountApi {
         '/core/v1/account/home_asset',
         data: {"currency": currency},
       );
+
+      final resData = res.data;
+      if (resData['data'] == null) {
+        final empty = AccountAssetRes()
+          ..totalAmount = '0.00'
+          ..totalAmountCurrency = 'USDT'
+          ..totalAsset = '0.00'
+          ..totalAssetCurrency = currency ?? 'NGN'
+          ..totalTbayAsset = '0'
+          ..totalCardgoalAsset = '0'
+          ..merchantStatus = '0';
+        return empty;
+      }
+
       final Map<String, dynamic> data = Map<String, dynamic>.from(
-        res.data['data'],
+        resData['data'],
       );
-      // return AccountAssetRes.fromJson(CommonUtils.removeNullKeys(data));
       return AccountAssetRes.fromJson(data);
     } catch (e) {
       print("getHomeAsset error: $e");
-
       rethrow;
     }
   }

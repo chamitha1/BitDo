@@ -166,7 +166,9 @@ class _BalanceSectionState extends State<BalanceSection> {
             name: item.currency,
             total: item.usableAmount,
             frozen: item.frozenAmount,
+        
             usdtVal: item.totalAsset,
+            currencyLabel: item.totalAssetCurrency,
           ),
           if (index < list.length - 1)
             const Divider(height: 32, color: Color(0xFFF1F5F9)),
@@ -211,6 +213,7 @@ class _BalanceSectionState extends State<BalanceSection> {
     required String total,
     required String frozen,
     required String usdtVal,
+    required String currencyLabel,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -237,7 +240,7 @@ class _BalanceSectionState extends State<BalanceSection> {
             SizedBox(width: 2),
             Expanded(child: _assetDetailColumn("Frozen", frozen)),
             SizedBox(width: 2),
-            Expanded(child: _assetDetailColumn("USDT", usdtVal)),
+            Expanded(child: _assetDetailColumn(currencyLabel, usdtVal)),
           ],
         ),
       ],
