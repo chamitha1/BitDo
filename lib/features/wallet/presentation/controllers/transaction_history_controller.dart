@@ -96,7 +96,10 @@ class TransactionHistoryController extends GetxController {
       final Map<String, dynamic> params = {
         "pageNum": pageNum,
         "pageSize": pageSize,
-        // "bizType": "1",
+        "pageNum": pageNum,
+        "pageSize": pageSize,
+        "type": "0",  
+        "bizCategory": "", 
       };
 
       if (accountNumber != null) {
@@ -105,13 +108,18 @@ class TransactionHistoryController extends GetxController {
 
       final res = await AccountApi.getJourPageList(params);
 
-      if (res.list.isEmpty) {
+      final deposits = res.list.where((item) {
+          final amt = double.tryParse(item.transAmount?.replaceAll(',', '') ?? '0') ?? 0;
+          return amt > 0;
+      }).toList();
+
+      if (deposits.isEmpty && res.list.isEmpty) {
         isEnd.value = true;
       } else {
         if (refresh) {
-          depositList.assignAll(res.list);
+          depositList.assignAll(deposits);
         } else {
-          depositList.addAll(res.list);
+          depositList.addAll(deposits);
         }
 
         if (res.list.length < pageSize) {

@@ -1,8 +1,3 @@
-import 'package:json_annotation/json_annotation.dart';
-
-part 'withdraw_page_res.g.dart';
-
-@JsonSerializable()
 class WithdrawPageRes {
   final String id;
   final String userId;
@@ -34,8 +29,41 @@ class WithdrawPageRes {
     this.payBank,
   });
 
-  factory WithdrawPageRes.fromJson(Map<String, dynamic> json) =>
-      _$WithdrawPageResFromJson(json);
+  factory WithdrawPageRes.fromJson(Map<String, dynamic> json) {
+    return WithdrawPageRes(
+      id: json['id']?.toString() ?? '',
+      userId: json['userId']?.toString() ?? '',
+      amount: json['amount']?.toString() ?? '0',
+      actualAmount: json['actualAmount']?.toString() ?? '0',
+      fee: json['fee']?.toString() ?? '0',
+      currency: json['currency']?.toString() ?? '',
+      status: json['status']?.toString() ?? '',
+      createDatetime: json['createDatetime'] is int 
+          ? json['createDatetime'].toString() 
+          : json['createDatetime']?.toString() ?? '',
+      payDatetime: json['payDatetime']?.toString(),
+      applyDatetime: json['applyDatetime']?.toString(),
+      payCardNo: json['payCardNo']?.toString(),
+      payCardName: json['payCardName']?.toString(),
+      payBank: json['payBank']?.toString(),
+    );
+  }
 
-  Map<String, dynamic> toJson() => _$WithdrawPageResToJson(this);
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'userId': userId,
+      'amount': amount,
+      'actualAmount': actualAmount,
+      'fee': fee,
+      'currency': currency,
+      'status': status,
+      'createDatetime': createDatetime,
+      'payDatetime': payDatetime,
+      'applyDatetime': applyDatetime,
+      'payCardNo': payCardNo,
+      'payCardName': payCardName,
+      'payBank': payBank,
+    };
+  }
 }

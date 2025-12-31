@@ -299,8 +299,12 @@ class BalanceHistoryPage extends GetView<BalanceHistoryController> {
   }
 
   Widget _buildTransactionItem(Jour tx) {
-    // 1=Deposit, 2=Withdraw
-    final isDeposit = tx.bizType == '1';
+    // Format amount sign
+    double val =
+        double.tryParse(tx.transAmount?.replaceAll(',', '') ?? '0') ?? 0.0;
+        
+  
+    final isDeposit = tx.bizType == '1' || val > 0;
 
     final amountColor = isDeposit
         ? const Color(0xFF00C087)
@@ -315,21 +319,16 @@ class BalanceHistoryPage extends GetView<BalanceHistoryController> {
         ? 'assets/icons/balance_history/card_receive.png'
         : 'assets/icons/balance_history/card_send.png';
 
-    // Format amount sign
     final amountPrefix = isDeposit ? "+" : "-";
-    double val =
-        double.tryParse(tx.transAmount?.replaceAll(',', '') ?? '0') ?? 0.0;
     if (val < 0) val = -val;
     final amountStr = "$amountPrefix${val.toStringAsFixed(2)}";
 
     return GestureDetector(
       onTap: () {
-        Get.toNamed(
-          Routes.transactionDetail,
-          arguments: {
-            'id': tx.id,
-          },
-        );
+        Get.toNamed(Routes.transactionDetail, parameters: {
+          "id": tx.id ?? '', 
+          "type": tx.bizType ?? '1' 
+        });
       },
       child: Container(
         padding: const EdgeInsets.all(16),

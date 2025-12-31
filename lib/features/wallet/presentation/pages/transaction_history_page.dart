@@ -242,8 +242,9 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
       onTap: () {
         Get.toNamed(
           Routes.transactionDetail,
-          arguments: {
+          parameters: {
             'id': item.id,
+            'type': '1', // Default type 1 for deposits/jour
           },
         );
       },
@@ -350,8 +351,9 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
       onTap: () {
         Get.toNamed(
           Routes.transactionDetail,
-          arguments: {
+          parameters: {
             'id': item.id,
+            'type': '2', // Explicitly type 2 for withdrawals
           },
         );
       },

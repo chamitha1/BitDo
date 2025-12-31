@@ -8,12 +8,11 @@ import 'package:BitOwi/models/withdraw_page_res.dart';
 import 'package:BitOwi/features/home/presentation/controllers/balance_controller.dart';
 
 class BalanceHistoryController extends GetxController {
-  var currentTab = 0.obs; // 0: All, 1: Deposits, 2: Withdrawals
+  var currentTab = 0.obs; 
   var isLoading = false.obs;
   var transactions = <Jour>[].obs;
   var accountDetail = Rxn<AccountDetailAssetRes>();
 
-  // Pagination
   int pageNum = 1;
   final int pageSize = 20;
   bool isEnd = false;
@@ -80,7 +79,6 @@ class BalanceHistoryController extends GetxController {
         }
       }
 
-      // Call without assetCurrency to get all assets.
       final res = await AccountApi.getBalanceAccount();
       print("Balance fetched successfully: ${res.totalAmount}");
       accountDetail.value = res;
@@ -93,20 +91,29 @@ class BalanceHistoryController extends GetxController {
     try {
       if (currentTab.value == 2) {
         // Withdraw Tab
-        final params = {"pageNum": pageNum, "pageSize": pageSize};
+        final Map<String, dynamic> params = {
+          "pageNum": pageNum, 
+          "pageSize": pageSize
+        };
+        if (accountNumber != null) {
+          params['accountNumber'] = accountNumber;
+        }
         print("Fetching Withdrawals with params: $params");
 
         final PageInfo<WithdrawPageRes> res =
             await AccountApi.getWithdrawPageList(params);
         print("Withdrawals fetched. Count: ${res.list.length}");
 
-        // Map WithdrawPageRes to Jour
+
         final List<Jour> mappedList = res.list.map((w) {
+          double amt = double.tryParse(w.actualAmount) ?? 0;
+          if (amt > 0) amt = -amt; 
+
           return Jour(
             id: w.id,
             userId: w.userId,
-            bizType: '2', // set as Withdraw
-            transAmount: w.actualAmount,
+            bizType: '2', 
+            transAmount: amt.toString(),
             currency: w.currency,
             createDatetime: w.createDatetime,
             remark: "Withdraw",
@@ -137,27 +144,36 @@ class BalanceHistoryController extends GetxController {
 
         List<Jour> processedList = res.list
             .map((item) {
+            
+              /*
               String finalBizType = item.bizType ?? '';
+              final double amount = double.tryParse(item.transAmount ?? '0') ?? 0;
 
-              if (finalBizType == 'amount change' || finalBizType.isEmpty) {
-                final double amount =
-                    double.tryParse(item.transAmount ?? '0') ?? 0;
-                if (amount > 0) {
-                  finalBizType = '1'; // as Deposit
-                } else if (amount < 0) {
-                  finalBizType = '2'; // as Withdraw
-                }
-                return item.copyWith(bizType: finalBizType);
+              if (finalBizType != '1' && finalBizType != '2') {
+                 if (amount < 0) {
+                   finalBizType = '2'; // Withdraw
+                 } else {
+                   finalBizType = '1'; // Deposit
+                 }
               }
-              return item;
+              return item.copyWith(bizType: finalBizType);
+              */
+              
+              // Just return item as is, or ensure bizType is NOT '2' unless it really is a withdrawal ID source.
+              // Since this is getJourPageList, these are always Journal IDs.
+              // We force '1' (or just leave it) to ensure getJourDetail is used.
+              
+              return item; 
             })
-            .cast<Jour>()
             .toList();
 
         //Tab Filter
         if (currentTab.value == 1) {
           processedList = processedList
-              .where((item) => item.bizType == '1')
+              .where((item) {
+                 final double amount = double.tryParse(item.transAmount ?? '0') ?? 0;
+                 return item.bizType == '1' || amount > 0;
+              })
               .toList();
         }
 

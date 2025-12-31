@@ -8,6 +8,8 @@ import 'package:BitOwi/models/withdraw_rule_detail_res.dart';
 import 'package:BitOwi/models/page_info.dart';
 import 'package:BitOwi/models/jour.dart';
 import 'package:BitOwi/models/jour_front_detail.dart';
+import 'package:BitOwi/models/withdraw_detail_res.dart';
+
 
 class AccountApi {
   static Future<AccountDetailAssetRes> getBalanceAccount({
@@ -109,6 +111,49 @@ class AccountApi {
       print("getWithdrawRuleDetail error: $e");
       rethrow;
     }
+  }
+
+  static Future<WithdrawDetailRes> getWithdrawDetail(String id) async {
+    try {
+      final res = await ApiClient.dio.post(
+        '/core/v1/withdraw/detail_front/$id',
+      );
+      print("Raw Withdraw Detail Response (Dio): ${res.data}"); 
+      
+      var data = res.data;
+      if (data is Map) {
+         if (data.containsKey('data')) {
+            data = data['data'];
+         }
+      }
+      
+      if (data == null) {
+         print("Warning: Withdraw detail data is null");
+         return WithdrawDetailRes(
+            id: id, 
+            userId: '', 
+            amount: '0', 
+            actualAmount: '0', 
+            fee: '0', 
+            currency: '', 
+            status: '', 
+            createDatetime: ''
+         );
+      }
+
+      final cleanData = _removeNullKeys(Map<String, dynamic>.from(data));
+      print("Cleaned Data for Model: $cleanData");
+
+      return WithdrawDetailRes.fromJson(cleanData);
+    } catch (e) {
+      print("getWithdrawDetail error: $e");
+      rethrow;
+    }
+  }
+
+  static Map<String, dynamic> _removeNullKeys(Map<String, dynamic> map) {
+    map.removeWhere((key, value) => value == null);
+    return map;
   }
 
   /// 📝TODO
