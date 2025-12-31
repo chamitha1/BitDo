@@ -58,11 +58,7 @@ class HomeBottomNavBar extends StatelessWidget {
           ? Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xff1D5DE5), Color(0xff174AB7)],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
+                color: const Color(0xff1D5DE5),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Image.asset(
