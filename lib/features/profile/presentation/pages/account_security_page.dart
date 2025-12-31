@@ -42,41 +42,41 @@ class AccountAndSecurityPage extends StatelessWidget {
           child: Column(
             children: [
               // Transaction Password
-              _buildMenuCard(
-                title: "Transaction password",
-                onTap: () {},
-              ),
-              const SizedBox(height: 16),
+              // _buildMenuCard(
+              //   title: "Transaction password",
+              //   onTap: () {},
+              // ),
+              // const SizedBox(height: 16),
 
               // Change Login Password
-              _buildMenuCard(
-                title: "Change login password",
-                onTap: () {},
-              ),
-              const SizedBox(height: 16),
+              // _buildMenuCard(
+              //   title: "Change login password",
+              //   onTap: () {},
+              // ),
+              // const SizedBox(height: 16),
 
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    _buildMenuItem(
-                      title: "Authenticator app",
-                      onTap: () {},
-                      showDivider: true,
-                    ),
-                    _buildMenuItem(
-                      title: "Change email",
-                      onTap: () {},
-                      showDivider: false,
-                    ),
-                  ],
-                ),
-              ),
+              // Container(
+              //   decoration: BoxDecoration(
+              //     color: Colors.white,
+              //     borderRadius: BorderRadius.circular(12),
+              //   ),
+              //   child: Column(
+              //     children: [
+              //       _buildMenuItem(
+              //         title: "Authenticator app",
+              //         onTap: () {},
+              //         showDivider: true,
+              //       ),
+              //       _buildMenuItem(
+              //         title: "Change email",
+              //         onTap: () {},
+              //         showDivider: false,
+              //       ),
+              //     ],
+              //   ),
+              // ),
 
-              const SizedBox(height: 40),
+              // const SizedBox(height: 40),
 
               // Log Out Button
               SizedBox(
