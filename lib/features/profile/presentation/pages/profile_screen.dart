@@ -323,40 +323,40 @@ class ProfileScreen extends StatelessWidget {
             onTap: () => Get.toNamed(Routes.accountSecurity),
           ),
           const Divider(height: 1, color: Color(0xFFF0F4FF)),
-          _buildMenuItem(
-            icon: Icons.book_outlined,
-            title: "Address Book",
-            subtitle: "Manage your saved addresses",
-            onTap: () {},
-          ),
+          // _buildMenuItem(
+          //   icon: Icons.book_outlined,
+          //   title: "Address Book",
+          //   subtitle: "Manage your saved addresses",
+          //   onTap: () {},
+          // ),
         ]),
         const SizedBox(height: 16),
         // Card 2
-        _buildGroupCard([
-           _buildMenuItem(
-            icon: Icons.info_outline,
-            title: "Help Center",
-            subtitle: "Support, FAQs, and assistance",
-            onTap: () {},
-          ),
-          const Divider(height: 1, color: Color(0xFFF0F4FF)),
-           _buildMenuItem(
-            icon: Icons.smartphone_outlined,
-            title: "About us",
-            subtitle: "Learn more about the app",
-            onTap: () {},
-          ),
-        ]),
+        // _buildGroupCard([
+        //    _buildMenuItem(
+        //     icon: Icons.info_outline,
+        //     title: "Help Center",
+        //     subtitle: "Support, FAQs, and assistance",
+        //     onTap: () {},
+        //   ),
+        //   const Divider(height: 1, color: Color(0xFFF0F4FF)),
+        //    _buildMenuItem(
+        //     icon: Icons.smartphone_outlined,
+        //     title: "About us",
+        //     subtitle: "Learn more about the app",
+        //     onTap: () {},
+        //   ),
+        // ]),
         const SizedBox(height: 16),
         // Card 3
-        _buildGroupCard([
-           _buildMenuItem(
-            icon: Icons.settings_outlined,
-            title: "Settings",
-            subtitle: "Account and application preferences",
-            onTap: () {},
-          ),
-        ]),
+        // _buildGroupCard([
+        //    _buildMenuItem(
+        //     icon: Icons.settings_outlined,
+        //     title: "Settings",
+        //     subtitle: "Account and application preferences",
+        //     onTap: () {},
+        //   ),
+        // ]),
       ],
     );
   }
