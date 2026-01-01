@@ -1,4 +1,5 @@
 import 'package:BitOwi/features/auth/presentation/controllers/user_controller.dart';
+import 'package:BitOwi/features/profile/presentation/pages/change_transaction_password_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -34,7 +35,7 @@ class AccountAndSecurityPage extends StatelessWidget {
             color: Color(0XFF151E2F),
           ),
         ),
-        centerTitle: false, // Left aligned title as requested
+        centerTitle: false,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -42,11 +43,13 @@ class AccountAndSecurityPage extends StatelessWidget {
           child: Column(
             children: [
               // Transaction Password
-              // _buildMenuCard(
-              //   title: "Transaction password",
-              //   onTap: () {},
-              // ),
-              // const SizedBox(height: 16),
+              _buildMenuCard(
+                title: "Change Transaction password",
+                onTap: () {
+                   Get.to(() => const ChangeTransactionPasswordPage());
+                },
+              ),
+              const SizedBox(height: 16),
 
               // Change Login Password
               // _buildMenuCard(
@@ -96,7 +99,7 @@ class AccountAndSecurityPage extends StatelessWidget {
                       fontFamily: 'Inter',
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
-                      color: Color(0xFF717F9A), 
+                      color: Color(0xFF717F9A),
                     ),
                   ),
                 ),
@@ -109,7 +112,8 @@ class AccountAndSecurityPage extends StatelessWidget {
                 height: 56,
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () => _showDeleteConfirmDialog(context, userController),
+                  onPressed: () =>
+                      _showDeleteConfirmDialog(context, userController),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
                     shape: RoundedRectangleBorder(
@@ -174,14 +178,12 @@ class AccountAndSecurityPage extends StatelessWidget {
       child: Container(
         height: 56,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: const BoxDecoration(
-          color: Colors.transparent,
-        ),
+        decoration: const BoxDecoration(color: Colors.transparent),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (!showDivider) const Spacer(), 
-             Row(
+            if (!showDivider) const Spacer(),
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
@@ -199,7 +201,7 @@ class AccountAndSecurityPage extends StatelessWidget {
             if (showDivider) ...[
               const Spacer(),
               const Divider(height: 1, color: Color(0xFFF0F4FF)),
-            ] else 
+            ] else
               const Spacer(),
           ],
         ),
@@ -207,7 +209,10 @@ class AccountAndSecurityPage extends StatelessWidget {
     );
   }
 
-  void _showDeleteConfirmDialog(BuildContext context, UserController controller) {
+  void _showDeleteConfirmDialog(
+    BuildContext context,
+    UserController controller,
+  ) {
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.all(24),
@@ -230,10 +235,7 @@ class AccountAndSecurityPage extends StatelessWidget {
             const Text(
               "Confirm if you want to delete account?",
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: Color(0xFF454F63),
-              ),
+              style: TextStyle(fontSize: 16, color: Color(0xFF454F63)),
             ),
             const SizedBox(height: 32),
             Row(
@@ -248,7 +250,10 @@ class AccountAndSecurityPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text("No", style: TextStyle(color: Colors.black)),
+                    child: const Text(
+                      "No",
+                      style: TextStyle(color: Colors.black),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -256,7 +261,7 @@ class AccountAndSecurityPage extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () {
                       Get.back();
-                      controller.logout(); // Reuse logout 
+                      controller.logout(); // Reuse logout
                     },
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -265,8 +270,10 @@ class AccountAndSecurityPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text("Yes",
-                        style: TextStyle(color: Colors.white)),
+                    child: const Text(
+                      "Yes",
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ),
               ],

@@ -64,7 +64,21 @@ class UserApi {
         data: {'email': email, 'bizType': bizType.value},
       );
 
-      final data = response.data as Map<String, dynamic>;
+      Map<String, dynamic> data;
+      if (response.data is Map) {
+        data = response.data as Map<String, dynamic>;
+      } else if (response.data is String) {
+        try {
+          print("Response data is String, parsing...");
+
+          return false;
+        } catch (e) {
+          return false;
+        }
+      } else {
+        return false;
+      }
+
       if (data['code'] == 200 ||
           data['code'] == '200' ||
           data['errorCode'] == 'Success' ||

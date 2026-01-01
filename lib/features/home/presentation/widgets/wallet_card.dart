@@ -2,6 +2,8 @@ import 'package:BitOwi/features/home/presentation/controllers/balance_controller
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../wallet/presentation/pages/deposit_screen.dart';
+import 'package:BitOwi/features/auth/presentation/controllers/user_controller.dart';
+import 'package:BitOwi/features/profile/presentation/pages/change_transaction_password_page.dart';
 import '../../../wallet/presentation/pages/withdrawal_page.dart';
 
 class WalletCard extends StatefulWidget {
@@ -79,16 +81,33 @@ class _WalletCardState extends State<WalletCard> {
                   "Withdraw",
                   "assets/icons/home/withdraw.png",
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => WithdrawalPage(
-                          symbol: controller.selectedAsset?.currency ?? '',
-                          accountNumber:
-                              controller.selectedAsset?.accountNumber ?? '',
+                    final userController = Get.find<UserController>();
+                    final tradePwdFlag = userController.user.value?.tradePwdFlag;
+
+                    print("Trade Password Flag Value: $tradePwdFlag"); 
+
+                    if (tradePwdFlag == '1') {
+                      print("Transaction password set"); 
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => WithdrawalPage(
+                            symbol: controller.selectedAsset?.currency ?? '',
+                            accountNumber:
+                                controller.selectedAsset?.accountNumber ?? '',
+                          ),
                         ),
-                      ),
-                    );
+                      );
+                    } else {
+                      print("Transaction password not set"); 
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Set a transaction password"),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                      Get.to(() => const ChangeTransactionPasswordPage());
+                    }
                   },
                 ),
               ),
