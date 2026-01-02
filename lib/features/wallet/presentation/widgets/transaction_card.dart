@@ -16,6 +16,17 @@ class TransactionCard extends StatelessWidget {
     required this.date,
   });
 
+  // String shortAddress(String value, {int visible = 12}) {
+  //   if (value.length <= visible) return value;
+  //   return "${value.substring(0, visible)}....";
+  // }
+
+  String shortAddressMiddle(String value) {
+    if (value.length <= 12) return value;
+    return "${value.substring(0, 6)}....${value.substring(value.length - 4)}";
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final amountColor = isDeposit
@@ -91,7 +102,8 @@ class TransactionCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    address,
+                    // address,
+                    shortAddressMiddle(address),
                     style: const TextStyle(
                       fontFamily: 'Inter',
                       fontSize: 14,
