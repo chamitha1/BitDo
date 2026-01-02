@@ -13,6 +13,9 @@ class BalanceController extends GetxController {
   );
   final RxBool isLoading = true.obs;
   final RxString errorMessage = ''.obs;
+  final RxBool isObscured = false.obs;
+
+  void toggleObscured() => isObscured.toggle();
 
   final RxString selectedCurrency = RxString('');
 

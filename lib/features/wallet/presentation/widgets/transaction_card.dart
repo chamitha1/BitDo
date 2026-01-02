@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class TransactionCard extends StatelessWidget {
   final bool isDeposit;
   final String amount;
-  final String status;
-  final String address;
   final String date;
 
   const TransactionCard({
     super.key,
     required this.isDeposit,
     required this.amount,
-    required this.status,
-    required this.address,
     required this.date,
   });
 
@@ -26,119 +23,83 @@ class TransactionCard extends StatelessWidget {
     return "${value.substring(0, 6)}....${value.substring(value.length - 4)}";
   }
 
-
   @override
   Widget build(BuildContext context) {
     final amountColor = isDeposit
         ? const Color(0xff2ECC71)
         : const Color(0xffE74C3C);
 
-    final isCompleted = status == "Completed";
-    final statusBgColor = isCompleted
-        ? const Color(0xffEAF9F0)
-        : const Color(0xffFFFBF6);
-    final statusTextColor = isCompleted
-        ? const Color(0xff40A372)
-        : const Color(0xffFF9B29);
-
     return Container(
-      padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.all(16.w),
+      margin: EdgeInsets.only(bottom: 12.w),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: Column(
+      child: Row(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                amount,
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: amountColor,
-                ),
+          Container(
+            width: 40.w,
+            height: 40.w,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFFF3F4F6), width: 1),
+            ),
+            child: Center(
+              child: Icon(
+                isDeposit ? Icons.download : Icons.upload,
+                size: 20.w,
+                color: isDeposit
+                    ? const Color(0xff2ECC71)
+                    : const Color(0xffE74C3C),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: statusBgColor,
-                  borderRadius: BorderRadius.circular(100),
-                ),
-                child: Text(
-                  status,
+            ),
+          ),
+          SizedBox(width: 12.w),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Amount Change",
                   style: TextStyle(
                     fontFamily: 'Inter',
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: statusTextColor,
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xff151E2F),
                   ),
                 ),
-              ),
-            ],
+                SizedBox(height: 4.w),
+                Text(
+                  date,
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w400,
+                    color: const Color(0xff9CA3AF),
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 16),
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    isDeposit ? "From" : "Address",
-                    style: const TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xff454F63),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    // address,
-                    shortAddressMiddle(address),
-                    style: const TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xff151E2F),
-                    ),
-                  ),
-                ],
-              ),
-
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  const Text(
-                    "Arrival Date & Time",
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xff454F63),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    date,
-                    style: const TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xff151E2F),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+          Text(
+            (isDeposit ? "+" : "-") + amount,
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w600,
+              color: amountColor,
+            ),
           ),
         ],
       ),

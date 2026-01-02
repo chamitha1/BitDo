@@ -16,7 +16,7 @@ class WalletCard extends StatefulWidget {
 class _WalletCardState extends State<WalletCard> {
   final BalanceController controller = Get.put(BalanceController());
 
-  bool _isObscured = false;
+
 
   @override
   Widget build(BuildContext context) {
@@ -82,12 +82,13 @@ class _WalletCardState extends State<WalletCard> {
                   "assets/icons/home/withdraw.png",
                   onTap: () {
                     final userController = Get.find<UserController>();
-                    final tradePwdFlag = userController.user.value?.tradePwdFlag;
+                    final tradePwdFlag =
+                        userController.user.value?.tradePwdFlag;
 
-                    print("Trade Password Flag Value: $tradePwdFlag"); 
+                    print("Trade Password Flag Value: $tradePwdFlag");
 
                     if (tradePwdFlag == '1') {
-                      print("Transaction password set"); 
+                      print("Transaction password set");
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -99,7 +100,7 @@ class _WalletCardState extends State<WalletCard> {
                         ),
                       );
                     } else {
-                      print("Transaction password not set"); 
+                      print("Transaction password not set");
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text("Set a transaction password"),
@@ -134,10 +135,14 @@ class _WalletCardState extends State<WalletCard> {
       }
 
       final asset = controller.homeAssetData.value;
-      
-      final totalAmount = asset?.totalAmount ?? '0.00';
-      
-      final totalAsset = asset?.totalAsset ?? '0.00';
+
+      final totalAmount =
+          double.tryParse(asset?.totalAmount ?? '0')?.toStringAsFixed(2) ??
+          '0.00';
+
+      final totalAsset =
+          double.tryParse(asset?.totalAsset ?? '0')?.toStringAsFixed(2) ??
+          '0.00';
       final totalAssetCurrency = asset?.totalAssetCurrency ?? 'USD';
 
       return Column(
@@ -147,7 +152,7 @@ class _WalletCardState extends State<WalletCard> {
             children: [
               RichText(
                 text: TextSpan(
-                  text: _isObscured
+                  text: controller.isObscured.value
                       ? "******"
                       : "${totalAmount.split('.').first}.",
                   style: const TextStyle(
@@ -156,7 +161,7 @@ class _WalletCardState extends State<WalletCard> {
                     fontWeight: FontWeight.w600,
                     fontFamily: 'Inter',
                   ),
-                  children: _isObscured
+                  children: controller.isObscured.value
                       ? []
                       : <TextSpan>[
                           TextSpan(
@@ -176,9 +181,7 @@ class _WalletCardState extends State<WalletCard> {
               const SizedBox(width: 10),
               GestureDetector(
                 onTap: () {
-                  setState(() {
-                    _isObscured = !_isObscured;
-                  });
+                  controller.toggleObscured();
                 },
                 child: Container(
                   width: 24,
@@ -188,7 +191,7 @@ class _WalletCardState extends State<WalletCard> {
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: Image.asset(
-                    _isObscured
+                    controller.isObscured.value
                         ? 'assets/icons/login/eye.png'
                         : 'assets/icons/home/eye_slash.png',
                     color: Colors.white,
@@ -199,7 +202,7 @@ class _WalletCardState extends State<WalletCard> {
           ),
           const SizedBox(height: 8),
           Text(
-            _isObscured ? "****" : "≈$totalAsset $totalAssetCurrency",
+            controller.isObscured.value ? "****" : "≈$totalAsset $totalAssetCurrency",
             style: const TextStyle(
               color: Colors.white,
               fontSize: 16,
@@ -231,10 +234,10 @@ class _WalletCardState extends State<WalletCard> {
           child: Text(
             currency,
             style: const TextStyle(
-               fontWeight: FontWeight.w500,
-               fontSize: 14,
-               fontFamily: 'Inter',
-               color: Color(0xff151E2F),
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
+              fontFamily: 'Inter',
+              color: Color(0xff151E2F),
             ),
           ),
         );

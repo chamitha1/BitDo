@@ -57,7 +57,8 @@ class _BalanceSectionState extends State<BalanceSection> {
                         scale: 0.7,
                         child: Switch(
                           value: _hideSmallAssets,
-                          onChanged: (v) => setState(() => _hideSmallAssets = v),
+                          onChanged: (v) =>
+                              setState(() => _hideSmallAssets = v),
                           activeColor: const Color(0xff2ECC71),
                           activeTrackColor: const Color(
                             0xFF2ECC71,
@@ -166,18 +167,23 @@ class _BalanceSectionState extends State<BalanceSection> {
             behavior: HitTestBehavior.opaque,
             onTap: () {
               if (item.currency != null && item.accountNumber != null) {
-                Get.toNamed(Routes.walletDetail, parameters: {
-                  'symbol': item.currency!,
-                  'accountNumber': item.accountNumber!,
-                });
+                Get.toNamed(
+                  Routes.walletDetail,
+                  parameters: {
+                    'symbol': item.currency!,
+                    'accountNumber': item.accountNumber!,
+                  },
+                );
               }
             },
             child: _assetItem(
               icon: item.icon,
               name: item.currency,
-              total: item.usableAmount,
-              frozen: item.frozenAmount,
-              usdtVal: item.totalAsset,
+              total: controller.isObscured.value ? "********" : item.usableAmount,
+              frozen:
+                  controller.isObscured.value ? "********" : item.frozenAmount,
+              usdtVal:
+                  controller.isObscured.value ? "********" : item.totalAsset,
               currencyLabel: item.totalAssetCurrency,
             ),
           ),
@@ -226,6 +232,9 @@ class _BalanceSectionState extends State<BalanceSection> {
     required String usdtVal,
     required String currencyLabel,
   }) {
+
+    final isObscured = controller.isObscured.value;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -247,11 +256,17 @@ class _BalanceSectionState extends State<BalanceSection> {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(child: _assetDetailColumn("Assets", total)),
+            Expanded(
+                child: _assetDetailColumn(
+                    "Assets", isObscured ? "********" : total)),
             SizedBox(width: 2),
-            Expanded(child: _assetDetailColumn("Frozen", frozen)),
+            Expanded(
+                child: _assetDetailColumn(
+                    "Frozen", isObscured ? "********" : frozen)),
             SizedBox(width: 2),
-            Expanded(child: _assetDetailColumn(currencyLabel, usdtVal)),
+            Expanded(
+                child: _assetDetailColumn(
+                    currencyLabel, isObscured ? "********" : usdtVal)),
           ],
         ),
       ],

@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:BitOwi/features/wallet/presentation/pages/qr_scanner_page.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:BitOwi/features/wallet/presentation/widgets/coin_selector_card.dart'; 
+import 'package:BitOwi/features/wallet/presentation/widgets/coin_selector_card.dart';
 import 'package:get/get.dart';
 
 class WithdrawScreen extends StatefulWidget {
@@ -32,7 +32,6 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
   // final TextEditingController _amountController = TextEditingController();
   final WithdrawController controller = Get.put(WithdrawController());
 
-
   bool _isWithdrawAll = false;
   bool _isPasswordObscure = true;
   final double _balance = 543488384.94;
@@ -42,7 +41,6 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
     super.initState();
     controller.setArgs(widget.symbol, widget.accountNumber);
   }
-
 
   void _toggleWithdrawAll() {
     setState(() {
@@ -55,7 +53,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
             0.0;
 
         controller.amountController.text = maxAmount.toString();
-   
+
         controller.calculateFee(maxAmount.toString());
       } else {
         controller.amountController.clear();
@@ -85,7 +83,6 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
 
     if (!await controller.sendOtp(type: SmsBizType.withdraw)) return;
 
-   
     controller.clearInputs();
     setState(() {
       controller.calculateFee('');
@@ -93,7 +90,8 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
     });
 
     final userController = Get.find<UserController>();
-    final email = userController.user.value?.loginName ??
+    final email =
+        userController.user.value?.loginName ??
         userController.user.value?.email ??
         '';
 
@@ -162,7 +160,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                     Text(
+                    Text(
                       "Withdraw Address",
                       style: const TextStyle(
                         fontFamily: 'Inter',
@@ -265,7 +263,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                         Text(
+                        Text(
                           "Withdraw Amount",
                           style: const TextStyle(
                             fontFamily: 'Inter',
@@ -293,9 +291,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      onChanged: (val) {
-                          
-                      },
+                      onChanged: (val) {},
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.white,
@@ -360,7 +356,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                               ),
                             ),
                             const SizedBox(width: 8),
-                             Text(
+                            Text(
                               "Withdraw All",
                               style: const TextStyle(
                                 fontFamily: 'Inter',
@@ -371,19 +367,21 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                             ),
                           ],
                         ),
-                        Obx(() => Text(
-                          "Fee : ${controller.fee.value.toStringAsFixed(2)} ${controller.symbol.value}",
-                          style: const TextStyle(
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.w500,
-                            fontSize: 12,
-                            color: Color(0xFF2E3D5B),
+                        Obx(
+                          () => Text(
+                            "Fee : ${controller.fee.value.toStringAsFixed(2)} ${controller.symbol.value}",
+                            style: const TextStyle(
+                              fontFamily: 'Inter',
+                              fontWeight: FontWeight.w500,
+                              fontSize: 12,
+                              color: Color(0xFF2E3D5B),
+                            ),
                           ),
-                        )),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 30),
-                     Text(
+                    Text(
                       "Transaction Password",
                       style: const TextStyle(
                         fontFamily: 'Inter',
@@ -472,7 +470,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                 Text(
+                                Text(
                                   "Friendly Reminder",
                                   style: const TextStyle(
                                     fontFamily: 'Inter',
@@ -482,15 +480,19 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: 4),
-                                Obx(() => Text(
-                                  controller.note.value.isNotEmpty ? controller.note.value : "Minimum withdrawal amount: ${controller.ruleInfo.value?.minAmount ?? '10'} ${controller.symbol.value}",
-                                  style: const TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 14,
-                                    color: Color(0xFF40A372),
+                                Obx(
+                                  () => Text(
+                                    controller.note.value.isNotEmpty
+                                        ? controller.note.value
+                                        : "Minimum withdrawal amount: ${controller.ruleInfo.value?.minAmount ?? '10'} ${controller.symbol.value}",
+                                    style: const TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 14,
+                                      color: Color(0xFF40A372),
+                                    ),
                                   ),
-                                )),
+                                ),
                               ],
                             ),
                           ),
@@ -577,7 +579,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
             ),
           ),
           const SizedBox(width: 12),
-           Text(
+          Text(
             "Withdraw".tr,
             style: const TextStyle(
               fontFamily: 'Inter',

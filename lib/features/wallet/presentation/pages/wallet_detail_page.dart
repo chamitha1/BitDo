@@ -31,11 +31,15 @@ class WalletDetailPage extends GetView<WalletDetailController> {
               borderRadius: BorderRadius.circular(12),
             ),
             padding: const EdgeInsets.all(8),
-            child: const Icon(Icons.arrow_back_ios_new, size: 16, color: Colors.black),
+            child: const Icon(
+              Icons.arrow_back_ios_new,
+              size: 16,
+              color: Colors.black,
+            ),
           ),
         ),
         title: Text(
-          "Assets",
+          "Balances",
           style: TextStyle(
             fontFamily: 'Inter',
             fontWeight: FontWeight.w600,
@@ -45,20 +49,24 @@ class WalletDetailPage extends GetView<WalletDetailController> {
         ),
       ),
       body: Obx(() {
-        if (controller.accountInfo.value == null && controller.isLoading.value) {
-            return const Center(child: CircularProgressIndicator());
+        if (controller.accountInfo.value == null &&
+            controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
         }
-        
-        if(controller.accountInfo.value == null) {
-             return Center(
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                        const Text("No data available"),
-                        ElevatedButton(onPressed: controller.refreshData, child: const Text("Retry"))
-                    ]
-                )
-             );
+
+        if (controller.accountInfo.value == null) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text("No data available"),
+                ElevatedButton(
+                  onPressed: controller.refreshData,
+                  child: const Text("Retry"),
+                ),
+              ],
+            ),
+          );
         }
 
         final info = controller.accountInfo.value!;
@@ -94,32 +102,35 @@ class WalletDetailPage extends GetView<WalletDetailController> {
                     SliverPadding(
                       padding: EdgeInsets.symmetric(horizontal: 20.w),
                       sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                             if(index < controller.transactionList.length){
-                                final item = controller.transactionList[index];
-                                final isDeposit = item.bizCategory?.toLowerCase() == 'deposit' || item.bizCategory?.toLowerCase() == 'charge'; // Adjust logic
-                                
-                                return TransactionCard(
-                                  isDeposit: isDeposit,
-                                  amount: "${isDeposit ? '+' : ''}${item.transAmount} ${item.currency}", 
-                                  status: item.status ?? 'Unknown', 
-                                  address: item.accountNumber ?? '-', 
-                                  date: item.createDatetime != null 
-                                      ? DateFormat('yyyy-MM-dd HH:mm').format(
-                                          DateTime.fromMillisecondsSinceEpoch(
-                                            item.createDatetime is int 
-                                              ? item.createDatetime 
-                                              : int.tryParse(item.createDatetime.toString()) ?? 0
-                                          )
-                                        ) 
-                                      : '-',
-                                );
-                             }
-                             return null;
-                          },
-                          childCount: controller.transactionList.length,
-                        ),
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          if (index < controller.transactionList.length) {
+                            final item = controller.transactionList[index];
+                            final isDeposit =
+                                item.bizCategory?.toLowerCase() == 'deposit' ||
+                                item.bizCategory?.toLowerCase() ==
+                                    'charge'; // Adjust logic
+
+                            return TransactionCard(
+                              isDeposit: isDeposit,
+                              amount:
+                                  "${double.tryParse(item.transAmount?.toString() ?? '0')?.toStringAsFixed(2) ?? '0.00'} ${item.currency ?? ''}",
+                              date: item.createDatetime != null
+                                  ? DateFormat('yyyy-MM-dd HH:mm').format(
+                                      DateTime.fromMillisecondsSinceEpoch(
+                                        item.createDatetime is int
+                                            ? item.createDatetime
+                                            : int.tryParse(
+                                                    item.createDatetime
+                                                        .toString(),
+                                                  ) ??
+                                                  0,
+                                      ),
+                                    )
+                                  : '-',
+                            );
+                          }
+                          return null;
+                        }, childCount: controller.transactionList.length),
                       ),
                     ),
                     if (controller.transactionList.isEmpty)
@@ -129,7 +140,10 @@ class WalletDetailPage extends GetView<WalletDetailController> {
                           child: Center(
                             child: Text(
                               "No transactions found",
-                              style: TextStyle(color: Colors.grey, fontSize: 14.sp),
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 14.sp,
+                              ),
                             ),
                           ),
                         ),
@@ -139,7 +153,7 @@ class WalletDetailPage extends GetView<WalletDetailController> {
                 ),
               ),
             ),
-             _buildBottomBar(info),
+            _buildBottomBar(info),
           ],
         );
       }),
@@ -175,12 +189,28 @@ class WalletDetailPage extends GetView<WalletDetailController> {
                 ),
               ),
               SizedBox(height: 20.w),
-              _buildRow("Total Amount", info.totalAmount ?? '0'),
-              _buildRow("Available", info.usableAmount ?? '0'),
-              _buildRow("Frozen", info.frozenAmount ?? '0'),
+              _buildRow(
+                  "Total Amount",
+                  double.tryParse(info.totalAmount ?? '0')
+                          ?.toStringAsFixed(2) ??
+                      '0.00'),
+              _buildRow(
+                  "Available",
+                  double.tryParse(info.usableAmount ?? '0')
+                          ?.toStringAsFixed(2) ??
+                      '0.00'),
+              _buildRow(
+                  "Frozen",
+                  double.tryParse(info.frozenAmount ?? '0')
+                          ?.toStringAsFixed(2) ??
+                      '0.00'),
               Divider(height: 24.w, color: const Color(0xFFF3F4F6)),
-              _buildRow("Valuation (USDT)", "~${info.totalAmountUsdt ?? '0'}"),
-             // _buildRow("Valuation (${info.totalAssetCurrency})", "~${info.totalAsset ?? '0'}"),
+              _buildRow(
+                  "Valuation (USDT)",
+                  " ${double.tryParse(info.totalAmountUsdt ?? '0')?.toStringAsFixed(2) ?? '0.00'}"),
+              _buildRow(
+                  "Valuation (USD)",
+                  " ${double.tryParse(info.totalAsset ?? '0')?.toStringAsFixed(2) ?? '0.00'}"),
             ],
           ),
         ),
@@ -196,7 +226,7 @@ class WalletDetailPage extends GetView<WalletDetailController> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(30),
                 boxShadow: [
-                   BoxShadow(
+                  BoxShadow(
                     color: const Color(0xFF000000).withOpacity(0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
@@ -204,10 +234,15 @@ class WalletDetailPage extends GetView<WalletDetailController> {
                 ],
               ),
               child: ClipRRect(
-                  borderRadius: BorderRadius.circular(30),
-                  child: info.icon != null && info.icon!.isNotEmpty 
-                    ? Image.network(info.icon!, fit: BoxFit.cover, errorBuilder: (c,e,s) => const Icon(Icons.currency_bitcoin)) 
-                    : const Icon(Icons.currency_bitcoin)
+                borderRadius: BorderRadius.circular(30),
+                child: info.icon != null && info.icon!.isNotEmpty
+                    ? Image.network(
+                        info.icon!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (c, e, s) =>
+                            const Icon(Icons.currency_bitcoin),
+                      )
+                    : const Icon(Icons.currency_bitcoin),
               ),
             ),
           ),
@@ -262,59 +297,65 @@ class WalletDetailPage extends GetView<WalletDetailController> {
         children: [
           Expanded(
             child: SizedBox(
-                height: 48.w,
-                child: ElevatedButton(
-                  onPressed: () {
-                     // Deposit
-                     Get.toNamed(Routes.deposit, parameters: {'symbol': info.currency ?? ''});
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1D5DE5),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 0,
+              height: 48.w,
+              child: ElevatedButton(
+                onPressed: () {
+                  // Deposit
+                  Get.toNamed(
+                    Routes.deposit,
+                    parameters: {'symbol': info.currency ?? ''},
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1D5DE5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Text(
-                    "Deposit",
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16.sp,
-                      color: Colors.white,
-                    ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  "Deposit",
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16.sp,
+                    color: Colors.white,
                   ),
                 ),
+              ),
             ),
           ),
           SizedBox(width: 16.w),
           Expanded(
             child: SizedBox(
-                height: 48.w,
-                 child: OutlinedButton(
-                  onPressed: () {
-                     // Withdraw
-                     Get.toNamed(Routes.withdrawal, parameters: {
-                         'symbol': info.currency ?? '',
-                         'accountNumber': controller.accountNumber,
-                     });
-                  },
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFF1D5DE5)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    "Withdraw",
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16.sp,
-                      color: const Color(0xFF1D5DE5),
-                    ),
+              height: 48.w,
+              child: OutlinedButton(
+                onPressed: () {
+                  // Withdraw
+                  Get.toNamed(
+                    Routes.withdrawal,
+                    parameters: {
+                      'symbol': info.currency ?? '',
+                      'accountNumber': controller.accountNumber,
+                    },
+                  );
+                },
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFF1D5DE5)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
+                child: Text(
+                  "Withdraw",
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16.sp,
+                    color: const Color(0xFF1D5DE5),
+                  ),
+                ),
+              ),
             ),
           ),
         ],
