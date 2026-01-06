@@ -213,11 +213,11 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                                 // Address book logic
                               },
                               child: Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: Image.asset(
-                                  'assets/icons/withdrawal/book.png',
-                                  width: 24,
-                                  height: 24,
+                                padding: const EdgeInsets.all(4),
+                                child: SvgPicture.asset(
+                                  'assets/icons/withdrawal/book.svg',
+                                  width: 20,
+                                  height: 20,
                                 ),
                               ),
                             ),
@@ -236,7 +236,8 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                                 } else {
                                   CustomSnackbar.showError(
                                     title: "Permission Denied",
-                                    message: "Camera permission is required to scan QR codes.",
+                                    message:
+                                        "Camera permission is required to scan QR codes.",
                                   );
                                 }
                               },
@@ -247,10 +248,10 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                                   bottom: 10,
                                   left: 4,
                                 ),
-                                child: Image.asset(
-                                  'assets/icons/withdrawal/scan.png',
-                                  width: 24,
-                                  height: 24,
+                                child: SvgPicture.asset(
+                                  'assets/icons/withdrawal/scan.svg',
+                                  width: 20,
+                                  height: 20,
                                 ),
                               ),
                             ),
@@ -459,8 +460,8 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Image.asset(
-                            'assets/icons/withdrawal/lightbulb.png',
+                          SvgPicture.asset(
+                            'assets/icons/withdrawal/lightbulb.svg',
                             width: 24,
                             height: 24,
                             color: const Color(0xFF40A372),
@@ -567,14 +568,15 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
           Container(
             width: 32,
             height: 32,
+            alignment: Alignment.center,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
               color: Color(0xffF6F9FF),
             ),
             child: GestureDetector(
               onTap: () => Navigator.pop(context),
-              child: Image.asset(
-                'assets/icons/withdrawal/back_arrow.png',
+              child: SvgPicture.asset(
+                'assets/icons/withdrawal/arrow-left.svg',
                 width: 24,
                 height: 24,
               ),
@@ -582,7 +584,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
           ),
           const SizedBox(width: 12),
           Text(
-            "Withdraw".tr,
+            "Blockchain Address".tr,
             style: const TextStyle(
               fontFamily: 'Inter',
               fontWeight: FontWeight.w600,
@@ -608,8 +610,8 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                 );
               }
             },
-            child: Image.asset(
-              'assets/icons/withdrawal/clock.png',
+            child: SvgPicture.asset(
+              'assets/icons/withdrawal/clock.svg',
               width: 24,
               height: 24,
             ),

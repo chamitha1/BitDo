@@ -94,8 +94,8 @@ class BalanceHistoryPage extends GetView<BalanceHistoryController> {
             onTap: () => Get.until(
               (route) => Get.currentRoute == '/HomeScreen' || route.isFirst,
             ),
-            child: Image.asset(
-              'assets/icons/deposit/arrow_back.png',
+            child: SvgPicture.asset(
+              'assets/icons/withdrawal/arrow-left.svg',
               width: 24,
               height: 24,
             ),
@@ -113,10 +113,13 @@ class BalanceHistoryPage extends GetView<BalanceHistoryController> {
           const Spacer(),
           GestureDetector(
             onTap: () => controller.refreshData(),
-            child: SvgPicture.asset(
-              'assets/icons/balance_history/refresh-circle.svg',
-              width: 24,
-              height: 24,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(0, 2, 0, 0),
+              child: SvgPicture.asset(
+                'assets/icons/balance_history/refresh-circle.svg',
+                width: 30,
+                height: 30,
+              ),
             ),
           ),
         ],
@@ -305,8 +308,7 @@ class BalanceHistoryPage extends GetView<BalanceHistoryController> {
     // Format amount sign
     double val =
         double.tryParse(tx.transAmount?.replaceAll(',', '') ?? '0') ?? 0.0;
-        
-  
+
     final isDeposit = tx.bizType == '1' || val > 0;
 
     final amountColor = isDeposit
@@ -328,10 +330,10 @@ class BalanceHistoryPage extends GetView<BalanceHistoryController> {
 
     return GestureDetector(
       onTap: () {
-        Get.toNamed(Routes.transactionDetail, parameters: {
-          "id": tx.id ?? '', 
-          "type": tx.bizType ?? '1' 
-        });
+        Get.toNamed(
+          Routes.transactionDetail,
+          parameters: {"id": tx.id ?? '', "type": tx.bizType ?? '1'},
+        );
       },
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -372,7 +374,7 @@ class BalanceHistoryPage extends GetView<BalanceHistoryController> {
                             tx.createDatetime is int
                                 ? tx.createDatetime
                                 : int.tryParse(tx.createDatetime.toString()) ??
-                                    0,
+                                      0,
                           ).toString().split('.')[0]
                         : '',
                     style: const TextStyle(

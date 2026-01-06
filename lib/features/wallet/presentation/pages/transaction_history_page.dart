@@ -2,6 +2,7 @@ import 'package:BitOwi/config/routes.dart';
 import 'package:BitOwi/features/wallet/presentation/controllers/transaction_history_controller.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -55,12 +56,12 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                       width: 40,
                       height: 40,
                       decoration: const BoxDecoration(
-                        color: Color(0xffECEFF5),
+                        // color: Color(0xffECEFF5),
                         shape: BoxShape.circle,
                       ),
                       child: Center(
-                        child: Image.asset(
-                          "assets/icons/deposit/arrow_back.png",
+                        child: SvgPicture.asset(
+                          "assets/icons/withdrawal/arrow-left.svg",
                           width: 20,
                           height: 20,
                           color: const Color(0xff151E2F),
@@ -283,7 +284,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    "Completed", 
+                    "Completed",
                     style: const TextStyle(
                       fontSize: 10,
                       color: Color(0xff27AE60),
