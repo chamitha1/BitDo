@@ -17,11 +17,11 @@ class ProfileScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFF6F9FF),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTopBar(),
+              SizedBox(height: 56, child: _buildTopBar()),
               const SizedBox(height: 20),
               _buildProfileCard(userController),
               const SizedBox(height: 24),

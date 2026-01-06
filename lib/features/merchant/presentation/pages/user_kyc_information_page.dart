@@ -188,6 +188,7 @@ class _UserKycInformationPageState extends State<UserKycInformationPage> {
       child: Scaffold(
         backgroundColor: const Color(0xFFF6F9FF),
         appBar: AppBar(
+          toolbarHeight: 56,
           backgroundColor: const Color(0xFFF6F9FF),
           surfaceTintColor: const Color(0xFFF6F9FF),
           elevation: 0,

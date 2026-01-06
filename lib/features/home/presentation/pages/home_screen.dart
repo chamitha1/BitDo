@@ -59,11 +59,14 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               // Index 0: Home
               SingleChildScrollView(
-                padding: const EdgeInsets.all(20.0),
+                padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const HomeHeader(),
+                    SizedBox(
+                      height: 56,
+                      child: const HomeHeader(),
+                    ),
                     const SizedBox(height: 20),
                     const WalletCard(),
                     const SizedBox(height: 20),

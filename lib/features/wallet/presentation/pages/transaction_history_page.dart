@@ -43,8 +43,9 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
         child: Column(
           children: [
             // Header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            Container(
+              height: 56,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [

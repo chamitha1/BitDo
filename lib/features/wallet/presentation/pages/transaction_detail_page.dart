@@ -13,6 +13,7 @@ class TransactionDetailPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F9FF),
       appBar: AppBar(
+        toolbarHeight: 56,
         backgroundColor: const Color(0xFFF6F9FF),
         elevation: 0,
         centerTitle: true,

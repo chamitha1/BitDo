@@ -127,13 +127,13 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: const Color(0xFFF6F9FF),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 30),
+                const SizedBox(height: 56),
 
                 Text(
                   'Welcome Back to Sign in'.tr,

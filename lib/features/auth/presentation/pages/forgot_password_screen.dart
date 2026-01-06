@@ -51,6 +51,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     return Scaffold(
       backgroundColor: const Color(0XFFF6F9FF),
       appBar: AppBar(
+        toolbarHeight: 56,
         // ... (existing app bar props)
         backgroundColor: Colors.transparent,
         elevation: 0,

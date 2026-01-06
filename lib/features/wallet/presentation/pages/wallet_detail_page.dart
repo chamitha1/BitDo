@@ -18,6 +18,7 @@ class WalletDetailPage extends GetView<WalletDetailController> {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F9FF),
       appBar: AppBar(
+        toolbarHeight: 56,
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,

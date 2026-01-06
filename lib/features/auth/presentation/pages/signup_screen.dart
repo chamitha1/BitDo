@@ -258,11 +258,11 @@ class _SignupScreenState extends State<SignupScreen> {
       backgroundColor: const Color(0XFFF6F9FF),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 20),
+              const SizedBox(height: 56),
               const Text(
                 "Let's Get You Started",
                 style: TextStyle(

@@ -20,10 +20,10 @@ class _P2PPageState extends State<P2PPage> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
               child: Column(
                 children: [
-                  _buildHeader(),
+                  SizedBox(height: 56, child: _buildHeader()),
                   const SizedBox(height: 20),
                   _buildTradeTypeToggle(),
                   const SizedBox(height: 20),
