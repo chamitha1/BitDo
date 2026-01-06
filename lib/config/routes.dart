@@ -83,10 +83,7 @@ class AppPages {
       }),
     ),
     //
-    GetPage(
-      name: Routes.accountSecurity,
-      page: () => const AccountAndSecurityPage(),
-    ),
+    GetPage(name: Routes.accountSecurity, page: () => AccountAndSecurityPage()),
     GetPage(
       name: Routes.transactionDetail,
       page: () => const TransactionDetailPage(),

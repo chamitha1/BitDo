@@ -5,6 +5,9 @@ import 'package:BitOwi/features/profile/presentation/pages/change_transaction_pa
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:BitOwi/features/profile/presentation/widgets/profile_widgets.dart';
+import 'package:BitOwi/features/profile/presentation/pages/account_security_page.dart';
+import 'package:BitOwi/features/merchant/presentation/controllers/user_kyc_personal_information_controller.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -307,97 +310,76 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildMenuCards(BuildContext context) {
     return Column(
       children: [
-        // Card 1
-        _buildGroupCard([
-          _buildMenuItem(
+        // Account and security and address book (kyc?)
+        ProfileGroupCard(children: [
+          ProfileMenuItem(
             iconPath: 'assets/icons/merchant_details/user_kyc.svg',
             title: "KYC",
             subtitle: "User KYC verification",
             onTap: () {
-              Get.toNamed(Routes.userKycPersonalInformation);
+              Get.to(
+                () => UserKycInformationPage(),
+                binding: BindingsBuilder(() {
+                  Get.put(UserKycInformationController());
+                }),
+              );
             },
           ),
           const Divider(height: 1, color: Color(0xFFF0F4FF)),
-          _buildMenuItem(
+          ProfileMenuItem(
             iconPath: 'assets/icons/profile_page/security.svg',
             title: "Account and Security",
             subtitle: "Manage your profile and settings",
-            onTap: () => Get.toNamed(Routes.accountSecurity),
+            onTap: () => Get.to(() => AccountAndSecurityPage()),
           ),
           const Divider(height: 1, color: Color(0xFFF0F4FF)),
-          _buildMenuItem(
-            iconPath: 'assets/icons/profile_page/security.svg',
-            title: "Change Transaction Password",
-            subtitle: "",
+          ProfileMenuItem(
+            iconPath: 'assets/icons/profile_page/address.svg',
+            title: "Address Book",
+            subtitle: "Manage your saved addresses",
             onTap: () => Get.to(() => const ChangeTransactionPasswordPage()),
           ),
+          // const Divider(height: 1, color: Color(0xFFF0F4FF)),
+
+          // ProfileMenuItem(
+          //   iconPath: 'assets/icons/profile_page/security.svg',
+          //   title: "Change Transaction Password",
+          //   subtitle: "",
+          //   onTap: () => Get.to(() => const ChangeTransactionPasswordPage()),
+          // ),
           const Divider(height: 1, color: Color(0xFFF0F4FF)),
         ]),
         const SizedBox(height: 16),
-        // ... (other cards)
+        //Help and about us
+        ProfileGroupCard(children: [
+          ProfileMenuItem(
+            iconPath: 'assets/icons/profile_page/info_circle.svg',
+            title: "Help Center ",
+            subtitle: "Support, FAQs, and assistance",
+            onTap: () => Get.to(() => const ChangeTransactionPasswordPage()),
+          ),
+          const Divider(height: 1, color: Color(0xFFF0F4FF)),
+
+          ProfileMenuItem(
+            iconPath: 'assets/icons/profile_page/about.svg',
+            title: "About us",
+            subtitle: "Learn more about the app",
+            onTap: () => Get.to(() => const ChangeTransactionPasswordPage()),
+          ),
+        ]),
+        const SizedBox(height: 16),
+
+        ProfileGroupCard(children: [
+          ProfileMenuItem(
+            iconPath: 'assets/icons/profile_page/setting.svg',
+            title: "Settings",
+            subtitle: "Account and application prefer",
+            onTap: () => Get.to(() => const ChangeTransactionPasswordPage()),
+          ),
+        ]),
       ],
     );
   }
 
-  Widget _buildGroupCard(List<Widget> children) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(children: children),
-    );
-  }
 
-  Widget _buildMenuItem({
-    required String iconPath,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      leading: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: const Color(0xFFE8EFFF),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        padding: const EdgeInsets.all(10),
-        child: SvgPicture.asset(
-          iconPath,
-          colorFilter: const ColorFilter.mode(
-            Color(0xFF1D5DE5),
-            BlendMode.srcIn,
-          ),
-        ),
-      ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          fontFamily: 'Inter',
-          color: Color(0xFF151E2F),
-        ),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w400,
-          fontFamily: 'Inter',
-          color: Color(0xFF6A7282),
-        ),
-      ),
-      trailing: SvgPicture.asset(
-        'assets/icons/profile_page/arrow-right.svg',
-        width: 20,
-        height: 20,
-        colorFilter: const ColorFilter.mode(Color(0xFF909DAD), BlendMode.srcIn),
-      ),
-    );
-  }
 }

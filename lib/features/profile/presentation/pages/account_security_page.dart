@@ -1,10 +1,15 @@
 import 'package:BitOwi/features/auth/presentation/controllers/user_controller.dart';
 import 'package:BitOwi/features/profile/presentation/pages/change_transaction_password_page.dart';
+import 'package:BitOwi/features/profile/presentation/widgets/profile_widgets.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 class AccountAndSecurityPage extends StatelessWidget {
-  const AccountAndSecurityPage({super.key});
+  AccountAndSecurityPage({super.key});
+
+  final RxBool isPatternLockEnabled = false.obs;
 
   @override
   Widget build(BuildContext context) {
@@ -13,25 +18,18 @@ class AccountAndSecurityPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F9FF),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFF6F9FF),
         elevation: 0,
         leading: IconButton(
-          icon: Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.grey.shade200),
-            ),
-            child: const Icon(Icons.arrow_back, color: Colors.black, size: 18),
-          ),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF151E2F)),
           onPressed: () => Get.back(),
         ),
         title: const Text(
-          "Account and Security",
+          "Account & Security",
           style: TextStyle(
             fontSize: 20,
             fontFamily: 'Inter',
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w600,
             color: Color(0XFF151E2F),
           ),
         ),
@@ -42,44 +40,88 @@ class AccountAndSecurityPage extends StatelessWidget {
           padding: const EdgeInsets.all(20.0),
           child: Column(
             children: [
-              // Transaction Password
-              // _buildMenuCard(
-              //   title: "Change Transaction password",
-              //   onTap: () {
-              //      Get.to(() => const ChangeTransactionPasswordPage());
-              //   },
-              // ),
+              // Header Image
+              SvgPicture.asset(
+                'assets/icons/profile_page/shield_account_security.svg',
+                width: 80, 
+                height: 80,
+              ),
               const SizedBox(height: 16),
+              // Header Title
+              const Text(
+                "Account & Security",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Inter',
+                  color: Color(0xFF151E2F),
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Header Subtitle
+              const Text(
+                "Manage Your Account Preferences",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                  fontFamily: 'Inter',
+                  color: Color(0xFF717F9A),
+                ),
+              ),
+              const SizedBox(height: 32),
 
-              // Change Login Password
-              // _buildMenuCard(
-              //   title: "Change login password",
-              //   onTap: () {},
-              // ),
-              // const SizedBox(height: 16),
+              // Menu Items
+              ProfileGroupCard(
+                children: [
+                  ProfileMenuItem(
+                    iconPath: 'assets/icons/profile_page/account_security/arrow-swap-horizontal.svg',
+                    title: "Change Transaction Password",
+                    subtitle: "Update your transaction password",
+                    onTap: () {
+                      Get.to(() => const ChangeTransactionPasswordPage());
+                    },
+                  ),
+                  const _Divider(),
+                  ProfileMenuItem(
+                    iconPath: 'assets/icons/profile_page/account_security/lock.svg',
+                    title: "Change Login Password",
+                    subtitle: "Transaction password, payment options",
+                    onTap: () {
+                      // TODO
+                    },
+                  ),
+                  const _Divider(),
+                  Obx(() => ProfileMenuItem(
+                    iconPath: 'assets/icons/profile_page/account_security/menu.svg',
+                    title: "Pattern Lock",
+                    subtitle: "Transaction password",
+                    trailing: CupertinoSwitch(
+                      value: isPatternLockEnabled.value,
+                      activeColor: const Color(0xFF2ECC71),
+                      onChanged: (value) {
+                        isPatternLockEnabled.value = value;
+                      },
+                    ),
+                    onTap: () {}, // Toggle switch
+                  )),
+                  const _Divider(),
+                  ProfileMenuItem(
+                    iconPath: 'assets/icons/profile_page/account_security/security-safe.svg',
+                    title: "Authenticator App",
+                    subtitle: "Enable 2 Factor Authentication",
+                    onTap: () {},
+                  ),
+                  const _Divider(),
+                  ProfileMenuItem(
+                    iconPath: 'assets/icons/profile_page/account_security/sms-edit.svg',
+                    title: "Change Email",
+                    subtitle: "Update your email address",
+                    onTap: () {},
+                  ),
+                ],
+              ),
 
-              // Container(
-              //   decoration: BoxDecoration(
-              //     color: Colors.white,
-              //     borderRadius: BorderRadius.circular(12),
-              //   ),
-              //   child: Column(
-              //     children: [
-              //       _buildMenuItem(
-              //         title: "Authenticator app",
-              //         onTap: () {},
-              //         showDivider: true,
-              //       ),
-              //       _buildMenuItem(
-              //         title: "Change email",
-              //         onTap: () {},
-              //         showDivider: false,
-              //       ),
-              //     ],
-              //   ),
-              // ),
-
-              // const SizedBox(height: 40),
+              const SizedBox(height: 40),
 
               // Log Out Button
               SizedBox(
@@ -132,78 +174,9 @@ class AccountAndSecurityPage extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(height: 20),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMenuCard({required String title, required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 56,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 14,
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF151E2F),
-              ),
-            ),
-            const Icon(Icons.chevron_right, color: Color(0xFF909DAD)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMenuItem({
-    required String title,
-    required VoidCallback onTap,
-    bool showDivider = true,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 56,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: const BoxDecoration(color: Colors.transparent),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (!showDivider) const Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF151E2F),
-                  ),
-                ),
-                const Icon(Icons.chevron_right, color: Color(0xFF909DAD)),
-              ],
-            ),
-            if (showDivider) ...[
-              const Spacer(),
-              const Divider(height: 1, color: Color(0xFFF0F4FF)),
-            ] else
-              const Spacer(),
-          ],
         ),
       ),
     );
@@ -283,5 +256,14 @@ class AccountAndSecurityPage extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _Divider extends StatelessWidget {
+  const _Divider();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Divider(height: 1, color: Color(0xFFF0F4FF));
   }
 }
