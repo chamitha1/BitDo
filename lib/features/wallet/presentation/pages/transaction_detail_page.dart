@@ -1,6 +1,7 @@
 import 'package:BitOwi/features/wallet/presentation/controllers/transaction_detail_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 class TransactionDetailPage extends StatelessWidget {
@@ -38,23 +39,26 @@ class TransactionDetailPage extends StatelessWidget {
 
         final detail = controller.detail.value;
         if (detail == null) {
-          return const Center(
-            child: Text("Transaction details not found."),
-          );
+          return const Center(child: Text("Transaction details not found."));
         }
 
         double amount = double.tryParse(detail.transAmount) ?? 0.0;
-        final bool isDeposit = amount >= 0; 
-        
-        final Color statusTextColor =
-            isDeposit ? const Color(0xFF40A372) : const Color(0xFFE74C3C);
-        final Color statusBgColor =
-            isDeposit ? const Color(0xFFEAF9F0) : const Color(0xFFFDF4F5);
-        final String statusLabel = isDeposit ? "Deposit" : "Charge";
+        final bool isDeposit = amount >= 0;
+
+        final Color statusTextColor = isDeposit
+            ? const Color(0xFF40A372)
+            : const Color(0xFFE74C3C);
+
+        final statusCardBgColor = isDeposit
+            ? Color(0xffEAF9F0)
+            : Color(0xffFDF4F5);
+        final Color cardBgColor = const Color(0xFFF6F9FF).withOpacity(0.45);
+        final String statusLabel = "Charge";
 
         return SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Container(
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
@@ -62,17 +66,16 @@ class TransactionDetailPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Status Header
+                // Status Header Card
                 Container(
+                  width: double.infinity,
                   padding: const EdgeInsets.symmetric(
-                    vertical: 24,
+                    vertical: 14,
                     horizontal: 20,
                   ),
                   decoration: BoxDecoration(
-                    color: statusBgColor,
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(16),
-                    ),
+                    color: statusCardBgColor,
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,53 +118,52 @@ class TransactionDetailPage extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 12),
 
                 // Fields
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    children: [
-                      _buildInfoRow(
-                        label: "Previous Balance",
-                        value: "${detail.preAmount ?? '0'} ${detail.currency ?? ''}",
-                      ),
-                      const SizedBox(height: 24),
-                      _buildInfoRow(
-                        label: "New Balance",
-                        value: "${detail.postAmount ?? '0'} ${detail.currency ?? ''}",
-                      ),
-                      const SizedBox(height: 24),
-                      _buildInfoRow(
-                        label: "Address",
-                        value: detail.accountNumber ?? '',
-                        allowCopy: true,
-                      ),
-                      const SizedBox(height: 24),
-                      _buildInfoRow(
-                        label: "Transaction Hash",
-                        value: detail.refNo ?? '',
-                        allowCopy: true,
-                        isUnderline: true,
-                      ),
-                      const SizedBox(height: 24),
-                      _buildInfoRow(
-                        label: "Fees", 
-                        value: "0.00 ${detail.currency ?? ''}",
-                      ),
-                      const SizedBox(height: 24),
-                      _buildInfoRow(
-                        label: "Transaction Time",
-                        value: _formatDate(detail.createDatetime),
-                      ),
-                      const SizedBox(height: 24),
-                       _buildInfoRow(
-                        label: "Remark",
-                        value: detail.remark ?? '',
-                      ),
-                      const SizedBox(height: 40),
-                    ],
-                  ),
+                _buildInfoRow(
+                  label: "Previous Balance",
+                  value: "${detail.preAmount ?? '0'} ${detail.currency ?? ''}",
+                  bgColor: cardBgColor,
+                ),
+                const SizedBox(height: 12),
+                _buildInfoRow(
+                  label: "New Balance",
+                  value: "${detail.postAmount ?? '0'} ${detail.currency ?? ''}",
+                  bgColor: cardBgColor,
+                ),
+                const SizedBox(height: 12),
+                _buildInfoRow(
+                  label: "Address",
+                  value: detail.accountNumber ?? '',
+                  allowCopy: true,
+                  bgColor: cardBgColor,
+                ),
+                const SizedBox(height: 12),
+                _buildInfoRow(
+                  label: "Transaction Hash",
+                  value: detail.refNo ?? '',
+                  allowCopy: true,
+                  isUnderline: true,
+                  bgColor: cardBgColor,
+                ),
+                const SizedBox(height: 12),
+                _buildInfoRow(
+                  label: "Fees",
+                  value: "0.00 ${detail.currency ?? ''}",
+                  bgColor: cardBgColor,
+                ),
+                const SizedBox(height: 12),
+                _buildInfoRow(
+                  label: "Transaction Time",
+                  value: _formatDate(detail.createDatetime),
+                  bgColor: cardBgColor,
+                ),
+                const SizedBox(height: 12),
+                _buildInfoRow(
+                  label: "Remark",
+                  value: detail.remark ?? '',
+                  bgColor: cardBgColor,
                 ),
               ],
             ),
@@ -180,75 +182,88 @@ class TransactionDetailPage extends StatelessWidget {
       timestamp = int.tryParse(date) ?? 0;
     }
     if (timestamp == 0) return "";
-    return DateTime.fromMillisecondsSinceEpoch(timestamp).toString().split('.')[0];
+    return DateTime.fromMillisecondsSinceEpoch(
+      timestamp,
+    ).toString().split('.')[0];
   }
 
   Widget _buildInfoRow({
     required String label,
     required String value,
+    required Color bgColor,
     bool allowCopy = false,
     bool isUnderline = false,
   }) {
     if (value.isEmpty) return const SizedBox.shrink();
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Color(0xFF717F9A),
-                  fontSize: 12,
-                  fontFamily: 'Inter',
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Color(0xFF717F9A),
+                    fontSize: 12,
+                    fontFamily: 'Inter',
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                value,
-                style: TextStyle(
-                  color: const Color(0xFF151E2F),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: 'Inter',
-                  decoration: isUnderline ? TextDecoration.underline : null,
+                const SizedBox(height: 8),
+                Text(
+                  value,
+                  style: TextStyle(
+                    color: const Color(0xFF151E2F),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: 'Inter',
+                    decoration: isUnderline ? TextDecoration.underline : null,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ),
-        if (allowCopy)
-          GestureDetector(
-            onTap: () {
-              Clipboard.setData(ClipboardData(text: value));
-              Get.showSnackbar(
-                const GetSnackBar(
-                  message: "Copied to clipboard",
-                  duration: Duration(seconds: 2),
-                  backgroundColor: Colors.black87,
-                  borderRadius: 8,
-                  margin: EdgeInsets.all(16),
-                ),
-              );
-            },
-            child: Container(
-              padding: const EdgeInsets.all(0),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE9F6FF),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Image.asset(
-                "assets/icons/deposit/copy.png",
-                width: 40,
-                height: 40,
-                color: const Color(0xFF2495E5),
-              ),
+              ],
             ),
           ),
-      ],
+          if (allowCopy)
+            Padding(
+              padding: const EdgeInsets.only(left: 12),
+              child: GestureDetector(
+                onTap: () {
+                  Clipboard.setData(ClipboardData(text: value));
+                  Get.showSnackbar(
+                    const GetSnackBar(
+                      message: "Copied to clipboard",
+                      duration: Duration(seconds: 2),
+                      backgroundColor: Colors.black87,
+                      borderRadius: 8,
+                      margin: EdgeInsets.all(16),
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE9F6FF),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: SvgPicture.asset(
+                    "assets/icons/deposit/copy.svg",
+                    width: 21,
+                    height: 21,
+                    color: const Color(0xFF2495E5),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

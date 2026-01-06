@@ -321,8 +321,8 @@ class BalanceHistoryPage extends GetView<BalanceHistoryController> {
         ? const Color(0xFF40A372)
         : const Color(0xFFE74C3C);
     final iconAsset = isDeposit
-        ? 'assets/icons/balance_history/card_receive.png'
-        : 'assets/icons/balance_history/card_send.png';
+        ? 'assets/icons/home/deposit.svg'
+        : 'assets/icons/home/withdraw.svg';
 
     final amountPrefix = isDeposit ? "+" : "-";
     if (val < 0) val = -val;
@@ -351,7 +351,7 @@ class BalanceHistoryPage extends GetView<BalanceHistoryController> {
                 color: iconBg,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Image.asset(iconAsset, color: iconColor),
+              child: SvgPicture.asset(iconAsset, color: iconColor),
             ),
             const SizedBox(width: 12),
             Expanded(
