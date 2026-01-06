@@ -28,7 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _obscurePassword = true;
   bool _rememberMe = false;
-  bool _isLoading = false; 
+  bool _isLoading = false;
 
   final Color _primaryBlue = const Color(0XFF1D5DE5);
 
@@ -81,7 +81,9 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       final dynamic rawData = response.data;
 
-      final Map<String, dynamic> data = rawData is String ? jsonDecode(rawData) : rawData;
+      final Map<String, dynamic> data = rawData is String
+          ? jsonDecode(rawData)
+          : rawData;
 
       // ignore: avoid_print
       print('Login response: $data');
@@ -112,10 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // ignore: avoid_print
       print('Login error: $e');
 
-      CustomSnackbar.showError(
-        title: '登录失败'.tr,
-        message: '请检查账号或网络后重试'.tr,
-      );
+      CustomSnackbar.showError(title: '登录失败'.tr, message: '请检查账号或网络后重试'.tr);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -126,280 +125,264 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F9FF),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 56),
-
-                Text(
-                  'Welcome Back to Sign in'.tr,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.w700,
-                    color: Color(0XFF151E2F),
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
-                Text(
-                  'Your account is protected with encrypted login and advanced authentication.'
-                      .tr,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Color(0XFF454F63),
-                    height: 1.5,
-                    fontWeight: FontWeight.w500,
-                    fontFamily: 'Inter',
-                  ),
-                ),
-
-                const SizedBox(height: 32),
-
-                _buildLabel('Email'.tr),
-                _emailAutocompleteField(
-                  hint: 'Enter your email'.tr,
-                  iconPath: 'assets/icons/login/sms.svg',
-                ),
-
-                const SizedBox(height: 20),
-
-                _buildLabel('Password'.tr),
-                _textField(
-                  controller: _passwordController,
-                  hint: 'Enter Password'.tr,
-                  iconPath: 'assets/icons/login/lock.svg',
-                  isPassword: true,
-                  suffixIconPath: _obscurePassword
-                      ? 'assets/icons/login/eye.svg'
-                      : 'assets/icons/sign_up/eye-slash.svg',
-                  validator: _validatePassword,
-                ),
-
-                const SizedBox(height: 12),
-
-                Row(
-                  children: [
-                    SizedBox(
-                      height: 24,
-                      width: 24,
-                      child: Checkbox(
-                        value: _rememberMe,
-                        onChanged: (v) =>
-                            setState(() => _rememberMe = v ?? false),
-                        activeColor: _primaryBlue,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        side: BorderSide(color: Colors.grey.shade400),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-
-                    Text(
-                      'Remind me'.tr,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0XFF454F63),
-                      ),
-                    ),
-
-                    const Spacer(),
-
-                    GestureDetector(
-                      onTap: () {
-                        Get.to(() => const ForgotPasswordScreen());
-                      },
-                      child: Text(
-                        'Forgot Password?'.tr,
-                        style: const TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 12,
-                          color: Color(0XFF1D5DE5),
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 32),
-
-                Container(
-                  width: double.infinity,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF1D5DE5), Color(0xFF174AB7)],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _onLogin,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            height: 18,
-                            width: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(
-                            '登录'.tr,
-                            style: const TextStyle(
-                              fontFamily: 'Inter',
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0XFFFFFFFF),
-                            ),
-                          ),
-                  ),
-                ),
-
-                // const SizedBox(height: 32),
-
-                // Row(
-                //   children: [
-                //     Expanded(child: Divider(color: Colors.grey.shade300)),
-                //     Padding(
-                //       padding: const EdgeInsets.symmetric(horizontal: 16),
-                //       child: Text(
-                //         'or continue with'.tr,
-                //         style: const TextStyle(
-                //           fontFamily: 'Inter',
-                //           fontSize: 12,
-                //           color: Color(0XFF454F63),
-                //           fontWeight: FontWeight.w400,
-                //         ),
-                //       ),
-                //     ),
-                //     Expanded(child: Divider(color: Colors.grey.shade300)),
-                //   ],
-                // ),
-
-                // const SizedBox(height: 24),
-
-                // Row(
-                //   children: [
-                //     _socialButton('assets/images/login/tbay_logo.png'),
-                //     const SizedBox(width: 14),
-                //     _socialButton('assets/images/login/cardgoal_logo.png'),
-                //   ],
-                // ),
-                const SizedBox(height: 20),
-
-                Center(
-                  child: RichText(
-                    text: TextSpan(
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontFamily: 'Inter',
-                        color: Color(0XFF151E2F),
-                        fontWeight: FontWeight.w400,
-                      ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        TextSpan(text: "Don't have an account? ".tr),
-                        TextSpan(
-                          text: 'Sign up'.tr,
-                          style: const TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 14,
-                            color: Color(0XFF1D5DE5),
-                            fontWeight: FontWeight.w600,
-                          ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              Get.offNamed(Routes.signup);
-                            },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                        const SizedBox(height: 56),
 
-                const SizedBox(height: 90),
-                // terms and privacy
-                Row(
-                  children: [
-                    Expanded(
-                      child: Center(
-                        child: Wrap(
-                          alignment: WrapAlignment.center,
-                          runSpacing: 4,
+                        Text(
+                          'Welcome Back to Sign in'.tr,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontFamily: 'Inter',
+                            fontWeight: FontWeight.w700,
+                            color: Color(0XFF151E2F),
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        Text(
+                          'Your account is protected with encrypted login and advanced authentication.'
+                              .tr,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Color(0XFF454F63),
+                            height: 1.5,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+
+                        const SizedBox(height: 32),
+
+                        _buildLabel('Email'.tr),
+                        _emailAutocompleteField(
+                          hint: 'Enter your email'.tr,
+                          iconPath: 'assets/icons/login/sms.svg',
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        _buildLabel('Password'.tr),
+                        _textField(
+                          controller: _passwordController,
+                          hint: 'Enter Password'.tr,
+                          iconPath: 'assets/icons/login/lock.svg',
+                          isPassword: true,
+                          suffixIconPath: _obscurePassword
+                              ? 'assets/icons/login/eye.svg'
+                              : 'assets/icons/sign_up/eye-slash.svg',
+                          validator: _validatePassword,
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        Row(
                           children: [
-                            GestureDetector(
-                              onTap: () {
-                                Get.to(
-                                  () => RichTextConfig(
-                                    title: "Terms & Condition",
-                                    configKey: "registered_agreement_textarea",
-                                    configType: "system",
-                                  ),
-                                );
-                              },
-                              child: Text(
-                                "Terms & Condition",
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Color(0XFF28A6FF),
-                                  fontWeight: FontWeight.w600,
-                                  fontFamily: 'Inter',
+                            SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: Checkbox(
+                                value: _rememberMe,
+                                onChanged: (v) =>
+                                    setState(() => _rememberMe = v ?? false),
+                                activeColor: _primaryBlue,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4),
                                 ),
+                                side: BorderSide(color: Colors.grey.shade400),
                               ),
                             ),
+                            const SizedBox(width: 8),
+
                             Text(
-                              " and ",
+                              'Remind me'.tr,
                               style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
                                 color: Color(0XFF454F63),
-                                fontFamily: 'Inter',
-                                fontWeight: FontWeight.w600,
                               ),
                             ),
+
+                            const Spacer(),
+
                             GestureDetector(
                               onTap: () {
-                                Get.to(
-                                  () => RichTextConfig(
-                                    title: "Privacy Policy",
-                                    configKey: "privacy_agreement_textarea",
-                                    configType: "system",
-                                  ),
-                                );
+                                Get.to(() => const ForgotPasswordScreen());
                               },
                               child: Text(
-                                "Privacy Policy",
+                                'Forgot Password?'.tr,
                                 style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Color(0XFF28A6FF),
-                                  fontWeight: FontWeight.w600,
                                   fontFamily: 'Inter',
+                                  fontSize: 12,
+                                  color: Color(0XFF1D5DE5),
+                                  fontWeight: FontWeight.w400,
                                 ),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    ),
-                  ],
-                ),
 
-                const SizedBox(height: 20),
-              ],
-            ),
-          ),
+                        const SizedBox(height: 32),
+
+                        Container(
+                          width: double.infinity,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            // gradient: const LinearGradient(
+                            //   colors: [Color(0xFF1D5DE5), Color(0xFF174AB7)],
+                            //   begin: Alignment.topCenter,
+                            //   end: Alignment.bottomCenter,
+                            // ),
+                            color: Color(0xff1D5DE5),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: ElevatedButton(
+                            onPressed: _isLoading ? null : _onLogin,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: _isLoading
+                                ? const SizedBox(
+                                    height: 18,
+                                    width: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text(
+                                    '登录'.tr,
+                                    style: const TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0XFFFFFFFF),
+                                    ),
+                                  ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        Center(
+                          child: RichText(
+                            text: TextSpan(
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontFamily: 'Inter',
+                                color: Color(0XFF151E2F),
+                                fontWeight: FontWeight.w400,
+                              ),
+                              children: [
+                                TextSpan(text: "Don't have an account? ".tr),
+                                TextSpan(
+                                  text: 'Sign up'.tr,
+                                  style: const TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontSize: 14,
+                                    color: Color(0XFF1D5DE5),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      Get.offNamed(Routes.signup);
+                                    },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        const Spacer(),
+                        // terms and privacy
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Center(
+                                child: Wrap(
+                                  alignment: WrapAlignment.center,
+                                  runSpacing: 4,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        Get.to(
+                                          () => RichTextConfig(
+                                            title: "Terms & Condition",
+                                            configKey:
+                                                "registered_agreement_textarea",
+                                            configType: "system",
+                                          ),
+                                        );
+                                      },
+                                      child: Text(
+                                        "Terms & Condition",
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Color(0XFF28A6FF),
+                                          fontWeight: FontWeight.w600,
+                                          fontFamily: 'Inter',
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      " and ",
+                                      style: const TextStyle(
+                                        color: Color(0XFF454F63),
+                                        fontFamily: 'Inter',
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        Get.to(
+                                          () => RichTextConfig(
+                                            title: "Privacy Policy",
+                                            configKey:
+                                                "privacy_agreement_textarea",
+                                            configType: "system",
+                                          ),
+                                        );
+                                      },
+                                      child: Text(
+                                        "Privacy Policy",
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Color(0XFF28A6FF),
+                                          fontWeight: FontWeight.w600,
+                                          fontFamily: 'Inter',
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 20),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

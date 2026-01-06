@@ -156,10 +156,7 @@ class _OtpBottomSheetState extends State<OtpBottomSheet> {
       }
     } catch (e) {
       if (!mounted) return;
-      CustomSnackbar.showError(
-        title: "Error",
-        message: "Resend failed: $e",
-      );
+      CustomSnackbar.showError(title: "Error", message: "Resend failed: $e");
     } finally {
       if (mounted) setState(() => _isResending = false);
     }
@@ -243,11 +240,12 @@ class _OtpBottomSheetState extends State<OtpBottomSheet> {
             height: 50,
             child: Container(
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFF1D5DE5), Color(0xFF174AB7)],
-                ),
+                // gradient: const LinearGradient(
+                //   begin: Alignment.topCenter,
+                //   end: Alignment.bottomCenter,
+                //   colors: [Color(0xFF1D5DE5), Color(0xFF174AB7)],
+                // ),
+                color: Color(0xff1D5DE5),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: ElevatedButton(

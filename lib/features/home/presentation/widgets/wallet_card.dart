@@ -1,6 +1,7 @@
 import 'package:BitOwi/features/home/presentation/controllers/balance_controller.dart';
 import 'package:BitOwi/core/widgets/custom_snackbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import '../../../wallet/presentation/pages/deposit_screen.dart';
 import 'package:BitOwi/features/auth/presentation/controllers/user_controller.dart';
@@ -17,8 +18,6 @@ class WalletCard extends StatefulWidget {
 class _WalletCardState extends State<WalletCard> {
   final BalanceController controller = Get.put(BalanceController());
 
-
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -29,15 +28,15 @@ class _WalletCardState extends State<WalletCard> {
         gradient: const LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0xff1D5DE5), Color(0xff174AB7)],
+          colors: [Color(0xff1D5DE5), Color(0xff28A6FF)],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF1D5DE5).withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
+        // boxShadow: [
+        //   BoxShadow(
+        //     color: const Color(0xFF1D5DE5).withOpacity(0.3),
+        //     blurRadius: 20,
+        //     offset: const Offset(0, 10),
+        //   ),
+        // ],
       ),
       child: Column(
         children: [
@@ -65,7 +64,7 @@ class _WalletCardState extends State<WalletCard> {
               Expanded(
                 child: _walletActionButton(
                   "Deposit",
-                  "assets/icons/home/deposit.png",
+                  "assets/icons/home/deposit.svg",
                   onTap: () {
                     Navigator.push(
                       context,
@@ -80,7 +79,7 @@ class _WalletCardState extends State<WalletCard> {
               Expanded(
                 child: _walletActionButton(
                   "Withdraw",
-                  "assets/icons/home/withdraw.png",
+                  "assets/icons/home/withdraw.svg",
                   onTap: () {
                     final userController = Get.find<UserController>();
                     final tradePwdFlag =
@@ -189,10 +188,14 @@ class _WalletCardState extends State<WalletCard> {
                     color: const Color(0xff4A7DEA),
                     borderRadius: BorderRadius.circular(24),
                   ),
-                  child: Image.asset(
+                  alignment: Alignment.center,
+                  child: SvgPicture.asset(
+                    width: 16,
+                    height: 16,
+                    // fit: BoxFit.contain,
                     controller.isObscured.value
-                        ? 'assets/icons/login/eye.png'
-                        : 'assets/icons/home/eye_slash.png',
+                        ? 'assets/icons/forgot_password/eye.svg'
+                        : 'assets/icons/forgot_password/eye-slash.svg',
                     color: Colors.white,
                   ),
                 ),
@@ -201,7 +204,9 @@ class _WalletCardState extends State<WalletCard> {
           ),
           const SizedBox(height: 8),
           Text(
-            controller.isObscured.value ? "****" : "≈$totalAsset $totalAssetCurrency",
+            controller.isObscured.value
+                ? "****"
+                : "≈$totalAsset $totalAssetCurrency",
             style: const TextStyle(
               color: Colors.white,
               fontSize: 16,
@@ -259,8 +264,8 @@ class _WalletCardState extends State<WalletCard> {
               ),
             ),
             const SizedBox(width: 4),
-            Image.asset(
-              'assets/icons/home/arrow_down.png',
+            SvgPicture.asset(
+              'assets/icons/home/chevron_down.svg',
               width: 16,
               height: 16,
             ),
@@ -311,12 +316,12 @@ class _WalletCardState extends State<WalletCard> {
       child: Container(
         height: 48,
         decoration: BoxDecoration(
-          color: const Color(0xff1D5DE5),
+          color: const Color(0xff28A6FF),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF1D5DE5).withOpacity(0.3),
-              offset: const Offset(0, 4),
+              color: const Color.fromARGB(255, 29, 115, 177).withOpacity(0.2),
+              offset: const Offset(0, 6),
               blurRadius: 24,
               spreadRadius: 0,
             ),
@@ -325,7 +330,7 @@ class _WalletCardState extends State<WalletCard> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(iconPath, width: 20, height: 20),
+            SvgPicture.asset(iconPath, width: 20, height: 20),
             const SizedBox(width: 8),
             Text(
               text,

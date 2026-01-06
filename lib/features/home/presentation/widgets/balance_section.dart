@@ -3,6 +3,7 @@ import 'package:BitOwi/core/widgets/custom_snackbar.dart';
 import 'package:BitOwi/features/wallet/presentation/pages/balance_history_page.dart';
 import 'package:BitOwi/config/routes.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 
 class BalanceSection extends StatefulWidget {
@@ -27,11 +28,11 @@ class _BalanceSectionState extends State<BalanceSection> {
       ),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
                     "Balance",
@@ -42,71 +43,77 @@ class _BalanceSectionState extends State<BalanceSection> {
                       fontFamily: 'Inter',
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Text(
-                        "Hide Small Assets",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Color(0xff454F63),
-                          fontWeight: FontWeight.w400,
+                  GestureDetector(
+                    onTap: () {
+                      final asset = controller.selectedAsset ??
+                          (controller.balanceData.value?.accountList.isNotEmpty ==
+                                  true
+                              ? controller.balanceData.value!.accountList.first
+                              : null);
+
+                      if (asset != null) {
+                        Get.to(
+                          () => const BalanceHistoryPage(),
+                          arguments: {
+                            'accountNumber': asset.accountNumber,
+                            'symbol': asset.currency,
+                          },
+                        );
+                      } else {
+                        CustomSnackbar.showError(
+                          title: "Error",
+                          message: "No asset selected",
+                        );
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xffE8EFFF),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      alignment: Alignment.center,
+                      child: SvgPicture.asset(
+                        'assets/icons/home/clock.svg',
+                        width: 20,
+                        height: 20,
+                        colorFilter: const ColorFilter.mode(
+                          Color(0xff151E2F),
+                          BlendMode.srcIn,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Transform.scale(
-                        scale: 0.7,
-                        child: Switch(
-                          value: _hideSmallAssets,
-                          onChanged: (v) =>
-                              setState(() => _hideSmallAssets = v),
-                          activeColor: const Color(0xff2ECC71),
-                          activeTrackColor: const Color(
-                            0xFF2ECC71,
-                          ).withOpacity(0.2),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ],
               ),
-              GestureDetector(
-                onTap: () {
-                  final asset =
-                      controller.selectedAsset ??
-                      (controller.balanceData.value?.accountList.isNotEmpty ==
-                              true
-                          ? controller.balanceData.value!.accountList.first
-                          : null);
-
-                  if (asset != null) {
-                    Get.to(
-                      () => const BalanceHistoryPage(),
-                      arguments: {
-                        'accountNumber': asset.accountNumber,
-                        'symbol': asset.currency,
-                      },
-                    );
-                  } else {
-                    CustomSnackbar.showError(
-                      title: "Error",
-                      message: "No asset selected",
-                    );
-                  }
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xffE8EFFF),
-                    borderRadius: BorderRadius.circular(8),
+              const SizedBox(height: 0),
+              Row(
+                children: [
+                  const Text(
+                    "Hide Small Assets",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xff454F63),
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
-                  child: Image.asset(
-                    'assets/icons/home/clock.png',
-                    width: 24,
+                  const SizedBox(width: 8),
+                  SizedBox(
                     height: 24,
-                    color: const Color(0xff151E2F),
+                    width: 40,
+                    child: Transform.scale(
+                      scale: 0.7,
+                      child: Switch(
+                        value: _hideSmallAssets,
+                        onChanged: (v) => setState(() => _hideSmallAssets = v),
+                        activeColor: const Color(0xff2ECC71),
+                        activeTrackColor: const Color(
+                          0xFF2ECC71,
+                        ).withOpacity(0.2),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ],
           ),
@@ -183,11 +190,15 @@ class _BalanceSectionState extends State<BalanceSection> {
             child: _assetItem(
               icon: item.icon,
               name: item.currency,
-              total: controller.isObscured.value ? "********" : item.usableAmount,
-              frozen:
-                  controller.isObscured.value ? "********" : item.frozenAmount,
-              usdtVal:
-                  controller.isObscured.value ? "********" : item.totalAsset,
+              total: controller.isObscured.value
+                  ? "********"
+                  : item.usableAmount,
+              frozen: controller.isObscured.value
+                  ? "********"
+                  : item.frozenAmount,
+              usdtVal: controller.isObscured.value
+                  ? "********"
+                  : item.totalAsset,
               currencyLabel: item.totalAssetCurrency,
             ),
           ),
@@ -236,7 +247,6 @@ class _BalanceSectionState extends State<BalanceSection> {
     required String usdtVal,
     required String currencyLabel,
   }) {
-
     final isObscured = controller.isObscured.value;
 
     return Column(
@@ -261,16 +271,25 @@ class _BalanceSectionState extends State<BalanceSection> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-                child: _assetDetailColumn(
-                    "Assets", isObscured ? "********" : total)),
+              child: _assetDetailColumn(
+                "Assets",
+                isObscured ? "********" : total,
+              ),
+            ),
             SizedBox(width: 2),
             Expanded(
-                child: _assetDetailColumn(
-                    "Frozen", isObscured ? "********" : frozen)),
+              child: _assetDetailColumn(
+                "Frozen",
+                isObscured ? "********" : frozen,
+              ),
+            ),
             SizedBox(width: 2),
             Expanded(
-                child: _assetDetailColumn(
-                    currencyLabel, isObscured ? "********" : usdtVal)),
+              child: _assetDetailColumn(
+                currencyLabel,
+                isObscured ? "********" : usdtVal,
+              ),
+            ),
           ],
         ),
       ],

@@ -15,12 +15,15 @@ class GradientButton extends StatelessWidget {
     return Container(
       width: double.infinity,
       height: 50,
+
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF1D5DE5), Color(0xFF174AB7)],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
+        color: Color(0xff1D5DE5),
+
+        // gradient: const LinearGradient(
+        //   colors: [Color(0xFF1D5DE5), Color(0xFF174AB7)],
+        //   begin: Alignment.topCenter,
+        //   end: Alignment.bottomCenter,
+        // ),
         borderRadius: BorderRadius.circular(12),
       ),
       child: ElevatedButton(

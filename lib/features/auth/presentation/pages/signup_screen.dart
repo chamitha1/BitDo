@@ -755,14 +755,17 @@ class _SignupScreenState extends State<SignupScreen> {
       height: 30,
       decoration: BoxDecoration(
         color: isVerified
-            ? const Color(0xff2ECC71)
+            ? const Color(0xffEAF9F0)
             : (isEnabled ? null : const Color(0XFFB9C6E2)),
         gradient: (isEnabled && !isVerified)
             ? const LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xFF1D5DE5), Color(0xFF174AB7)],
+                colors: [Color(0xFF1D5DE5), Color(0xFF28A6FF)],
               )
+            : null,
+        border: isVerified
+            ? Border.all(color: const Color(0xFFABEAC6), width: 1.0)
             : null,
         borderRadius: BorderRadius.circular(8),
       ),
@@ -786,7 +789,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     "assets/icons/sign_up/check_circle.png",
                     width: 14,
                     height: 14,
-                    color: Colors.white,
+                    color: const Color(0xFF40A372),
                   ),
                   const SizedBox(width: 6),
                   Text(
@@ -795,7 +798,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       fontFamily: 'Inter',
-                      color: Colors.white,
+                      color: Color(0xFF40A372),
                     ),
                   ),
                 ],
@@ -803,7 +806,7 @@ class _SignupScreenState extends State<SignupScreen> {
             : Text(
                 text,
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   fontWeight: FontWeight.w400,
                   fontFamily: 'Inter',
                   color: Colors.white,

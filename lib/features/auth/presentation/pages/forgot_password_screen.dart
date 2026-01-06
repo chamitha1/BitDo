@@ -50,216 +50,234 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0XFFF6F9FF),
-      appBar: AppBar(
-        toolbarHeight: 56,
-        // ... (existing app bar props)
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: Color(0XFF151E2F),
-            size: 20,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 70),
-              const Text(
-                "Forgot Password?",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xff151E2F),
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                "No worries—tell us your email and we'll help you reset your password safely.",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xff454F63),
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 36),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: 56,
+                        alignment: Alignment.centerLeft,
+                        child: GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Container(
+                            height: 40,
+                            width: 40,
+                            alignment: Alignment.centerLeft,
+                            color: Colors.transparent,
+                            child: SvgPicture.asset(
+                              'assets/icons/merchant_details/arrow_left.svg',
+                            ),
+                            //   Icons.arrow_back_ios_new,
+                            //   color: Color(0XFF151E2F),
+                            //   size: 20,
+                            // ),
+                          ),
+                        ),
+                      ),
+                      const Text(
+                        "Forgot Password?",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xff151E2F),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        "No worries—tell us your email and we'll help you reset your password safely.",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xff454F63),
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 36),
 
-              _textLabel("Email"),
-              _emailAutocompleteField(
-                hint: "Enter your email",
-                iconPath: "assets/icons/sign_up/sms.svg",
-                enabled: !_isEmailVerified,
-                suffixWidget: Padding(
-                  padding: const EdgeInsets.only(
-                    right: 8.0,
-                    top: 8.0,
-                    bottom: 8.0,
-                  ),
-                  child: _verifyButton(
-                    text: _isEmailVerified ? "Verified" : "Verify",
-                    isEnabled: _isEmailPopulated,
-                    isVerified: _isEmailVerified,
+                      _textLabel("Email"),
+                      _emailAutocompleteField(
+                        hint: "Enter your email",
+                        iconPath: "assets/icons/sign_up/sms.svg",
+                        enabled: !_isEmailVerified,
+                        suffixWidget: Padding(
+                          padding: const EdgeInsets.only(
+                            right: 8.0,
+                            top: 8.0,
+                            bottom: 8.0,
+                          ),
+                          child: _verifyButton(
+                            text: _isEmailVerified ? "Verified" : "Verify",
+                            isEnabled: _isEmailPopulated,
+                            isVerified: _isEmailVerified,
 
-                    onPressed: () async {
-                      if (_isEmailPopulated) {
-                        _autocompleteFocusNode?.unfocus();
-                        FocusScope.of(context).unfocus();
+                            onPressed: () async {
+                              if (_isEmailPopulated) {
+                                _autocompleteFocusNode?.unfocus();
+                                FocusScope.of(context).unfocus();
 
-                        setState(() => _isSendingOtp = true);
+                                setState(() => _isSendingOtp = true);
 
-                        final bool response = await userApi.sendOtp(
-                          email: _emailController.text.trim(),
-                          bizType: SmsBizType.forgetPwd,
-                        );
-
-                        setState(() => _isSendingOtp = false);
-
-                        print('OTP sent response: $response');
-
-                        if (response == true) {
-                          if (!mounted) return;
-                          await showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            backgroundColor: Colors.transparent,
-                            barrierColor: const Color(
-                              0xFFECEFF5,
-                            ).withOpacity(0.7),
-                            builder: (context) => OtpBottomSheet(
-                              email: _emailController.text.trim(),
-                              otpLength: 6,
-                              bizType: SmsBizType.forgetPwd,
-
-                              onVerifyPin: (pin) async {
-                      
-                                _verifiedSmsCode = pin; 
-                                return true;
-                              },
-
-                              onResend: () async {
-                                return await userApi.sendOtp(
+                                final bool response = await userApi.sendOtp(
                                   email: _emailController.text.trim(),
                                   bizType: SmsBizType.forgetPwd,
                                 );
-                              },
 
-                              onVerified: () {
-                                Navigator.pop(context);
-                                setState(() => _isEmailVerified = true);
-                                CustomSnackbar.showSuccess(
-                                  title: "Success",
-                                  message: "Email Verified Successfully!",
-                                );
-                              },
-                            ),
-                          );
-                        } else {
-                          if (!mounted) return;
-                          CustomSnackbar.showError(
-                            title: "Error",
-                            message: "Failed to send OTP. Please try again.",
-                          );
-                        }
-                      }
-                    },
+                                setState(() => _isSendingOtp = false);
+
+                                print('OTP sent response: $response');
+
+                                if (response == true) {
+                                  if (!mounted) return;
+                                  await showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    backgroundColor: Colors.transparent,
+                                    barrierColor: const Color(
+                                      0xFFECEFF5,
+                                    ).withOpacity(0.7),
+                                    builder: (context) => OtpBottomSheet(
+                                      email: _emailController.text.trim(),
+                                      otpLength: 6,
+                                      bizType: SmsBizType.forgetPwd,
+
+                                      onVerifyPin: (pin) async {
+                                        _verifiedSmsCode = pin;
+                                        return true;
+                                      },
+
+                                      onResend: () async {
+                                        return await userApi.sendOtp(
+                                          email: _emailController.text.trim(),
+                                          bizType: SmsBizType.forgetPwd,
+                                        );
+                                      },
+
+                                      onVerified: () {
+                                        Navigator.pop(context);
+                                        setState(() => _isEmailVerified = true);
+                                        CustomSnackbar.showSuccess(
+                                          title: "Success",
+                                          message:
+                                              "Email Verified Successfully!",
+                                        );
+                                      },
+                                    ),
+                                  );
+                                } else {
+                                  if (!mounted) return;
+                                  CustomSnackbar.showError(
+                                    title: "Error",
+                                    message:
+                                        "Failed to send OTP. Please try again.",
+                                  );
+                                }
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      _textLabel("New Password"),
+                      TextField(
+                        controller: _passController,
+                        enabled: _isEmailVerified,
+                        obscureText: !_isPasswordVisible,
+                        decoration: _inputDecoration(
+                          hint: "Enter New Password",
+                          iconPath: "assets/icons/sign_up/lock.svg",
+                          suffixIconPath: !_isPasswordVisible
+                              ? "assets/icons/sign_up/eye.svg"
+                              : "assets/icons/sign_up/eye-slash.svg",
+                          isPassword: true,
+                          enabled: _isEmailVerified,
+                          borderColor: _passwordErrorText != null
+                              ? const Color(0xFFE74C3C)
+                              : null,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      _textLabel("Confirm Password"),
+                      TextField(
+                        controller: _confirmPassController,
+                        enabled: _isEmailVerified,
+                        obscureText: !_isPasswordVisible,
+                        decoration: _inputDecoration(
+                          hint: "Re-Enter New Password",
+                          iconPath: "assets/icons/sign_up/lock.svg",
+                          suffixIconPath: !_isPasswordVisible
+                              ? "assets/icons/sign_up/eye.svg"
+                              : "assets/icons/sign_up/eye-slash.svg",
+                          isPassword: true,
+                          enabled: _isEmailVerified,
+                          errorText: _passwordErrorText,
+                        ),
+                      ),
+                      const Spacer(),
+                      const SizedBox(height: 40),
+
+                      GradientButton(
+                        text: "Update",
+                        onPressed: _isEmailVerified
+                            ? () async {
+                                setState(() {
+                                  if (_passController.text.isEmpty) {
+                                    _passwordErrorText =
+                                        "Password cannot be empty";
+                                  } else if (_passController.text.length < 6) {
+                                    _passwordErrorText =
+                                        "Password must be at least 6 characters";
+                                  } else if (_passController.text !=
+                                      _confirmPassController.text) {
+                                    _passwordErrorText =
+                                        "Passwords do not match";
+                                  } else {
+                                    _passwordErrorText = null;
+                                  }
+                                });
+
+                                if (_passwordErrorText == null) {
+                                  try {
+                                    await UserApi.forgetLoginPwd(
+                                      email: _emailController.text.trim(),
+                                      smsCaptcha: _verifiedSmsCode,
+                                      loginPwd: _passController.text,
+                                    );
+
+                                    if (!mounted) return;
+                                    CustomSnackbar.showSuccess(
+                                      title: "Success",
+                                      message: "Password Reset Successful!",
+                                    );
+                                    Navigator.pop(context);
+                                  } catch (e) {
+                                    if (!mounted) return;
+                                    CustomSnackbar.showError(
+                                      title: "Error",
+                                      message: "Reset Failed: $e",
+                                    );
+                                  }
+                                }
+                              }
+                            : () {},
+                      ),
+                      const SizedBox(height: 24),
+                    ],
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
-
-              _textLabel("New Password"),
-              TextField(
-                controller: _passController,
-                enabled: _isEmailVerified,
-                obscureText: !_isPasswordVisible,
-                decoration: _inputDecoration(
-                  hint: "Enter New Password",
-                  iconPath: "assets/icons/sign_up/lock.svg",
-                  suffixIconPath: !_isPasswordVisible
-                      ? "assets/icons/sign_up/eye.svg"
-                      : "assets/icons/sign_up/eye-slash.svg",
-                  isPassword: true,
-                  enabled: _isEmailVerified,
-                  borderColor: _passwordErrorText != null
-                      ? const Color(0xFFE74C3C)
-                      : null,
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              _textLabel("Confirm Password"),
-              TextField(
-                controller: _confirmPassController,
-                enabled: _isEmailVerified,
-                obscureText: !_isPasswordVisible,
-                decoration: _inputDecoration(
-                  hint: "Re-Enter New Password",
-                  iconPath: "assets/icons/sign_up/lock.svg",
-                  suffixIconPath: !_isPasswordVisible
-                      ? "assets/icons/sign_up/eye.svg"
-                      : "assets/icons/sign_up/eye-slash.svg",
-                  isPassword: true,
-                  enabled: _isEmailVerified,
-                  errorText: _passwordErrorText,
-                ),
-              ),
-              const SizedBox(height: 40),
-
-              GradientButton(
-                text: "Update",
-                onPressed: _isEmailVerified
-                    ? () async {
-                        setState(() {
-                          if (_passController.text.isEmpty) {
-                             _passwordErrorText = "Password cannot be empty";
-                          } else if (_passController.text.length < 6) {
-                             _passwordErrorText = "Password must be at least 6 characters";
-                          } else if (_passController.text !=
-                              _confirmPassController.text) {
-                            _passwordErrorText = "Passwords do not match";
-                          } else {
-                            _passwordErrorText = null;
-                          }
-                        });
-
-                        if (_passwordErrorText == null) {
-                           try {
-                             await UserApi.forgetLoginPwd(
-                               email: _emailController.text.trim(),
-                               smsCaptcha: _verifiedSmsCode,
-                               loginPwd: _passController.text,
-                             );
-                             
-                             if (!mounted) return;
-                             CustomSnackbar.showSuccess(
-                               title: "Success",
-                               message: "Password Reset Successful!",
-                             );
-                             Navigator.pop(context);
-                             
-                           } catch (e) {
-                             if (!mounted) return;
-                             CustomSnackbar.showError(
-                               title: "Error",
-                               message: "Reset Failed: $e",
-                             );
-                           }
-                        }
-                      }
-                    : () {},
-              ),
-              const SizedBox(height: 24),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
@@ -280,7 +298,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       ),
     );
   }
- 
+
   InputDecoration _inputDecoration({
     required String hint,
     required String iconPath,
@@ -396,17 +414,21 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }) {
     return Container(
       margin: const EdgeInsets.only(right: 8),
+
       height: 30,
       decoration: BoxDecoration(
         color: isVerified
-            ? const Color(0xff2ECC71)
+            ? const Color(0xffEAF9F0)
             : (isEnabled ? null : const Color(0XFFB9C6E2)),
         gradient: (isEnabled && !isVerified)
             ? const LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xFF1D5DE5), Color(0xFF174AB7)],
+                colors: [Color(0xFF1D5DE5), Color(0xFF28A6FF)],
               )
+            : null,
+        border: isVerified
+            ? Border.all(color: const Color(0xFFABEAC6), width: 1.0)
             : null,
         borderRadius: BorderRadius.circular(8),
       ),
@@ -426,11 +448,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             ? Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Image.asset(
-                    "assets/icons/sign_up/check_circle.png",
+                  SvgPicture.asset(
+                    "assets/icons/forgot_password/check_circle.svg",
                     width: 20,
                     height: 20,
-                    color: Colors.white,
+                    colorFilter: const ColorFilter.mode(
+                      Color(0xFF40A372),
+                      BlendMode.srcIn,
+                    ),
                   ),
                   const SizedBox(width: 6),
                   Text(
@@ -439,7 +464,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       fontFamily: 'Inter',
-                      color: Colors.white,
+                      color: Color(0xFF40A372),
                     ),
                   ),
                 ],
