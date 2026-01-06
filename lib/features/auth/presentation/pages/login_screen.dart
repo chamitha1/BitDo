@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'dart:convert';
+import 'package:dio/dio.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -111,13 +112,27 @@ class _LoginScreenState extends State<LoginScreen> {
         throw 'Login failed: ${data['errorMsg'] ?? 'Unknown'}';
       }
     } catch (e) {
-      // ignore: avoid_print
       print('Login error: $e');
-
-      CustomSnackbar.showError(title: '登录失败'.tr, message: '请检查账号或网络后重试'.tr);
+      final msg = _extractBackendError(e);
+      CustomSnackbar.showError(title: 'Login Failed', message: msg);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  String _extractBackendError(dynamic e) {
+    try {
+      if (e is DioException) {
+        final data = e.response?.data;
+        if (data is Map) {
+          final msg = data["errorMsg"] ?? data["message"] ?? data["msg"];
+          if (msg != null) return msg.toString();
+        }
+        return e.message ?? "Login failed";
+      }
+    } catch (_) {}
+
+    return e.toString().replaceFirst("Exception: ", "");
   }
 
   @override

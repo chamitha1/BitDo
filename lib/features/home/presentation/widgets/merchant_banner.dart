@@ -1,5 +1,6 @@
 import 'package:BitOwi/features/merchant/presentation/pages/become_merchant_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class MerchantBanner extends StatelessWidget {
   final String merchantStatus;
@@ -39,7 +40,7 @@ class MerchantBanner extends StatelessWidget {
                 color: config.iconBackground,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Image.asset(config.iconPath, width: 20, height: 20),
+              child: SvgPicture.asset(config.iconPath, width: 20, height: 20),
             ),
 
             const SizedBox(width: 12),
@@ -69,9 +70,11 @@ class MerchantBanner extends StatelessWidget {
                 ],
               ),
             ),
-            Image.asset(
-              "assets/icons/home/arrow_right.png",
+            SvgPicture.asset(
+              "assets/icons/home/arrow-right.svg",
               color: config.iconBackground,
+              width: 24,
+              height: 24,
             ),
           ],
         ),
@@ -89,7 +92,7 @@ class MerchantBanner extends StatelessWidget {
         return _MerchantBannerConfig(
           title: "Become a merchant",
           subtitle: "Apply to start accepting crypto payments",
-          iconPath: "assets/icons/home/merchant.png",
+          iconPath: "assets/icons/home/merchant.svg",
           backgroundColor: Colors.white,
           borderColor: const Color(0xffD1DEF9),
           iconBackground: const Color(0xff4A7DEA),
@@ -104,7 +107,7 @@ class MerchantBanner extends StatelessWidget {
         return _MerchantBannerConfig(
           title: "In Review...",
           subtitle: "Security and compliance checks in progress",
-          iconPath: "assets/icons/home/timer.png",
+          iconPath: "assets/icons/home/timer.svg",
           backgroundColor: const Color(0xffFFF6EC),
           borderColor: const Color(0xffFFD9B0),
           iconBackground: const Color(0xffF59E0B),
@@ -118,7 +121,7 @@ class MerchantBanner extends StatelessWidget {
         return _MerchantBannerConfig(
           title: "Certified Merchant",
           subtitle: "You're approved and ready to accept payments",
-          iconPath: "assets/icons/home/tick_circle.png",
+          iconPath: "assets/icons/home/tick-circle.svg",
           backgroundColor: const Color(0xffEAF9F0),
           borderColor: const Color(0xffABEAC6),
           iconBackground: const Color(0xff40A372),
@@ -131,7 +134,7 @@ class MerchantBanner extends StatelessWidget {
         return _MerchantBannerConfig(
           title: "Become a merchant",
           subtitle: "Apply to start accepting crypto payments",
-          iconPath: "assets/icons/home/merchant.png",
+          iconPath: "assets/icons/home/merchant.svg",
           backgroundColor: Colors.white,
           borderColor: const Color(0xffD1DEF9),
           iconBackground: const Color(0xff4A7DEA),

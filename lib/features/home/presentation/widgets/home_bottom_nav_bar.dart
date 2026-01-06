@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class HomeBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -41,16 +42,36 @@ class HomeBottomNavBar extends StatelessWidget {
         ),
         elevation: 0,
         items: [
-          _navItem("assets/icons/home/home.png", "Home", 0),
-          _navItem("assets/icons/home/p2p.png", "P2P", 1),
-          // _navItem("assets/icons/home/order.png", "Order", 2),
-          _navItem("assets/icons/home/profile.png", "Profile", 2),
+          _navItem(
+            "assets/icons/home/home.svg",
+            "assets/icons/home/homeSelected.svg",
+            "Home",
+            0,
+          ),
+          _navItem(
+            "assets/icons/home/p2p.svg",
+            "assets/icons/home/p2pSelected.svg",
+            "P2P",
+            1,
+          ),
+          // _navItem("assets/icons/home/order.svg", "assets/icons/home/ordersSelected.svg", "Order", 2),
+          _navItem(
+            "assets/icons/home/profile.svg",
+            "assets/icons/home/profileSelected.svg",
+            "Profile",
+            2,
+          ),
         ],
       ),
     );
   }
 
-  BottomNavigationBarItem _navItem(String iconPath, String label, int index) {
+  BottomNavigationBarItem _navItem(
+    String iconPath,
+    String selectedIconPath,
+    String label,
+    int index,
+  ) {
     final isSelected = currentIndex == index;
 
     return BottomNavigationBarItem(
@@ -58,22 +79,16 @@ class HomeBottomNavBar extends StatelessWidget {
           ? Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xff1D5DE5),
+                gradient: const LinearGradient(
+                  colors: [Color(0xff1D5DE5), Color(0xff28A6FF)],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Image.asset(
-                iconPath,
-                width: 20,
-                height: 20,
-                color: Colors.white,
-              ),
+              child: SvgPicture.asset(selectedIconPath, width: 20, height: 20),
             )
-          : Image.asset(
-              iconPath,
-              width: 22,
-              height: 22,
-              color: const Color(0XFF717F9A),
-            ),
+          : SvgPicture.asset(iconPath, width: 22, height: 22),
       label: label,
     );
   }

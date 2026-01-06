@@ -175,7 +175,10 @@ class _SignupScreenState extends State<SignupScreen> {
         return;
       }
 
-      CustomSnackbar.showSuccess(title: "Success", message: "OTP sent to your email!");
+      CustomSnackbar.showSuccess(
+        title: "Success",
+        message: "OTP sent to your email!",
+      );
 
       await showModalBottomSheet(
         context: context,
@@ -195,12 +198,18 @@ class _SignupScreenState extends State<SignupScreen> {
             return true;
           },
           onResend: () async {
-            return await userApi.sendOtp(email: email, bizType: SmsBizType.register);
+            return await userApi.sendOtp(
+              email: email,
+              bizType: SmsBizType.register,
+            );
           },
           onVerified: () {
             Navigator.pop(context);
             setState(() => _isEmailVerified = true);
-            CustomSnackbar.showSuccess(title: "Success", message: "Email Verified Successfully!");
+            CustomSnackbar.showSuccess(
+              title: "Success",
+              message: "Email Verified Successfully!",
+            );
           },
         ),
       );
@@ -237,7 +246,7 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
-    if (!passwordsValid || !termsValid) return;
+    // if (!passwordsValid || !termsValid) return;
 
     setState(() => _signingUp = true);
 
@@ -246,7 +255,9 @@ class _SignupScreenState extends State<SignupScreen> {
         email: _emailController!.text.trim(),
         smsCode: _verifiedOtp ?? "",
         loginPwd: _passController.text.trim(),
-        inviteCode: _inviteController.text.trim().isEmpty ? null : _inviteController.text.trim(),
+        inviteCode: _inviteController.text.trim().isEmpty
+            ? null
+            : _inviteController.text.trim(),
       );
 
       if (!mounted) return;
@@ -261,7 +272,9 @@ class _SignupScreenState extends State<SignupScreen> {
 
         Get.offAllNamed(Routes.home);
       } else {
-        final msg = (resData['errorMsg'] ?? resData['message'] ?? "Signup failed").toString();
+        final msg =
+            (resData['errorMsg'] ?? resData['message'] ?? "Signup failed")
+                .toString();
         _showTopError(msg);
       }
     } catch (e) {
@@ -329,7 +342,11 @@ class _SignupScreenState extends State<SignupScreen> {
                             iconPath: "assets/icons/sign_up/sms.svg",
                             suffixWidget: Padding(
                               // ✅ SAME padding for Verify + Verified
-                              padding: const EdgeInsets.only(right: 8, top: 8, bottom: 8),
+                              padding: const EdgeInsets.only(
+                                right: 8,
+                                top: 8,
+                                bottom: 8,
+                              ),
                               child: _verifyButton(
                                 text: _isEmailVerified
                                     ? "Verified"
@@ -403,7 +420,9 @@ class _SignupScreenState extends State<SignupScreen> {
                                 child: Checkbox(
                                   value: _agreedToTerms,
                                   onChanged: _isEmailVerified
-                                      ? (v) => setState(() => _agreedToTerms = v ?? false)
+                                      ? (v) => setState(
+                                          () => _agreedToTerms = v ?? false,
+                                        )
                                       : null,
                                   activeColor: const Color(0xFF2F5599),
                                   shape: RoundedRectangleBorder(
@@ -428,13 +447,17 @@ class _SignupScreenState extends State<SignupScreen> {
                                         const TextSpan(text: "I agree to the "),
                                         TextSpan(
                                           text: "Terms of Service",
-                                          style: const TextStyle(color: Color(0XFF28A6FF)),
+                                          style: const TextStyle(
+                                            color: Color(0XFF28A6FF),
+                                          ),
                                           recognizer: _termsRec,
                                         ),
                                         const TextSpan(text: " and "),
                                         TextSpan(
                                           text: "Privacy Policy",
-                                          style: const TextStyle(color: Color(0XFF28A6FF)),
+                                          style: const TextStyle(
+                                            color: Color(0XFF28A6FF),
+                                          ),
                                           recognizer: _privacyRec,
                                         ),
                                       ],
@@ -452,12 +475,23 @@ class _SignupScreenState extends State<SignupScreen> {
 
                           GradientButton(
                             text: _signingUp ? "Signing Up..." : "Sign Up",
-                            onPressed: (_isEmailVerified && _agreedToTerms && !_signingUp)
+                            onPressed:
+                                (_isEmailVerified &&
+                                    _agreedToTerms &&
+                                    !_signingUp)
                                 ? _onSignup
                                 : () {
                                     setState(() => _submitted = true);
-                                    if (!_isEmailVerified) _showTopError("Please verify your email first.");
-                                    if (!_agreedToTerms) _showTopError("Please accept Terms & Privacy.");
+                                    if (!_isEmailVerified) {
+                                      _showTopError(
+                                        "Please verify your email first.",
+                                      );
+                                    }
+                                    if (!_agreedToTerms) {
+                                      _showTopError(
+                                        "Please accept Terms & Privacy.",
+                                      );
+                                    }
                                   },
                           ),
 
@@ -482,7 +516,8 @@ class _SignupScreenState extends State<SignupScreen> {
                                       fontWeight: FontWeight.w600,
                                     ),
                                     recognizer: TapGestureRecognizer()
-                                      ..onTap = () => Get.offNamed(Routes.login),
+                                      ..onTap = () =>
+                                          Get.offNamed(Routes.login),
                                   ),
                                 ],
                               ),
@@ -539,7 +574,9 @@ class _SignupScreenState extends State<SignupScreen> {
         final typedDomain = input.substring(atIndex + 1).toLowerCase();
         if (local.isEmpty) return const Iterable<String>.empty();
 
-        final matches = _emailDomains.where((d) => d.toLowerCase().startsWith(typedDomain));
+        final matches = _emailDomains.where(
+          (d) => d.toLowerCase().startsWith(typedDomain),
+        );
         return matches.map((d) => '$local@$d');
       },
       onSelected: (String selection) {
@@ -674,7 +711,10 @@ class _SignupScreenState extends State<SignupScreen> {
           iconPath,
           width: 20,
           height: 20,
-          colorFilter: const ColorFilter.mode(Color(0XFF717F9A), BlendMode.srcIn),
+          colorFilter: const ColorFilter.mode(
+            Color(0XFF717F9A),
+            BlendMode.srcIn,
+          ),
         ),
       ),
 
@@ -682,7 +722,11 @@ class _SignupScreenState extends State<SignupScreen> {
           ? Padding(
               padding: const EdgeInsets.only(right: 4.0),
               child: IconButton(
-                onPressed: enabled ? () => setState(() => _isPasswordVisible = !_isPasswordVisible) : null,
+                onPressed: enabled
+                    ? () => setState(
+                        () => _isPasswordVisible = !_isPasswordVisible,
+                      )
+                    : null,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 icon: Padding(
@@ -691,7 +735,10 @@ class _SignupScreenState extends State<SignupScreen> {
                     suffixIconPath,
                     width: 20,
                     height: 20,
-                    colorFilter: const ColorFilter.mode(Color(0xff2E3D5B), BlendMode.srcIn),
+                    colorFilter: const ColorFilter.mode(
+                      Color(0xff2E3D5B),
+                      BlendMode.srcIn,
+                    ),
                   ),
                 ),
               ),
@@ -700,7 +747,8 @@ class _SignupScreenState extends State<SignupScreen> {
 
       filled: true,
       fillColor: MaterialStateColor.resolveWith((states) {
-        if (states.contains(MaterialState.disabled)) return const Color(0xFFECEFF5);
+        if (states.contains(MaterialState.disabled))
+          return const Color(0xFFECEFF5);
         return Colors.white;
       }),
 
@@ -715,7 +763,10 @@ class _SignupScreenState extends State<SignupScreen> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color.fromARGB(255, 112, 152, 221), width: 1.0),
+        borderSide: const BorderSide(
+          color: Color.fromARGB(255, 112, 152, 221),
+          width: 1.0,
+        ),
       ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -736,7 +787,9 @@ class _SignupScreenState extends State<SignupScreen> {
       height: 32,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: isVerified ? const Color(0xffEAF9F0) : (isEnabled ? null : const Color(0XFFB9C6E2)),
+          color: isVerified
+              ? const Color(0xffEAF9F0)
+              : (isEnabled ? null : const Color(0XFFB9C6E2)),
           gradient: (isEnabled && !isVerified)
               ? const LinearGradient(
                   begin: Alignment.topCenter,
@@ -744,7 +797,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   colors: [Color(0xFF1D5DE5), Color(0xFF28A6FF)],
                 )
               : null,
-          border: isVerified ? Border.all(color: const Color(0xFFABEAC6), width: 1.0) : null,
+          border: isVerified
+              ? Border.all(color: const Color(0xFFABEAC6), width: 1.0)
+              : null,
           borderRadius: BorderRadius.circular(8),
         ),
         child: ElevatedButton(
@@ -756,7 +811,9 @@ class _SignupScreenState extends State<SignupScreen> {
             disabledBackgroundColor: Colors.transparent,
             disabledForegroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 14),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
           onPressed: (isEnabled && !isVerified) ? onPressed : null,
           child: isVerified
