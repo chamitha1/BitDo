@@ -1,172 +1,45 @@
-import 'package:BitOwi/api/common_api.dart';
-import 'package:BitOwi/api/user_api.dart';
-import 'package:BitOwi/core/widgets/custom_snackbar.dart';
+import 'package:BitOwi/features/merchant/presentation/controllers/kyc_personal_information_controller.dart';
 import 'package:BitOwi/features/merchant/presentation/widgets/personal_information_status_page.dart';
 import 'package:BitOwi/models/country_list_res.dart';
 import 'package:BitOwi/models/dict.dart';
-import 'package:BitOwi/models/identify_order_list_res.dart';
 import 'package:BitOwi/utils/aws_upload_util.dart';
+import 'package:BitOwi/utils/string_utils.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-// import 'package:file_picker/file_picker.dart';
 
-class KycPersonalInformationPage extends StatefulWidget {
-  String merchantStatus;
-  bool isEdit;
+class KycPersonalInformationPage extends StatelessWidget {
+  KycPersonalInformationPage({super.key});
 
-  KycPersonalInformationPage({
-    super.key,
-    required this.merchantStatus,
-    required this.isEdit,
-  });
+  // 🧠 GetX controller (provided by Binding)
+  final KycPersonalInformationController controller =
+      Get.find<KycPersonalInformationController>(); // 🧠
 
-  @override
-  State<KycPersonalInformationPage> createState() =>
-      _KycPersonalInformationPageState();
-}
-
-class _KycPersonalInformationPageState
-    extends State<KycPersonalInformationPage> {
-  final _formKey = GlobalKey<FormState>();
-
-  String topTip = '';
-
-  List<CountryListRes> countryList = [];
-  int countryIndex = -1;
-
-  // String? _selectedIdType;
-  List<Dict> idTypeList = [];
-  int idTypeIndex = -1;
-
-  DateTime? _selectedExpiryDate;
-  DateTime? _lastPickedDate;
-  bool _showCalendar = false;
-
-  String? _uploadedFileName;
-  bool _showWarning = true;
-
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _idNumberController = TextEditingController();
-
-  String? faceUrl;
-  bool _idImageUploading = false;
-
-  bool _isLoading = false;
-
-  bool get _isFormReady {
-    return countryIndex >= 0 &&
-        _nameController.text.isNotEmpty &&
-        idTypeIndex >= 0 &&
-        _idNumberController.text.isNotEmpty &&
-        // _selectedExpiryDate != null && // optional
-        faceUrl != null &&
-        faceUrl!.isNotEmpty;
-  }
-
-  IdentifyOrderListRes? latestSubmittedInfo;
-
-  bool isEdit = false;
-
-  @override
-  void initState() {
-    super.initState();
-    // isEdit = Get.parameters["edit"] == '1';
-    // for rejected status re apply via edit
-    isEdit = widget.isEdit;
-    getInitData();
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _idNumberController.dispose();
-    super.dispose();
-  }
-
-  Future<void> getLatestIdentifyOrderList() async {
-    try {
-      final list = await UserApi.getIdentifyOrderList();
-
-      setState(() {
-        // for success submit
-        latestSubmittedInfo = list.isNotEmpty ? list.first : null;
-      });
-    } catch (e) {}
-  }
-
-  Future<void> getInitData() async {
-    try {
-      // ToastUtil.showLoading();
-      setState(() {
-        _isLoading = true;
-      });
-
-      final result = await Future.wait<dynamic>([
-        CommonApi.getDictList(parentKey: 'id_kind'),
-        CommonApi.getCountryList(),
-        CommonApi.getConfig(type: 'identify_config'),
-      ]);
-
-      topTip = result[2].data['identify_note'] ?? '';
-      // authTip = result[2].data['identify_order_note'] ?? '';
-
-      idTypeList = result[0];
-      countryList = result[1];
-
-      if (isEdit) {
-        final list = await UserApi.getIdentifyOrderList();
-        if (list.isNotEmpty) {
-          final order = list.first;
-          countryIndex = countryList.indexWhere(
-            (element) => element.id == order.countryId,
-          );
-          idTypeIndex = idTypeList.indexWhere(
-            (element) => element.key == order.kind,
-          );
-          // expiry not loaded, since its optional
-          _nameController.text = order.realName;
-          _idNumberController.text = order.idNo;
-          faceUrl = order.frontImage;
-        }
-      }
-      // ToastUtil.dismiss();
-      // setState(() {});
-
-      if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-      });
-    } catch (e, stackTrace) {
-      debugPrint('getInitData error: $e');
-      debugPrint('$stackTrace');
-      if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
+  final _formKey = GlobalKey<FormState>(); // unchanged (UI concern)
 
   @override
   Widget build(BuildContext context) {
+    // 🧠 INIT controller ONCE using Get.arguments
+    // final args = Get.arguments as Map<String, dynamic>; // 🧠
+    // controller.init(
+    //   isEdit: args['isEdit'],
+    //   merchantStatus: args['merchantStatus'],
+    // ); // 🧠
+
     return PopScope(
       canPop: false, // prevent automatic pop
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
 
         // Handle system back + gesture back
-        Navigator.pop(
-          context,
-          widget.merchantStatus != '-1',
-        ); //  return value to previous screen
+        Get.back(result: controller.merchantStatus.value != '-1'); // 🔁
       },
       child: Scaffold(
         backgroundColor: const Color(0xFFF6F9FF),
         appBar: AppBar(
-          toolbarHeight: 56,
           backgroundColor: const Color(0xFFF6F9FF),
           surfaceTintColor: const Color(0xFFF6F9FF),
           elevation: 0,
@@ -182,7 +55,7 @@ class _KycPersonalInformationPageState
               ),
             ),
             onPressed: () =>
-                Navigator.pop(context, widget.merchantStatus != '-1'),
+                Get.back(result: controller.merchantStatus.value != '-1'), // 🔁
           ),
           title: const Text(
             "Personal Information",
@@ -196,23 +69,35 @@ class _KycPersonalInformationPageState
           centerTitle: false,
         ),
         body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: widget.merchantStatus == '-1'
-                ? personalInfoInputContent(context)
-                : SuccessfullySubmittedKYCInfo(
-                    countryIndex: countryIndex,
-                    countryList: countryList,
-                    idTypeIndex: idTypeIndex,
-                    idTypeList: idTypeList,
-                    name: _nameController.text,
-                    idNumber: _idNumberController.text,
-                    expiryDate: _selectedExpiryDate,
-                    merchantStatus: widget.merchantStatus,
-                    identifyOrderLatestSubmittedInfoStatus:
-                        latestSubmittedInfo?.status ?? '0',
-                  ),
-          ),
+          child: Obx(() {
+            // 👀 replaces setState rebuilds
+            if (controller.isLoading.value) {
+              return const Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Color(0xFF1D5DE5),
+                ),
+              );
+            }
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: controller.merchantStatus.value == '-1'
+                  ? personalInfoInputContent(context) // unchanged
+                  : SuccessfullySubmittedKYCInfo(
+                      countryIndex: controller.countryIndex.value, // 🔁
+                      countryList: controller.countryList, // 🔁
+                      idTypeIndex: controller.idTypeIndex.value, // 🔁
+                      idTypeList: controller.idTypeList, // 🔁
+                      name: controller.name.value, // 🔁
+                      idNumber: controller.idNumber.value, // 🔁
+                      expiryDate: controller.selectedExpiryDate.value, // 🔁
+                      merchantStatus: controller.merchantStatus.value,
+                      identifyOrderLatestSubmittedInfoStatus:
+                          controller.latestSubmittedInfo?.status ?? '0',
+                    ),
+            );
+          }),
         ),
       ),
     );
@@ -233,8 +118,13 @@ class _KycPersonalInformationPageState
     // }
     CountryListRes? country;
 
-    if (countryIndex >= 0 && countryIndex < countryList.length) {
-      country = countryList[countryIndex];
+    // if (countryIndex >= 0 && countryIndex < countryList.length) {
+    //   country = countryList[countryIndex];
+    // }
+    // ✅ SAFE index access via controller
+    if (controller.countryIndex.value >= 0 &&
+        controller.countryIndex.value < controller.countryList.length) {
+      country = controller.countryList[controller.countryIndex.value];
     }
 
     final locale = Get.locale;
@@ -249,7 +139,7 @@ class _KycPersonalInformationPageState
     final bool hasSelection = country != null;
 
     return GestureDetector(
-      onTap: countryList.isEmpty ? () {} : areaTapNationality,
+      onTap: controller.countryList.isEmpty ? () {} : areaTapNationality,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
@@ -271,7 +161,7 @@ class _KycPersonalInformationPageState
                       width: 24,
                       height: 24,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) {
+                      errorBuilder: (_, _, _) {
                         return const SizedBox(width: 24, height: 24);
                       },
                     ),
@@ -310,10 +200,8 @@ class _KycPersonalInformationPageState
     try {
       final result = await _showNationalityBottomSheet();
 
-      if (result != null && result != countryIndex) {
-        setState(() {
-          countryIndex = result;
-        });
+      if (result != null && result != controller.countryIndex.value) {
+        controller.countryIndex.value = result;
       }
     } catch (e) {
       debugPrint('areaTapNationality error: $e');
@@ -321,12 +209,14 @@ class _KycPersonalInformationPageState
   }
 
   Future<int?> _showNationalityBottomSheet() async {
-    int? tempSelectedIndex = countryIndex >= 0 ? countryIndex : null;
+    int? tempSelectedIndex = controller.countryIndex.value >= 0
+        ? controller.countryIndex.value
+        : null;
 
     final bool isChinese = Get.locale?.toString() == 'zh_CN';
 
     return showModalBottomSheet<int>(
-      context: context,
+      context: Get.context!,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) {
@@ -362,9 +252,9 @@ class _KycPersonalInformationPageState
                   Expanded(
                     child: ListView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      itemCount: countryList.length,
+                      itemCount: controller.countryList.length,
                       itemBuilder: (context, index) {
-                        final nationality = countryList[index];
+                        final nationality = controller.countryList[index];
                         final isSelected = tempSelectedIndex == index;
 
                         final name = isChinese
@@ -399,7 +289,7 @@ class _KycPersonalInformationPageState
                                     width: 48,
                                     height: 48,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) {
+                                    errorBuilder: (_, _, _) {
                                       return const SizedBox(
                                         width: 48,
                                         height: 48,
@@ -475,58 +365,62 @@ class _KycPersonalInformationPageState
   }
 
   //* -- select id type methods --
-  GestureDetector buildIdTypeSelection() {
-    Dict? idType;
+  Widget buildIdTypeSelection() {
+    return Obx(() {
+      Dict? idType;
 
-    if (idTypeIndex >= 0 && idTypeIndex < idTypeList.length) {
-      idType = idTypeList[idTypeIndex];
-    }
+      // ✅ SAFE access from controller
+      if (controller.idTypeIndex.value >= 0 &&
+          controller.idTypeIndex.value < controller.idTypeList.length) {
+        idType = controller.idTypeList[controller.idTypeIndex.value];
+      }
 
-    final bool hasSelection = idType != null;
-    final String displayText = hasSelection ? idType.value : "Select Type";
+      final bool hasSelection = idType != null;
+      final String displayText = hasSelection
+          ? StringUtils.toTitleCase(idType.value)
+          : "Select Type";
 
-    return GestureDetector(
-      onTap: idTypeList.isEmpty ? () {} : areaTapIdType,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              displayText,
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w400,
-                fontSize: 14,
-                color: hasSelection
-                    ? const Color(0xFF151E2F)
-                    : const Color(0xFF717F9A),
+      return GestureDetector(
+        onTap: controller.idTypeList.isEmpty ? () {} : areaTapIdType,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                displayText,
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w400,
+                  fontSize: 14,
+                  color: hasSelection
+                      ? const Color(0xFF151E2F)
+                      : const Color(0xFF717F9A),
+                ),
               ),
-            ),
-            const Icon(
-              Icons.keyboard_arrow_down,
-              color: Color(0xFF2E3D5B),
-              size: 20,
-            ),
-          ],
+              const Icon(
+                Icons.keyboard_arrow_down,
+                color: Color(0xFF2E3D5B),
+                size: 20,
+              ),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   Future<void> areaTapIdType() async {
     try {
       final result = await _showIdTypeBottomSheet();
 
-      if (result != null && result != idTypeIndex) {
-        setState(() {
-          idTypeIndex = result;
-        });
+      if (result != null && result != controller.idTypeIndex.value) {
+        controller.idTypeIndex.value = result;
       }
     } catch (e) {
       debugPrint('areaTapIdType error: $e');
@@ -534,17 +428,19 @@ class _KycPersonalInformationPageState
   }
 
   Future<int?> _showIdTypeBottomSheet() async {
-    int? tempSelectedIndex = idTypeIndex >= 0 ? idTypeIndex : null;
+    int? tempSelectedIndex = controller.idTypeIndex.value >= 0
+        ? controller.idTypeIndex.value
+        : null;
 
     return showModalBottomSheet<int>(
-      context: context,
+      context: Get.context!, // ✅ GetX context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setModalState) {
             return Container(
-              height: MediaQuery.of(context).size.height * 0.55,
+              height: MediaQuery.of(context).size.height * 0.65,
               decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -586,9 +482,9 @@ class _KycPersonalInformationPageState
                   Expanded(
                     child: ListView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      itemCount: idTypeList.length,
+                      itemCount: controller.idTypeList.length,
                       itemBuilder: (context, index) {
-                        final Dict idType = idTypeList[index];
+                        final Dict idType = controller.idTypeList[index];
                         final bool isSelected = tempSelectedIndex == index;
 
                         return GestureDetector(
@@ -629,7 +525,7 @@ class _KycPersonalInformationPageState
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: Text(
-                                    idType.value,
+                                    StringUtils.toTitleCase(idType.value),
                                     style: TextStyle(
                                       fontSize: 16,
                                       color: isSelected
@@ -664,10 +560,7 @@ class _KycPersonalInformationPageState
                         onPressed: tempSelectedIndex == null
                             ? null
                             : () {
-                                Navigator.pop(
-                                  context,
-                                  tempSelectedIndex, // ✅ return index
-                                );
+                                Navigator.pop(context, tempSelectedIndex);
                               },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: tempSelectedIndex == null
@@ -702,10 +595,10 @@ class _KycPersonalInformationPageState
   }
 
   //* -- input name methods --
-  TextFormField buildNameTextInput() {
+  Widget buildNameTextInput() {
     return TextFormField(
-      controller: _nameController,
-      onChanged: (_) => setState(() {}),
+      controller: controller.nameController,
+      onChanged: (v) => controller.name.value = v.trim(),
       decoration: InputDecoration(
         hintText: "Enter Your Name",
         hintStyle: const TextStyle(
@@ -733,14 +626,20 @@ class _KycPersonalInformationPageState
           vertical: 16,
         ),
       ),
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return "Name is required";
+        }
+        return null;
+      },
     );
   }
 
   //* -- input Id methods --
-  TextFormField buildIdTextInput() {
+  Widget buildIdTextInput() {
     return TextFormField(
-      controller: _idNumberController,
-      onChanged: (_) => setState(() {}),
+      controller: controller.idController,
+      onChanged: (v) => controller.idNumber.value = v.trim(),
       decoration: InputDecoration(
         hintText: "Enter Your ID Number",
         hintStyle: const TextStyle(
@@ -768,54 +667,67 @@ class _KycPersonalInformationPageState
           vertical: 16,
         ),
       ),
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return "ID number is required";
+        }
+        return null;
+      },
     );
   }
 
   //* -- select expiry methods --
 
-  String formatDate(DateTime? date) {
-    if (date == null) return "Select Date";
-    return DateFormat('MMM dd yyyy').format(date);
-  }
+  // String formatDate(DateTime? date) {
+  //   if (date == null) return "Select Date";
+  //   return DateFormat('MMM dd yyyy').format(date);
+  // }
 
   Column buildExpirySelection(BuildContext context) {
     return Column(
       children: [
         GestureDetector(
           onTap: () {
-            setState(() {
-              _showCalendar = true;
-            });
+            controller.showCalendar.value = true; // 🔁
           },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  formatDate(_selectedExpiryDate),
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.w400,
-                    fontSize: 14,
-                    color: _selectedExpiryDate == null
-                        ? const Color(0xFF717F9A)
-                        : const Color(0xFF151E2F),
+          child: Obx(() {
+            final selectedDate = controller.selectedExpiryDate.value;
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    selectedDate == null
+                        ? "Select Date"
+                        : DateFormat('MMM dd yyyy').format(selectedDate), // 🔁
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w400,
+                      fontSize: 14,
+                      color: selectedDate == null
+                          ? const Color(0xFF717F9A)
+                          : const Color(0xFF151E2F),
+                    ),
                   ),
-                ),
-                SvgPicture.asset('assets/icons/merchant_details/calendar.svg'),
-              ],
-            ),
-          ),
+                  SvgPicture.asset(
+                    'assets/icons/merchant_details/calendar.svg',
+                  ),
+                ],
+              ),
+            );
+          }),
         ),
-        if (_showCalendar) ...[
-          const SizedBox(height: 8),
-          Container(
+        // calendar
+        Obx(() {
+          if (!controller.showCalendar.value) return const SizedBox.shrink();
+          return Container(
+            margin: EdgeInsets.only(top: 8),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
@@ -844,53 +756,51 @@ class _KycPersonalInformationPageState
                 ),
               ),
               child: CalendarDatePicker(
-                initialDate: _selectedExpiryDate ?? DateTime.now(),
+                initialDate:
+                    controller.selectedExpiryDate.value ?? DateTime.now(),
                 firstDate: DateTime(1900),
                 lastDate: DateTime(2100),
                 // currentDate: _focusedDate,
                 onDateChanged: (DateTime date) {
                   bool pickedFromYearMode = false;
 
-                  if (_lastPickedDate != null) {
+                  final lastDate = controller.lastPickedDate.value;
+
+                  if (lastDate != null) {
                     pickedFromYearMode =
-                        date.year != _lastPickedDate!.year &&
-                        date.month == _lastPickedDate!.month &&
-                        date.day == _lastPickedDate!.day;
+                        date.year != lastDate.year &&
+                        date.month == lastDate.month &&
+                        date.day == lastDate.day;
                   }
 
                   if (pickedFromYearMode) {
-                    debugPrint("Picked from YEAR mode");
-
-                    setState(() {
-                      // Update date but KEEP calendar open
-                      _lastPickedDate = date;
-                      _selectedExpiryDate = date;
-                    });
+                    // 🟡 YEAR MODE → keep calendar open
+                    controller.lastPickedDate.value = date;
+                    controller.selectedExpiryDate.value = date;
                   } else {
-                    debugPrint("Picked from DAY mode");
-
-                    setState(() {
-                      _lastPickedDate = date;
-                      _selectedExpiryDate = date;
-                      _showCalendar = false; // close only here
-                    });
+                    // 🟢 DAY MODE → close calendar
+                    controller.lastPickedDate.value = date;
+                    controller.selectedExpiryDate.value = date;
+                    controller.showCalendar.value = false;
                   }
                 },
               ),
             ),
-          ),
-        ],
+          );
+        }),
       ],
     );
   }
 
   //* -- select ID picture methods --
   Widget buildIDPhotoSelection() {
-    if (faceUrl != null && faceUrl!.isNotEmpty) {
-      return _buildUploadedIDPreview();
-    }
-
-    return _buildUploadPlaceholder();
+    return Obx(() {
+      if (controller.faceUrl.value != null &&
+          controller.faceUrl.value!.isNotEmpty) {
+        return _buildUploadedIDPreview();
+      }
+      return _buildUploadPlaceholder();
+    });
   }
 
   DottedBorder _buildUploadPlaceholder() {
@@ -907,13 +817,14 @@ class _KycPersonalInformationPageState
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: _idImageUploading
-            ? Container(
+        child: controller.isIdImageUploading.value
+            ? const SizedBox(
                 height: 274,
-                alignment: Alignment.center,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Color(0xFF1D5DE5),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Color(0xFF1D5DE5),
+                  ),
                 ),
               )
             : Column(
@@ -963,7 +874,7 @@ class _KycPersonalInformationPageState
                       ),
                     ),
                     label: Text(
-                      _uploadedFileName ?? "Click to Upload",
+                      controller.uploadedFileName.value ?? "Click to Upload",
                       style: const TextStyle(
                         fontFamily: 'Inter',
                         fontWeight: FontWeight.w500,
@@ -1034,7 +945,7 @@ class _KycPersonalInformationPageState
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: Image.network(
-                    faceUrl!,
+                    controller.faceUrl.value!,
                     width: double.infinity,
                     height: 274,
                     fit: BoxFit.cover,
@@ -1054,7 +965,7 @@ class _KycPersonalInformationPageState
                         ),
                       );
                     },
-                    errorBuilder: (_, __, ___) {
+                    errorBuilder: (_, _, _) {
                       return Container(
                         height: 274,
                         alignment: Alignment.center,
@@ -1101,16 +1012,12 @@ class _KycPersonalInformationPageState
               ),
 
               // ---------- REMOVE BUTTON ----------
+              // ❌ Remove
               Positioned(
                 top: 14,
                 right: 14,
                 child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      faceUrl = null;
-                      _uploadedFileName = null;
-                    });
-                  },
+                  onTap: removeFaceImage,
                   child: Container(
                     width: 24,
                     height: 24,
@@ -1177,11 +1084,11 @@ class _KycPersonalInformationPageState
     );
   }
 
-  Future<void> pickImageFromGallery(ValueChanged<String> onSuccess) async {
-    setState(() {
-      _idImageUploading = true;
-    });
+  Future<void> pickImageFromGallery() async {
+    if (controller.isIdImageUploading.value) return; // 🛑
     try {
+      controller.isIdImageUploading.value = true;
+
       final ImagePicker picker = ImagePicker();
 
       final XFile? pickedFile = await picker.pickImage(
@@ -1190,9 +1097,7 @@ class _KycPersonalInformationPageState
       );
 
       if (pickedFile == null) {
-        setState(() {
-          _idImageUploading = false;
-        });
+        controller.isIdImageUploading.value = false;
         return;
       }
 
@@ -1201,10 +1106,13 @@ class _KycPersonalInformationPageState
       const maxSize = 5 * 1024 * 1024; // 5 MB
 
       if (bytes.lengthInBytes > maxSize) {
-        CustomSnackbar.showError(
-          title: "Error",
-          message: 'Image size cannot exceed 5MB',
+        Get.snackbar(
+          'Error',
+          'Image size cannot exceed 5MB',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
         );
+        controller.isIdImageUploading.value = false;
         return;
       }
 
@@ -1215,77 +1123,91 @@ class _KycPersonalInformationPageState
 
       final url = await AwsUploadUtil().upload(file: pickedFile);
 
-      // dismiss loading
-      // hideLoadingToast();
-      setState(() {
-        _idImageUploading = false;
-      });
-      onSuccess(url);
+      // success
+      controller.uploadedFileName.value = pickedFile.name; // ✅
+      controller.faceUrl.value = url;
     } catch (e) {
-      CustomSnackbar.showError(
-        title: "Error",
-        message: 'Image upload failed, please try again',
+      Get.snackbar(
+        'Upload Failed',
+        'Image upload failed, please try again',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
       );
-      setState(() {
-        _idImageUploading = false;
-      });
       print(e);
+    } finally {
+      controller.isIdImageUploading.value = false;
     }
   }
 
   Future<void> onPickFaceImage() async {
-    await pickImageFromGallery((String url) {
-      setState(() {
-        faceUrl = url;
-      });
-    });
+    await pickImageFromGallery();
+  }
+
+  /// ❌ Remove image
+  void removeFaceImage() {
+    controller.faceUrl.value = null;
+    controller.uploadedFileName.value = null;
   }
 
   //! -- submit button methods --
-
+  void showRedToast(
+    BuildContext context,
+    String message, {
+    Duration duration = const Duration(seconds: 2),
+  }) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            message,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          backgroundColor: const Color(0xFFD32F2F), // 🔴 Red
+          duration: duration,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      );
+  }
 
   Widget personalInfoInputContent(BuildContext context) {
-    return _isLoading
-        ? SizedBox(
-            height: MediaQuery.of(context).size.height,
-            child: const Center(
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Color(0xFF1D5DE5),
-              ),
-            ),
-          )
-        : Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Warning Card
-                if (topTip.isNotEmpty && _showWarning) buildTopTipWarningCard(),
-                // Nationality
-                buildTitleLabelText("Nationality"),
-                buildNationalitySelection(),
-                // Name
-                buildTitleLabelText("Name"),
-                buildNameTextInput(),
-                // Type of ID
-                buildTitleLabelText("Type of ID"),
-                buildIdTypeSelection(),
-                // Expiry Date
-                buildTitleLabelText("Expiry Date"),
-                buildExpirySelection(context),
-                // ID Number
-                buildTitleLabelText("ID Number"),
-                buildIdTextInput(),
-                // ID Picture
-                buildTitleLabelText("ID Picture"),
-                buildIDPhotoSelection(),
-                const SizedBox(height: 32),
-                buildSubmitButton(context),
-                const SizedBox(height: 40),
-              ],
-            ),
-          );
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Warning Card
+          if (controller.topTip.isNotEmpty &&
+              controller.showWarning.value) // 🔁
+            buildTopTipWarningCard(),
+          // Nationality
+          buildTitleLabelText("Nationality"),
+          buildNationalitySelection(),
+          // Name
+          buildTitleLabelText("Name"),
+          buildNameTextInput(),
+          // Type of ID
+          buildTitleLabelText("Type of ID"),
+          buildIdTypeSelection(),
+          // Expiry Date
+          buildTitleLabelText("Expiry Date"),
+          buildExpirySelection(context),
+          // ID Number
+          buildTitleLabelText("ID Number"),
+          buildIdTextInput(),
+          // ID Picture
+          buildTitleLabelText("ID Picture"),
+          buildIDPhotoSelection(),
+          const SizedBox(height: 32),
+          buildSubmitButton(context),
+          const SizedBox(height: 40),
+        ],
+      ),
+    );
   }
 
   Padding buildTitleLabelText(String titleText) {
@@ -1303,6 +1225,7 @@ class _KycPersonalInformationPageState
     );
   }
 
+  // 🔁 CHANGED: setState → controller.showWarning
   Container buildTopTipWarningCard() {
     return Container(
       padding: const EdgeInsets.all(10),
@@ -1337,7 +1260,7 @@ class _KycPersonalInformationPageState
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  topTip,
+                  controller.topTip,
                   style: TextStyle(
                     fontFamily: 'Inter',
                     fontWeight: FontWeight.w400,
@@ -1350,9 +1273,7 @@ class _KycPersonalInformationPageState
           ),
           GestureDetector(
             onTap: () {
-              setState(() {
-                _showWarning = false;
-              });
+              controller.showWarning.value = false; // 🔁
             },
             child: SvgPicture.asset(
               'assets/icons/merchant_details/close-square.svg',
@@ -1370,81 +1291,114 @@ class _KycPersonalInformationPageState
     return SizedBox(
       width: double.infinity,
       height: 56,
-      child: ElevatedButton(
-        onPressed: _isFormReady
-            ? () async {
-                if (!_formKey.currentState!.validate()) return;
 
-                try {
-                  setState(() {
-                    _isLoading = true;
-                  });
+      child: Obx(() {
+        final canSubmit = controller.isFormReady;
+        return ElevatedButton(
+          onPressed:
+              canSubmit // 🔁
+              ? () async {
+                  if (!_formKey.currentState!.validate()) return;
 
-                  final formattedDate = _selectedExpiryDate != null
-                      ? "${_selectedExpiryDate!.month.toString().padLeft(2, '0')}/${_selectedExpiryDate!.year}"
-                      : "00/0000";
+                  final success = await controller.submitKyc(); // 🧠
 
-                  await UserApi.createIdentifyOrder({
-                    "countryId": countryList[countryIndex].id,
-                    "realName": _nameController.text,
-                    "kind": idTypeList[idTypeIndex].key,
-                    "expireDate": formattedDate,
-                    "idNo": _idNumberController.text,
-                    "frontImage": faceUrl,
-                  }).then((value) async {
-                    if (value['errorMsg'] == 'SUCCESS' ||
-                        value['errorCode'] == 'Success') {
-                      CustomSnackbar.showSuccess(
-                        title: "Success",
-                        message: "KYC Information Submitted!",
-                      );
+                  if (success) {
+                    Get.snackbar(
+                      "Success",
+                      "KYC Information Submitted!",
+                      backgroundColor: const Color(0xFF10B981),
+                      colorText: Colors.white,
+                    );
+                    // //TODO:   getLatestIdentifyOrderList getLatestIdentifyOrderList getLatestIdentifyOrderList getLatestIdentifyOrderList
+                    //       await getLatestIdentifyOrderList();
+                    //       setState(() {
+                    //         _isLoading = false;
+                    //         widget.merchantStatus =
+                    //             latestSubmittedInfo?.status ?? '0';
+                    //       }
+                    // Get.back(result: true); // 🔁 return result
+                  } else {
+                    Get.snackbar(
+                      "Error",
+                      "Submission failed",
+                      backgroundColor: Colors.red,
+                      colorText: Colors.white,
+                    );
+                  }
 
-                      await getLatestIdentifyOrderList();
-                      setState(() {
-                        _isLoading = false;
-                        widget.merchantStatus =
-                            latestSubmittedInfo?.status ?? '0';
-                      });
-                    } else {
-                      setState(() {
-                        _isLoading = false;
-                        CustomSnackbar.showError(
-                          title: "Error",
-                          message: "${value['errorMsg']}",
-                        );
-                      });
-                    }
-                  });
-                } catch (e) {
-                  setState(() {
-                    _isLoading = false;
-                  });
-                  CustomSnackbar.showError(
-                    title: "Error",
-                    message: 'Submission failed. Please try again.',
-                  );
+                  // try {
+                  //   setState(() {
+                  //     _isLoading = true;
+                  //   });
+
+                  //   final formattedDate = _selectedExpiryDate != null
+                  //       ? "${_selectedExpiryDate!.month.toString().padLeft(2, '0')}/${_selectedExpiryDate!.year}"
+                  //       : "00/0000";
+
+                  //   await UserApi.createIdentifyOrder({
+                  //     "countryId": countryList[countryIndex].id,
+                  //     "realName": _nameController.text,
+                  //     "kind": idTypeList[idTypeIndex].key,
+                  //     "expireDate": formattedDate,
+                  //     "idNo": _idNumberController.text,
+                  //     "frontImage": faceUrl,
+                  //   }).then((value) async {
+                  //     if (value['errorMsg'] == 'SUCCESS' ||
+                  //         value['errorCode'] == 'Success') {
+                  //       ScaffoldMessenger.of(context).showSnackBar(
+                  //         const SnackBar(
+                  //           content: Text("KYC Information Submitted!"),
+                  //           backgroundColor: Color(0xFF10B981),
+                  //         ),
+                  //       );
+
+                  //       await getLatestIdentifyOrderList();
+                  //       setState(() {
+                  //         _isLoading = false;
+                  //         widget.merchantStatus =
+                  //             latestSubmittedInfo?.status ?? '0';
+                  //       });
+                  //     } else {
+                  //       setState(() {
+                  //         _isLoading = false;
+                  //         ScaffoldMessenger.of(context).showSnackBar(
+                  //           SnackBar(
+                  //             content: Text(
+                  //               "${value['errorMsg']}",
+                  //               style: TextStyle(color: const Color(0xFFCF4436)),
+                  //             ),
+                  //             backgroundColor: const Color(0xFFFDF4F5),
+                  //           ),
+                  //         );
+                  //       });
+                  //     }
+                  //   });
+                  // } catch (e) {
+                  //   controller.isLoading.value = false;
+                  //   showRedToast(context, 'Submission failed. Please try again.');
+                  // }
                 }
-              }
-            : null, //DISABLED
-        style: ElevatedButton.styleFrom(
-          backgroundColor: _isFormReady
-              ? const Color(0xFF1D5DE5)
-              : const Color(0xFFB9C6E2),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+              : null, //DISABLED
+          style: ElevatedButton.styleFrom(
+            backgroundColor: canSubmit
+                ? const Color(0xFF1D5DE5)
+                : const Color(0xFFB9C6E2),
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
-        ),
-        child: const Text(
-          "Submit",
-          style: TextStyle(
-            fontFamily: 'Inter',
-            fontWeight: FontWeight.w600,
-            fontSize: 16,
-            color: Colors.white,
+          child: const Text(
+            "Submit",
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+              color: Colors.white,
+            ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 

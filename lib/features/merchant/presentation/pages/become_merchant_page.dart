@@ -1,163 +1,26 @@
-import 'package:BitOwi/api/account_api.dart';
-import 'package:BitOwi/api/common_api.dart';
-import 'package:BitOwi/api/user_api.dart';
-import 'package:BitOwi/core/storage/storage_service.dart';
-import 'package:BitOwi/features/merchant/presentation/pages/personal_information_page.dart';
+import 'package:BitOwi/config/routes.dart';
+import 'package:BitOwi/features/merchant/presentation/controllers/become_merchant_controller.dart';
 import 'package:BitOwi/features/merchant/presentation/widgets/decertification_result_dialog.dart';
 import 'package:BitOwi/features/merchant/presentation/widgets/decertify_confirmation_bottom_sheet.dart';
 import 'package:BitOwi/features/merchant/presentation/widgets/reminder_card.dart';
 import 'package:BitOwi/features/merchant/presentation/widgets/step_card.dart';
 import 'package:BitOwi/features/merchant/presentation/widgets/verified_merchant_bottom_sheet.dart';
-import 'package:BitOwi/features/wallet/presentation/pages/deposit_screen.dart';
-import 'package:BitOwi/models/account_asset_res.dart';
-import 'package:BitOwi/models/identify_order_list_res.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 
-class BecomeMerchantPage extends StatefulWidget {
-  const BecomeMerchantPage({super.key});
+class BecomeMerchantPage extends StatelessWidget {
+  BecomeMerchantPage({super.key});
 
-  @override
-  State<BecomeMerchantPage> createState() => _BecomeMerchantPageState();
-}
-
-class _BecomeMerchantPageState extends State<BecomeMerchantPage> {
-  bool _isLoading = false;
-  AccountAssetRes? assetInfo;
-  IdentifyOrderListRes? latestSubmittedInfo;
-
-  late EasyRefreshController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = EasyRefreshController(controlFinishRefresh: true);
-    getInitData();
-  }
-
-  Future<void> getInitData() async {
-    try {
-      // ToastUtil.showLoading();
-      setState(() {
-        _isLoading = true;
-      });
-
-      await Future.wait<void>([
-        getLockAmount(),
-        getHomeAsset(),
-        getLatestIdentifyOrderList(),
-        getUSDTAmount(),
-      ]);
-    } catch (e) {}
-
-    // ToastUtil.dismiss();
-    setState(() {
-      _isLoading = false;
-    });
-  }
-
-  Future<void> getHomeAsset() async {
-    try {
-      // Merchant certification status -1: Not initiated, 0: Under review, 1: Review passed, 2: Review failed, 3: Decertification under review, 4: Decertification
-      final res = await AccountApi.getHomeAsset();
-
-      if (res.merchantStatus == '1') {
-        final userIdGet = await StorageService.getUserId();
-        final isShowed = await StorageService.getMerchantSucTip(
-          userIdGet ?? '',
-        );
-        if (!isShowed) {
-          // onetime
-          showVerifiedMerchantBottomSheet(context);
-        }
-        StorageService.setMerchantSucTip(userIdGet ?? '');
-      }
-
-      setState(() {
-        assetInfo = res;
-        // hasEnoughAmount = assetInfo.merchantStatus
-      });
-    } catch (e) {}
-  }
-
-  double usdtAmount = 0;
-  String frozenAmount = '';
-  String get merchantStatus {
-    return assetInfo?.merchantStatus ?? '';
-  }
-
-  bool get hasEnoughAmount {
-    if (merchantStatus == '0' ||
-        merchantStatus == '1' ||
-        merchantStatus == '3') {
-      return true;
-    }
-    if (assetInfo == null || double.tryParse(frozenAmount) == null) {
-      return false;
-    }
-    return usdtAmount >= double.parse(frozenAmount);
-  }
-
-  Future<void> getLockAmount() async {
-    try {
-      final res = await CommonApi.getConfig(key: 'merchant_frozen_amount');
-      setState(() {
-        frozenAmount = res.data["merchant_frozen_amount"] ?? '';
-      });
-    } catch (e) {}
-  }
-
-  Future<void> getUSDTAmount() async {
-    try {
-      final res = await AccountApi.getDetailAccount('USDT');
-      setState(() {
-        usdtAmount = double.tryParse(res.availableAmount!) ?? 0;
-      });
-    } catch (e) {}
-  }
-
-  Future<void> getLatestIdentifyOrderList() async {
-    try {
-      final list = await UserApi.getIdentifyOrderList();
-
-      setState(() {
-        latestSubmittedInfo = list.isNotEmpty ? list.first : null;
-      });
-    } catch (e) {}
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  Future<void> onRefresh() async {
-    try {
-      // final futures = [getBannerList()];
-      // final isLogin = context.read<AuthProvider>().isLogin;
-      // if (isLogin) {
-      // futures.add(getHomeAsset());
-      await getHomeAsset();
-      await getLatestIdentifyOrderList();
-      // }
-      // await Future.wait<void>(futures);
-      // if (isLogin) {
-      //   await getAccountList();
-      // }
-    } catch (e) {
-      print(e);
-    }
-    _controller.finishRefresh();
-  }
+  final BecomeMerchantController controller =
+      Get.find<BecomeMerchantController>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F9FF),
       appBar: AppBar(
-        toolbarHeight: 56,
         backgroundColor: const Color(0xFFF6F9FF),
         surfaceTintColor: const Color(0xFFF6F9FF),
         elevation: 0,
@@ -172,7 +35,7 @@ class _BecomeMerchantPageState extends State<BecomeMerchantPage> {
               BlendMode.srcIn,
             ),
           ),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Get.back(),
         ),
         title: const Text(
           "Merchant Details",
@@ -183,118 +46,192 @@ class _BecomeMerchantPageState extends State<BecomeMerchantPage> {
             color: Color(0xFF151E2F),
           ),
         ),
-        centerTitle: false,
       ),
+
       body: SafeArea(
         top: false,
         child: EasyRefresh(
-          controller: _controller,
-          onRefresh: onRefresh,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: _isLoading
-                ? SizedBox(
-                    height: MediaQuery.of(context).size.height,
-                    child: const Center(
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Color(0xFF1D5DE5),
+          controller: controller.refreshController,
+          onRefresh: () async {
+            await controller.refreshPage(); // 🔁 moved to controller
+            controller.refreshController.finishRefresh();
+          },
+          child: Obx(() {
+            if (controller.isLoading.value) {
+              return SizedBox(
+                height: MediaQuery.of(context).size.height,
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Color(0xFF1D5DE5),
+                  ),
+                ),
+              );
+            }
+
+            // final assetInfo = controller.assetInfo.value;
+            final latestInfo = controller.latestSubmittedInfo.value;
+
+            // 🧠 Keep existing side-effect (bottom sheet)
+            debugPrint("🍐${controller.hasShownMerchantSheet}");
+
+            if (controller.merchantStatus == '1' &&
+                !controller.hasShownMerchantSheet) {
+              controller.hasShownMerchantSheet = true; // ✅ guard immediately
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                showVerifiedMerchantBottomSheet(context);
+              });
+            }
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                children: [
+                  const SizedBox(height: 24),
+
+                  // 🟢 ICON
+                  Container(
+                    width: 100,
+                    height: 100,
+                    padding: const EdgeInsets.all(24),
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: [Color(0xFF52B7FF), Color(0xFF1D5DE5)],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
                       ),
                     ),
-                  )
-                : Column(
-                    children: [
-                      const SizedBox(height: 24),
-                      buildBecomeMerchantIcon(),
-                      const SizedBox(height: 24),
-                      const Text(
-                        "Become a Merchant",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w700,
-                          fontSize: 26,
-                          color: Color(0xFF151E2F),
-                        ),
+                    child: SvgPicture.asset(
+                      'assets/icons/merchant_details/shield.svg',
+                      colorFilter: const ColorFilter.mode(
+                        Colors.white,
+                        BlendMode.srcIn,
                       ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        "Start accepting crypto payments and grow your business",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w400,
-                          fontSize: 14,
-                          color: Color(0xFF454F63),
-                          height: 1.5,
-                        ),
-                      ),
-                      const SizedBox(height: 40),
-                      // StepCard 1
-                      StepCard(
-                        title: "KYC Verification",
-                        description:
-                            "Your identity helps us keep the platform secure",
-                        iconPath: "assets/icons/merchant_details/id_card.svg",
-                        stepNumber: "1",
-                        iconBackgroundColor: Color(0xFFE9F6FF),
-                        secondaryIconPath: latestSubmittedInfo?.status == '2'
-                            ? "assets/icons/merchant_details/close-square.svg"
-                            : latestSubmittedInfo?.status == '1'
-                            ? "assets/icons/merchant_details/tick-circle.svg"
-                            : null,
-                      ),
-                      const SizedBox(height: 16),
-                      // StepCard 2
-                      StepCard(
-                        title: "Deposit Fund",
-                        // description:
-                        //     "Deposit minimum 1000 USDT to activate merchant account",
-                        description: "Deposit amount ${frozenAmount}USDT'",
-                        iconPath: "assets/icons/merchant_details/money.svg",
-                        stepNumber: "2",
-                        iconBackgroundColor: Color(0xFFF4E9FE),
-                        secondaryIconPath: hasEnoughAmount
-                            ? "assets/icons/merchant_details/tick-circle.svg"
-                            : null,
-                      ),
-                      const SizedBox(height: 24),
-                      // Reminder card
-                      ReminderCard(
-                        merchantStatus: assetInfo?.merchantStatus ?? '',
-                        identifyOrderLatestSubmittedInfoStatus:
-                            latestSubmittedInfo?.status ?? '',
-                      ),
-                      const SizedBox(height: 40),
-                      // Bottom button
-                      _buildActionButton(
-                        context,
-                        assetInfo?.merchantStatus ?? '',
-                        latestSubmittedInfo?.status ?? '',
-                        handleMerchantApply,
-                        onReturn: () async {
-                          await getHomeAsset();
-                          await getLatestIdentifyOrderList();
-                        },
-                      ),
-                      const SizedBox(height: 24),
-                      if (assetInfo?.merchantStatus == '1')
-                        TextButton(
-                          onPressed: () {
-                            handleRemove(context);
-                          },
-                          child: const Text(
-                            "Decertify as Merchant",
-                            style: TextStyle(
-                              color: Color(0xFFE54848),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      const SizedBox(height: 40),
-                    ],
+                    ),
                   ),
-          ),
+
+                  const SizedBox(height: 24),
+
+                  const Text(
+                    "Become a Merchant",
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w700,
+                      fontSize: 26,
+                      color: Color(0xFF151E2F),
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  const Text(
+                    "Start accepting crypto payments and grow your business",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w400,
+                      fontSize: 14,
+                      color: Color(0xFF454F63),
+                    ),
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  // 🧾 STEP 1
+                  StepCard(
+                    title: "KYC Verification",
+                    description:
+                        "Your identity helps us keep the platform secure",
+                    iconPath: "assets/icons/merchant_details/id_card.svg",
+                    stepNumber: "1",
+                    iconBackgroundColor: const Color(0xFFE9F6FF),
+                    secondaryIconPath: latestInfo?.status == '2'
+                        ? "assets/icons/merchant_details/close-square.svg"
+                        : latestInfo?.status == '1'
+                        ? "assets/icons/merchant_details/tick-circle.svg"
+                        : null,
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // 💰 STEP 2
+                  StepCard(
+                    title: "Deposit Fund",
+                    description:
+                        "Deposit amount ${controller.frozenAmount} USDT",
+                    iconPath: "assets/icons/merchant_details/money.svg",
+                    stepNumber: "2",
+                    iconBackgroundColor: const Color(0xFFF4E9FE),
+                    secondaryIconPath: controller.hasEnoughAmount
+                        ? "assets/icons/merchant_details/tick-circle.svg"
+                        : null,
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // 🔔 REMINDER
+                  ReminderCard(
+                    merchantStatus: controller.merchantStatus,
+                    identifyOrderLatestSubmittedInfoStatus:
+                        latestInfo?.status ?? '',
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  // 🔘 ACTION BUTTON (UNCHANGED LOGIC)
+                  _buildActionButton(
+                    context,
+                    controller.merchantStatus,
+                    latestInfo?.status ?? '',
+                    controller.applyMerchant, // 🧠 moved
+                    onReturn: () async {
+                      await controller.refreshPage(); // 🔁 moved
+                    },
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // ❌ DECERTIFY
+                  if (controller.merchantStatus == '1')
+                    TextButton(
+                      onPressed: () {
+                        showDecertifyConfirmationBottomSheet(
+                          context,
+                          onProceed: () async {
+                            controller.isLoading.value = true;
+
+                            final res = await controller.removeMerchant(); // 🧠
+
+                            controller.isLoading.value = false;
+
+                            final errorCode = res['errorCode'] ?? '';
+
+                            showDecertificationResultDialog(
+                              context,
+                              result: errorCode == 'Success'
+                                  ? DecertificationResult.success
+                                  : DecertificationResult.failed,
+                            );
+
+                            await controller.refreshPage();
+                          },
+                        );
+                      },
+                      child: const Text(
+                        "Decertify as Merchant",
+                        style: TextStyle(
+                          color: Color(0xFFE54848),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+
+                  const SizedBox(height: 40),
+                ],
+              ),
+            );
+          }),
         ),
       ),
     );
@@ -318,81 +255,6 @@ class _BecomeMerchantPageState extends State<BecomeMerchantPage> {
         colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
       ),
     );
-  }
-
-  //! Decertify action
-  void handleRemove(BuildContext context) {
-    showDecertifyConfirmationBottomSheet(
-      context,
-      onProceed: () async {
-        // already proceed? bottom sheet popped
-        try {
-          setState(() {
-            _isLoading = true;
-          });
-          // ToastUtil.showLoading();
-
-          final res = await UserApi.removeMerchantOrder();
-
-          final String errorCode = res['errorCode'] ?? '';
-          final String errorMsg = res['errorMsg'] ?? '';
-
-          if (errorCode == 'Success') {
-            //  SUCCESS Dialog
-            showDecertificationResultDialog(
-              context,
-              result: DecertificationResult.success,
-            );
-          } else {
-            // FAILURE Dialog
-            showDecertificationResultDialog(
-              context,
-              result: DecertificationResult.failed,
-              errorMsg: errorMsg,
-              onCustomerCare: () {
-                Navigator.pop(context);
-                // TODO: Navigate to customer care
-              },
-            );
-          }
-        } catch (e) {
-          showDecertificationResultDialog(
-            context,
-            result: DecertificationResult.failed,
-            onCustomerCare: () {
-              Navigator.pop(context);
-              // TODO: Navigate to customer care
-            },
-          );
-        } finally {
-          // Refresh data AFTER success
-          await getHomeAsset(); // mostly needed only after SUCCESS Dialog
-          if (mounted) {
-            // ToastUtil.dismiss();
-            setState(() {
-              _isLoading = false;
-            });
-          }
-        }
-      },
-    );
-  }
-
-  Future<void> handleMerchantApply() async {
-    try {
-      setState(() {
-        _isLoading = true;
-      });
-      //     ToastUtil.showLoading();
-      await UserApi.createMerchantOrder();
-      //todo:
-      // EventBusUtil.fireUpdateMerchantStatus();
-      await getHomeAsset();
-    } catch (e) {}
-    setState(() {
-      _isLoading = false;
-    });
-    // ToastUtil.dismiss();
   }
 }
 
@@ -466,15 +328,13 @@ _ActionButtonConfig? _getActionConfig(
         backgroundColor: const Color(0xFF1D5DE5),
         textColor: Colors.white,
         onPressed: () async {
-          final bool? shouldRefresh = await Navigator.push<bool>(
-            context,
-            MaterialPageRoute(
-              builder: (context) => KycPersonalInformationPage(
-                merchantStatus: merchantStatus,
-                isEdit: false,
-              ),
-            ),
+
+          final result = await Get.toNamed(
+            Routes.kycPersonalInformation,
+            arguments: {'merchantStatus': merchantStatus, 'isEdit': false},
           );
+
+          final bool shouldRefresh = result == true;
 
           if (shouldRefresh == true) {
             await onReturn();
@@ -500,15 +360,13 @@ _ActionButtonConfig? _getActionConfig(
         backgroundColor: const Color(0xFF1D5DE5),
         textColor: Colors.white,
         onPressed: () async {
-          final bool? shouldRefresh = await Navigator.push<bool>(
-            context,
-            MaterialPageRoute(
-              builder: (context) => KycPersonalInformationPage(
-                merchantStatus: merchantStatus,
-                isEdit: true,
-              ),
-            ),
+       
+          final result = await Get.toNamed(
+            Routes.kycPersonalInformation,
+            arguments: {'merchantStatus': merchantStatus, 'isEdit': true},
           );
+
+          final bool shouldRefresh = result == true;
 
           if (shouldRefresh == true) {
             await onReturn();

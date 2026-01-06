@@ -11,7 +11,6 @@ class UserKycStatusPage extends StatelessWidget {
   final String name;
   final String idNumber;
   final DateTime? expiryDate;
-  final String merchantStatus;
   final String identifyOrderLatestSubmittedInfoStatus;
 
   const UserKycStatusPage({
@@ -23,7 +22,6 @@ class UserKycStatusPage extends StatelessWidget {
     required this.name,
     required this.idNumber,
     required this.expiryDate,
-    required this.merchantStatus,
     required this.identifyOrderLatestSubmittedInfoStatus,
   });
 
@@ -82,7 +80,7 @@ class UserKycStatusPage extends StatelessWidget {
 
               const SizedBox(height: 8),
 
-              if (merchantStatus == '0')
+              if (identifyOrderLatestSubmittedInfoStatus == '0')
                 Padding(
                   padding: const EdgeInsets.only(bottom: 24),
                   child: const Text(
@@ -119,7 +117,7 @@ class UserKycStatusPage extends StatelessWidget {
 
         /// Reminder
         // ReminderCard(
-        //   merchantStatus: merchantStatus,
+        //   identifyOrderLatestSubmittedInfoStatus: identifyOrderLatestSubmittedInfoStatus,
         //   identifyOrderLatestSubmittedInfoStatus:
         //       identifyOrderLatestSubmittedInfoStatus,
         // ),
@@ -130,9 +128,9 @@ class UserKycStatusPage extends StatelessWidget {
   }
 
   Container userKYCRemindCard() {
-    final bool isRejected = merchantStatus == '2'; // wont come here
-    final bool isApproved = merchantStatus == '1';
-    final bool isPending = merchantStatus == '0';
+    final bool isRejected = identifyOrderLatestSubmittedInfoStatus == '2'; // wont come here
+    final bool isApproved = identifyOrderLatestSubmittedInfoStatus == '1';
+    final bool isPending = identifyOrderLatestSubmittedInfoStatus == '0';
 
     final Color backgroundColor = isRejected
         ? const Color(0xFFFDF4F5)

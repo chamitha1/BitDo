@@ -314,12 +314,7 @@ class ProfileScreen extends StatelessWidget {
             title: "KYC",
             subtitle: "User KYC verification",
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => UserKycInformationPage(),
-                ),
-              );
+              Get.toNamed(Routes.userKycPersonalInformation);
             },
           ),
           const Divider(height: 1, color: Color(0xFFF0F4FF)),

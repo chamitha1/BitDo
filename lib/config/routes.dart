@@ -1,3 +1,9 @@
+import 'package:BitOwi/features/merchant/presentation/controllers/become_merchant_controller.dart';
+import 'package:BitOwi/features/merchant/presentation/controllers/kyc_personal_information_controller.dart';
+import 'package:BitOwi/features/merchant/presentation/controllers/user_kyc_personal_information_controller.dart';
+import 'package:BitOwi/features/merchant/presentation/pages/become_merchant_page.dart';
+import 'package:BitOwi/features/merchant/presentation/pages/personal_information_page.dart';
+import 'package:BitOwi/features/merchant/presentation/pages/user_kyc_information_page.dart';
 import 'package:get/get.dart';
 import 'package:BitOwi/features/auth/presentation/pages/login_screen.dart';
 import 'package:BitOwi/features/auth/presentation/pages/signup_screen.dart';
@@ -18,12 +24,17 @@ class Routes {
   static const String onboarding = '/onboarding';
   static const String login = '/login';
   static const String signup = '/signup';
-  static const String home = '/HomeScreen'; 
+  static const String home = '/HomeScreen';
   static const String accountSecurity = '/accountSecurity';
   static const String transactionDetail = '/transactionDetail';
   static const String walletDetail = '/walletDetail';
   static const String deposit = '/deposit';
   static const String withdrawal = '/withdrawal';
+  //
+  static const String becomeMerchant = '/becomeMerchant';
+  static const String kycPersonalInformation = '/kycPersonalInformation';
+  static const String userKycPersonalInformation =
+      '/userKycPersonalInformation';
 }
 
 class AppPages {
@@ -35,25 +46,43 @@ class AppPages {
         Get.put(SplashController());
       }),
     ),
-    GetPage(
-      name: Routes.onboarding,
-      page: () => const OnboardingScreen(),
-    ),
-    GetPage(
-      name: Routes.login,
-      page: () => const LoginScreen(),
-    ),
-    GetPage(
-      name: Routes.signup,
-      page: () => const SignupScreen(),
-    ),
+    GetPage(name: Routes.onboarding, page: () => const OnboardingScreen()),
+    GetPage(name: Routes.login, page: () => const LoginScreen()),
+    GetPage(name: Routes.signup, page: () => const SignupScreen()),
     GetPage(
       name: Routes.home,
       page: () => const HomeScreen(),
       binding: BindingsBuilder(() {
-         Get.put(BalanceController()); 
+        Get.put(BalanceController());
       }),
     ),
+    //
+    GetPage(
+      name: Routes.becomeMerchant,
+      page: () => BecomeMerchantPage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<BecomeMerchantController>(() => BecomeMerchantController());
+      }),
+    ),
+    GetPage(
+      name: Routes.kycPersonalInformation,
+      page: () => KycPersonalInformationPage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<KycPersonalInformationController>(
+          () => KycPersonalInformationController(),
+        );
+      }),
+    ),
+    GetPage(
+      name: Routes.userKycPersonalInformation,
+      page: () => UserKycInformationPage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<UserKycInformationController>(
+          () => UserKycInformationController(),
+        );
+      }),
+    ),
+    //
     GetPage(
       name: Routes.accountSecurity,
       page: () => const AccountAndSecurityPage(),
@@ -62,22 +91,17 @@ class AppPages {
       name: Routes.transactionDetail,
       page: () => const TransactionDetailPage(),
     ),
-    GetPage(
-      name: Routes.walletDetail,
-      page: () => const WalletDetailPage(),
-    ),
-    GetPage(
-      name: Routes.deposit,
-      page: () => const DepositScreen(),
-    ),
+    GetPage(name: Routes.walletDetail, page: () => const WalletDetailPage()),
+    GetPage(name: Routes.deposit, page: () => const DepositScreen()),
     GetPage(
       name: Routes.withdrawal,
       page: () {
-          final args = Get.arguments ?? {};
-          return WithdrawScreen(
-              symbol: Get.parameters['symbol'] ?? args['symbol'] ?? '', 
-              accountNumber: Get.parameters['accountNumber'] ?? args['accountNumber'] ?? ''
-          );
+        final args = Get.arguments ?? {};
+        return WithdrawScreen(
+          symbol: Get.parameters['symbol'] ?? args['symbol'] ?? '',
+          accountNumber:
+              Get.parameters['accountNumber'] ?? args['accountNumber'] ?? '',
+        );
       },
     ),
   ];

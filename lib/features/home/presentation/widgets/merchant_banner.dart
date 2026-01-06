@@ -1,6 +1,7 @@
-import 'package:BitOwi/features/merchant/presentation/pages/become_merchant_page.dart';
+import 'package:BitOwi/config/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 
 class MerchantBanner extends StatelessWidget {
   final String merchantStatus;
@@ -13,10 +14,7 @@ class MerchantBanner extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => BecomeMerchantPage()),
-        );
+        Get.toNamed(Routes.becomeMerchant);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
