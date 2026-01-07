@@ -174,97 +174,101 @@ class _ChangeTransactionPasswordPageState
         ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _label("Email"),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFECEFF5),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFDAE0EE)),
-                ),
-                child: Row(
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SvgPicture.asset(
-                      "assets/icons/sign_up/sms.svg",
-                      width: 20,
-                      height: 20,
-                      colorFilter: const ColorFilter.mode(
-                        Color(0xFF717F9A),
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        _email,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xFF151E2F),
-                          fontFamily: 'Inter',
-                        ),
-                      ),
-                    ),
+                    _label("Email"),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
+                        horizontal: 12,
+                        vertical: 10,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFEAF9F0),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFFABEAC6)),
+                        color: const Color(0xFFECEFF5),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFDAE0EE)),
                       ),
                       child: Row(
                         children: [
                           SvgPicture.asset(
-                            'assets/icons/profile_page/account_security/check-circle.svg',
-                            height: 18,
-                            width: 18,
+                            "assets/icons/sign_up/sms.svg",
+                            width: 24,
+                            height: 24,
+                            colorFilter: const ColorFilter.mode(
+                              Color(0xFF717F9A),
+                              BlendMode.srcIn,
+                            ),
                           ),
-                          SizedBox(width: 4),
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(0, 2, 0, 2),
+                          const SizedBox(width: 12),
+                          Expanded(
                             child: Text(
-                              "Verified",
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xFF40A372),
+                              _email,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xFF151E2F),
+                                fontFamily: 'Inter',
                               ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEAF9F0),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: const Color(0xFFABEAC6)),
+                            ),
+                            child: Row(
+                              children: [
+                                SvgPicture.asset(
+                                  'assets/icons/profile_page/account_security/check-circle.svg',
+                                  height: 18,
+                                  width: 18,
+                                ),
+                                SizedBox(width: 4),
+                                Text(
+                                  "Verified",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xFF40A372),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
                     ),
+                    const SizedBox(height: 24),
+
+                    _label("Transaction Password"),
+                    _passwordField(
+                      controller: _passController,
+                      placeholder: "Enter 6-Digit Password",
+                    ),
+                    const SizedBox(height: 24),
+
+                    _label("Confirm Transaction Password"),
+                    _passwordField(
+                      controller: _confirmPassController,
+                      placeholder: "Re-enter 6-Digit Password",
+                    ),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
-
-              _label("Transaction Password"),
-              _passwordField(
-                controller: _passController,
-                placeholder: "Enter 6-Digit Password",
-              ),
-              const SizedBox(height: 24),
-
-              _label("Confirm Transaction Password"),
-              _passwordField(
-                controller: _confirmPassController,
-                placeholder: "Re-enter 6-Digit Password",
-              ),
-              const SizedBox(height: 40),
-
-              SizedBox(
+            ),
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
@@ -296,8 +300,8 @@ class _ChangeTransactionPasswordPageState
                         ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

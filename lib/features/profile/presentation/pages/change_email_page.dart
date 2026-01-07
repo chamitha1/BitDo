@@ -95,8 +95,8 @@ class ChangeEmailPage extends StatelessWidget {
                     // Status Badge
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
+                        horizontal: 8,
+                        vertical: 4,
                       ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFEAF9F0),
@@ -108,8 +108,8 @@ class ChangeEmailPage extends StatelessWidget {
                         children: [
                           SvgPicture.asset(
                             'assets/icons/forgot_password/check_circle.svg',
-                            width: 16,
-                            height: 16,
+                            width: 18,
+                            height: 18,
                             colorFilter: const ColorFilter.mode(
                               Color(0xFF40A372),
                               BlendMode.srcIn,
@@ -119,9 +119,9 @@ class ChangeEmailPage extends StatelessWidget {
                           const Text(
                             "Verified",
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
                               fontFamily: 'Inter',
-                              fontWeight: FontWeight.w400,
                               color: Color(0xFF40A372),
                             ),
                           ),
@@ -155,6 +155,10 @@ class ChangeEmailPage extends StatelessWidget {
                     fontFamily: 'Inter',
                     fontWeight: FontWeight.w400,
                     color: Color(0xFF717F9A),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 14,
                   ),
                   prefixIcon: Padding(
                     padding: const EdgeInsets.all(12),

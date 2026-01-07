@@ -16,7 +16,9 @@ class AddressBookPage extends StatefulWidget {
 }
 
 class _AddressBookPageState extends State<AddressBookPage> {
+  final TextEditingController _searchController = TextEditingController();
   List<PersonalAddressListRes> addresses = [];
+  List<PersonalAddressListRes> filteredAddresses = [];
   bool isLoading = true;
 
   @override
@@ -25,17 +27,46 @@ class _AddressBookPageState extends State<AddressBookPage> {
     _fetchAddresses();
   }
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   Future<void> _fetchAddresses() async {
     try {
       final list = await AccountApi.getAddressList();
       setState(() {
         addresses = list;
+        filteredAddresses = list;
         isLoading = false;
       });
+      if (_searchController.text.isNotEmpty) {
+        _filterAddresses(_searchController.text);
+      }
     } catch (e) {
       setState(() => isLoading = false);
       print("Error loading addresses: $e");
     }
+  }
+
+  void _filterAddresses(String query) {
+    if (query.isEmpty) {
+      setState(() {
+        filteredAddresses = addresses;
+      });
+      return;
+    }
+    final lowerQuery = query.toLowerCase();
+    setState(() {
+      filteredAddresses = addresses.where((item) {
+        final name = (item.name ?? '').toLowerCase();
+        final symbol = (item.symbol ?? '').toLowerCase();
+        //final address = (item.address ?? '').toLowerCase();
+        return name.contains(lowerQuery) || symbol.contains(lowerQuery);
+        //|| address.contains(lowerQuery);
+      }).toList();
+    });
   }
 
   @override
@@ -81,11 +112,14 @@ class _AddressBookPageState extends State<AddressBookPage> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               child: Container(
                 decoration: BoxDecoration(
-                  color: const Color(0x73F6F9FF),
+                  color: Colors.white, //Color.fromRGBO(246, 249, 255, 0.45),
+
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: const Color(0xFFDAE0EE), width: 1),
                 ),
                 child: TextField(
+                  controller: _searchController,
+                  onChanged: _filterAddresses,
                   decoration: InputDecoration(
                     hintText: "Search Address or Currency",
                     hintStyle: const TextStyle(
@@ -117,7 +151,7 @@ class _AddressBookPageState extends State<AddressBookPage> {
             Expanded(
               child: isLoading
                   ? const Center(child: CircularProgressIndicator())
-                  : addresses.isEmpty
+                  : filteredAddresses.isEmpty
                   ? const Center(
                       child: Text(
                         "No addresses found",
@@ -129,11 +163,11 @@ class _AddressBookPageState extends State<AddressBookPage> {
                         horizontal: 20,
                         vertical: 10,
                       ),
-                      itemCount: addresses.length,
+                      itemCount: filteredAddresses.length,
                       separatorBuilder: (context, index) =>
                           const SizedBox(height: 16),
                       itemBuilder: (context, index) {
-                        final item = addresses[index];
+                        final item = filteredAddresses[index];
                         // icon based on sybol
                         String iconPath =
                             'assets/icons/profile_page/address/usdt.svg';

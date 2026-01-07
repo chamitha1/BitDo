@@ -258,7 +258,7 @@ class _AddAddressPageState extends State<AddAddressPage> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Color(0xffF6F9FF),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFFDAE0EE)),
       ),
@@ -324,7 +324,7 @@ class _AddAddressPageState extends State<AddAddressPage> {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Color(0xffF6F9FF),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: const Color(0xFFDAE0EE)),
             ),

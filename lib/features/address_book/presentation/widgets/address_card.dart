@@ -159,13 +159,15 @@ class AddressCard extends StatelessWidget {
                           color: const Color(0xFFE9F6FF),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        padding: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(6),
                         child: SvgPicture.asset(
-                          'assets/icons/deposit/copy.svg',
+                          'assets/icons/profile_page/address/copy.svg',
                           colorFilter: const ColorFilter.mode(
-                            Color(0xFF1D5DE5),
+                            Color(0xff28A6FF),
                             BlendMode.srcIn,
                           ),
+                          width: 20,
+                          height: 20,
                         ),
                       ),
                     ),
