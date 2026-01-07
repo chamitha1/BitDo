@@ -20,7 +20,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final BalanceController controller = Get.put(BalanceController());
-  
+
   int _navIndex = 0;
 
   late EasyRefreshController _refreshController;
@@ -59,14 +59,15 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               // Index 0: Home
               SingleChildScrollView(
-                padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
+                padding: const EdgeInsets.only(
+                  left: 20.0,
+                  right: 20.0,
+                  bottom: 20.0,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
-                      height: 56,
-                      child: const HomeHeader(),
-                    ),
+                    SizedBox(height: 56, child: const HomeHeader()),
                     const SizedBox(height: 20),
                     const WalletCard(),
                     const SizedBox(height: 20),
@@ -92,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               // Index 1: P2P
-              const P2PPage(),
+              // const P2PPage(),
               // Index 2: Order (Placeholder)
               // const Center(child: Text("Order Page")),
               // Index 2: Profile

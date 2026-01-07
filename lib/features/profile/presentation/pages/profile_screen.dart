@@ -1,4 +1,5 @@
 import 'package:BitOwi/config/routes.dart';
+import 'package:BitOwi/features/address_book/presentation/pages/address_book_page.dart';
 import 'package:BitOwi/features/auth/presentation/controllers/user_controller.dart';
 import 'package:BitOwi/features/merchant/presentation/pages/user_kyc_information_page.dart';
 import 'package:BitOwi/features/profile/presentation/pages/change_transaction_password_page.dart';
@@ -311,75 +312,79 @@ class ProfileScreen extends StatelessWidget {
     return Column(
       children: [
         // Account and security and address book (kyc?)
-        ProfileGroupCard(children: [
-          ProfileMenuItem(
-            iconPath: 'assets/icons/merchant_details/user_kyc.svg',
-            title: "KYC",
-            subtitle: "User KYC verification",
-            onTap: () {
-              Get.to(
-                () => UserKycInformationPage(),
-                binding: BindingsBuilder(() {
-                  Get.put(UserKycInformationController());
-                }),
-              );
-            },
-          ),
-          const Divider(height: 1, color: Color(0xFFF0F4FF)),
-          ProfileMenuItem(
-            iconPath: 'assets/icons/profile_page/security.svg',
-            title: "Account and Security",
-            subtitle: "Manage your profile and settings",
-            onTap: () => Get.to(() => AccountAndSecurityPage()),
-          ),
-          const Divider(height: 1, color: Color(0xFFF0F4FF)),
-          ProfileMenuItem(
-            iconPath: 'assets/icons/profile_page/address.svg',
-            title: "Address Book",
-            subtitle: "Manage your saved addresses",
-            onTap: () => Get.to(() => const ChangeTransactionPasswordPage()),
-          ),
-          // const Divider(height: 1, color: Color(0xFFF0F4FF)),
+        ProfileGroupCard(
+          children: [
+            ProfileMenuItem(
+              iconPath: 'assets/icons/merchant_details/user_kyc.svg',
+              title: "KYC",
+              subtitle: "User KYC verification",
+              onTap: () {
+                Get.to(
+                  () => UserKycInformationPage(),
+                  binding: BindingsBuilder(() {
+                    Get.put(UserKycInformationController());
+                  }),
+                );
+              },
+            ),
+            const Divider(height: 1, color: Color(0xFFF0F4FF)),
+            ProfileMenuItem(
+              iconPath: 'assets/icons/profile_page/security.svg',
+              title: "Account and Security",
+              subtitle: "Manage your profile and settings",
+              onTap: () => Get.to(() => AccountAndSecurityPage()),
+            ),
+            const Divider(height: 1, color: Color(0xFFF0F4FF)),
+            ProfileMenuItem(
+              iconPath: 'assets/icons/profile_page/address.svg',
+              title: "Address Book",
+              subtitle: "Manage your saved addresses",
+              onTap: () => Get.to(() => AddressBookPage()),
+            ),
+            // const Divider(height: 1, color: Color(0xFFF0F4FF)),
 
-          // ProfileMenuItem(
-          //   iconPath: 'assets/icons/profile_page/security.svg',
-          //   title: "Change Transaction Password",
-          //   subtitle: "",
-          //   onTap: () => Get.to(() => const ChangeTransactionPasswordPage()),
-          // ),
-          const Divider(height: 1, color: Color(0xFFF0F4FF)),
-        ]),
+            // ProfileMenuItem(
+            //   iconPath: 'assets/icons/profile_page/security.svg',
+            //   title: "Change Transaction Password",
+            //   subtitle: "",
+            //   onTap: () => Get.to(() => const ChangeTransactionPasswordPage()),
+            // ),
+            const Divider(height: 1, color: Color(0xFFF0F4FF)),
+          ],
+        ),
         const SizedBox(height: 16),
         //Help and about us
-        ProfileGroupCard(children: [
-          ProfileMenuItem(
-            iconPath: 'assets/icons/profile_page/info_circle.svg',
-            title: "Help Center ",
-            subtitle: "Support, FAQs, and assistance",
-            onTap: () => Get.to(() => const ChangeTransactionPasswordPage()),
-          ),
-          const Divider(height: 1, color: Color(0xFFF0F4FF)),
+        ProfileGroupCard(
+          children: [
+            ProfileMenuItem(
+              iconPath: 'assets/icons/profile_page/info_circle.svg',
+              title: "Help Center ",
+              subtitle: "Support, FAQs, and assistance",
+              onTap: () => Get.to(() => const ChangeTransactionPasswordPage()),
+            ),
+            const Divider(height: 1, color: Color(0xFFF0F4FF)),
 
-          ProfileMenuItem(
-            iconPath: 'assets/icons/profile_page/about.svg',
-            title: "About us",
-            subtitle: "Learn more about the app",
-            onTap: () => Get.to(() => const ChangeTransactionPasswordPage()),
-          ),
-        ]),
+            ProfileMenuItem(
+              iconPath: 'assets/icons/profile_page/about.svg',
+              title: "About us",
+              subtitle: "Learn more about the app",
+              onTap: () => Get.to(() => const ChangeTransactionPasswordPage()),
+            ),
+          ],
+        ),
         const SizedBox(height: 16),
 
-        ProfileGroupCard(children: [
-          ProfileMenuItem(
-            iconPath: 'assets/icons/profile_page/setting.svg',
-            title: "Settings",
-            subtitle: "Account and application prefer",
-            onTap: () => Get.to(() => const ChangeTransactionPasswordPage()),
-          ),
-        ]),
+        ProfileGroupCard(
+          children: [
+            ProfileMenuItem(
+              iconPath: 'assets/icons/profile_page/setting.svg',
+              title: "Settings",
+              subtitle: "Account and application prefer",
+              onTap: () => Get.to(() => const ChangeTransactionPasswordPage()),
+            ),
+          ],
+        ),
       ],
     );
   }
-
-
 }
