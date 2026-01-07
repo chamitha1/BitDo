@@ -60,27 +60,29 @@ class UserKycStatusPage extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: const Color(0xFF22C55E).withOpacity(0.12),
                 ),
-                child: const Icon(
-                  Icons.check_circle,
-                  color: Color(0xFF22C55E),
-                  size: 36,
+                child: Center(
+                  child: SvgPicture.asset(
+                    'assets/icons/merchant_details/checked_circle.svg',
+                    width: 36,
+                    height: 36,
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
 
               const SizedBox(height: 20),
 
-              const Text(
-                "Successfully Submitted",
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 20,
-                  color: Color(0xFF151E2F),
+              if (identifyOrderLatestSubmittedInfoStatus == '0') ...[
+                const Text(
+                  "Successfully Submitted",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 20,
+                    color: Color(0xFF151E2F),
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: 8),
-
-              if (identifyOrderLatestSubmittedInfoStatus == '0')
+                const SizedBox(height: 8),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 24),
                   child: const Text(
@@ -93,6 +95,16 @@ class UserKycStatusPage extends StatelessWidget {
                     ),
                   ),
                 ),
+              ] else if (identifyOrderLatestSubmittedInfoStatus == '1') ...[
+                const Text(
+                  "Successful Review",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 20,
+                    color: Color(0xFF151E2F),
+                  ),
+                ),
+              ],
 
               const Divider(color: Color(0xFFE2E8F0)),
               const SizedBox(height: 16),
@@ -128,7 +140,8 @@ class UserKycStatusPage extends StatelessWidget {
   }
 
   Container userKYCRemindCard() {
-    final bool isRejected = identifyOrderLatestSubmittedInfoStatus == '2'; // wont come here
+    final bool isRejected =
+        identifyOrderLatestSubmittedInfoStatus == '2'; // wont come here
     final bool isApproved = identifyOrderLatestSubmittedInfoStatus == '1';
     final bool isPending = identifyOrderLatestSubmittedInfoStatus == '0';
 

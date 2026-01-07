@@ -1,5 +1,6 @@
 import 'package:BitOwi/features/merchant/presentation/controllers/user_kyc_personal_information_controller.dart';
 import 'package:BitOwi/features/merchant/presentation/widgets/expiry_calendar.dart';
+import 'package:BitOwi/features/merchant/presentation/widgets/kyc_title_label.dart';
 import 'package:BitOwi/features/merchant/presentation/widgets/user_kyc_information_status_page.dart';
 import 'package:BitOwi/models/country_list_res.dart';
 import 'package:BitOwi/models/dict.dart';
@@ -819,7 +820,7 @@ class UserKycInformationPage extends StatelessWidget {
 
               /// ⬆️ UPLOAD BUTTON
               ElevatedButton.icon(
-                onPressed: controller.pickImage, // 🔁
+                onPressed: controller.onPickIdImage, // 🔁
                 icon: SvgPicture.asset(
                   'assets/icons/merchant_details/upload.svg',
                   height: 16,
@@ -829,19 +830,17 @@ class UserKycInformationPage extends StatelessWidget {
                     BlendMode.srcIn,
                   ),
                 ),
-                label: Obx(
-                  () => Text(
-                    // 🔁
-                    controller.uploadedFileName.value ?? "Click to Upload",
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w500,
-                      fontSize: 16,
-                      color: Colors.white,
-                    ),
+                label: Text(
+                  "Click to Upload",
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                    color: Colors.white,
                   ),
                 ),
+
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1D5DE5),
                   elevation: 0,
@@ -978,10 +977,7 @@ class UserKycInformationPage extends StatelessWidget {
                   top: 14,
                   right: 14,
                   child: GestureDetector(
-                    onTap: () {
-                      controller.faceUrl.value = null; // 🔁
-                      controller.uploadedFileName.value = null; // 🔁
-                    },
+                    onTap: controller.removeIdImage,
                     child: Container(
                       width: 24,
                       height: 24,
@@ -1015,7 +1011,7 @@ class UserKycInformationPage extends StatelessWidget {
                         child: SizedBox(
                           height: 48,
                           child: OutlinedButton.icon(
-                            onPressed: controller.pickImage, // 🔁
+                            onPressed: controller.onPickIdImage, // 🔁
                             icon: SvgPicture.asset(
                               'assets/icons/merchant_details/upload.svg',
                               height: 16,
@@ -1049,31 +1045,6 @@ class UserKycInformationPage extends StatelessWidget {
     });
   }
 
-  //! -- submit button methods --
-  void showRedToast(
-    BuildContext context,
-    String message, {
-    Duration duration = const Duration(seconds: 2),
-  }) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            message,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          backgroundColor: const Color(0xFFD32F2F), // 🔴 Red
-          duration: duration,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-      );
-  }
-
   Widget _buildForm(BuildContext context) {
     return Form(
       key: _formKey,
@@ -1085,42 +1056,27 @@ class UserKycInformationPage extends StatelessWidget {
               controller.showWarning.value)
             buildTopTipWarningCard(),
           // Nationality
-          buildTitleLabelText("Nationality"),
+          KycTitleLabel("Nationality"),
           buildNationalitySelection(),
           // Name
-          buildTitleLabelText("Name"),
+          KycTitleLabel("Name"),
           buildNameTextInput(),
           // Type of ID
-          buildTitleLabelText("Type of ID"),
+          KycTitleLabel("Type of ID"),
           buildIdTypeSelection(),
           // Expiry Date
-          buildTitleLabelText("Expiry Date"),
+          KycTitleLabel("Expiry Date"),
           buildExpirySelection(context),
           // ID Number
-          buildTitleLabelText("ID Number"),
+          KycTitleLabel("ID Number"),
           buildIdTextInput(),
           // ID Picture
-          buildTitleLabelText("ID Picture"),
+          KycTitleLabel("ID Picture"),
           buildIDPhotoSelection(),
           const SizedBox(height: 32),
           buildSubmitButton(context),
           const SizedBox(height: 40),
         ],
-      ),
-    );
-  }
-
-  Padding buildTitleLabelText(String titleText) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 16, bottom: 8),
-      child: Text(
-        titleText,
-        style: TextStyle(
-          fontFamily: 'Inter',
-          fontWeight: FontWeight.w400,
-          fontSize: 14,
-          color: Color(0xFF2E3D5B),
-        ),
       ),
     );
   }

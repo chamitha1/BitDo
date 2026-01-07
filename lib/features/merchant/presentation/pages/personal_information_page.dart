@@ -1,15 +1,15 @@
+import 'package:BitOwi/core/widgets/custom_snackbar.dart';
 import 'package:BitOwi/features/merchant/presentation/controllers/kyc_personal_information_controller.dart';
 import 'package:BitOwi/features/merchant/presentation/widgets/expiry_calendar.dart';
+import 'package:BitOwi/features/merchant/presentation/widgets/kyc_title_label.dart';
 import 'package:BitOwi/features/merchant/presentation/widgets/personal_information_status_page.dart';
 import 'package:BitOwi/models/country_list_res.dart';
 import 'package:BitOwi/models/dict.dart';
-import 'package:BitOwi/utils/aws_upload_util.dart';
 import 'package:BitOwi/utils/string_utils.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 class KycPersonalInformationPage extends StatelessWidget {
@@ -836,7 +836,7 @@ class KycPersonalInformationPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton.icon(
-                    onPressed: onPickFaceImage,
+                    onPressed: controller.onPickIdImage,
                     icon: SvgPicture.asset(
                       'assets/icons/merchant_details/upload.svg',
                       height: 16,
@@ -847,7 +847,7 @@ class KycPersonalInformationPage extends StatelessWidget {
                       ),
                     ),
                     label: Text(
-                      controller.uploadedFileName.value ?? "Click to Upload",
+                      "Click to Upload",
                       style: const TextStyle(
                         fontFamily: 'Inter',
                         fontWeight: FontWeight.w500,
@@ -990,7 +990,7 @@ class KycPersonalInformationPage extends StatelessWidget {
                 top: 14,
                 right: 14,
                 child: GestureDetector(
-                  onTap: removeFaceImage,
+                  onTap: controller.removeIdImage,
                   child: Container(
                     width: 24,
                     height: 24,
@@ -1024,7 +1024,7 @@ class KycPersonalInformationPage extends StatelessWidget {
                       child: SizedBox(
                         height: 48,
                         child: OutlinedButton.icon(
-                          onPressed: onPickFaceImage,
+                          onPressed: controller.onPickIdImage,
                           icon: SvgPicture.asset(
                             'assets/icons/merchant_details/upload.svg',
                             height: 16,
@@ -1057,96 +1057,6 @@ class KycPersonalInformationPage extends StatelessWidget {
     );
   }
 
-  Future<void> pickImageFromGallery() async {
-    if (controller.isIdImageUploading.value) return; // 🛑
-    try {
-      controller.isIdImageUploading.value = true;
-
-      final ImagePicker picker = ImagePicker();
-
-      final XFile? pickedFile = await picker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 85, // compress slightly (optional)
-      );
-
-      if (pickedFile == null) {
-        controller.isIdImageUploading.value = false;
-        return;
-      }
-
-      // ---------- SIZE CHECK ----------
-      final bytes = await pickedFile.readAsBytes();
-      const maxSize = 5 * 1024 * 1024; // 5 MB
-
-      if (bytes.lengthInBytes > maxSize) {
-        Get.snackbar(
-          'Error',
-          'Image size cannot exceed 5MB',
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
-        controller.isIdImageUploading.value = false;
-        return;
-      }
-
-      // ---------- UPLOAD ----------
-      // If you still upload to AWS like before
-      // show loading if needed
-      // showLoadingToast(context, "Uploading image...");
-
-      final url = await AwsUploadUtil().upload(file: pickedFile);
-
-      // success
-      controller.uploadedFileName.value = pickedFile.name; // ✅
-      controller.faceUrl.value = url;
-    } catch (e) {
-      Get.snackbar(
-        'Upload Failed',
-        'Image upload failed, please try again',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-      print(e);
-    } finally {
-      controller.isIdImageUploading.value = false;
-    }
-  }
-
-  Future<void> onPickFaceImage() async {
-    await pickImageFromGallery();
-  }
-
-  /// ❌ Remove image
-  void removeFaceImage() {
-    controller.faceUrl.value = null;
-    controller.uploadedFileName.value = null;
-  }
-
-  //! -- submit button methods --
-  void showRedToast(
-    BuildContext context,
-    String message, {
-    Duration duration = const Duration(seconds: 2),
-  }) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            message,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          backgroundColor: const Color(0xFFD32F2F), // 🔴 Red
-          duration: duration,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-      );
-  }
-
   Widget personalInfoInputContent(BuildContext context) {
     return Form(
       key: _formKey,
@@ -1158,42 +1068,27 @@ class KycPersonalInformationPage extends StatelessWidget {
               controller.showWarning.value) // 🔁
             buildTopTipWarningCard(),
           // Nationality
-          buildTitleLabelText("Nationality"),
+          KycTitleLabel("Nationality"),
           buildNationalitySelection(),
           // Name
-          buildTitleLabelText("Name"),
+          KycTitleLabel("Name"),
           buildNameTextInput(),
           // Type of ID
-          buildTitleLabelText("Type of ID"),
+          KycTitleLabel("Type of ID"),
           buildIdTypeSelection(),
           // Expiry Date
-          buildTitleLabelText("Expiry Date"),
+          KycTitleLabel("Expiry Date"),
           buildExpirySelection(context),
           // ID Number
-          buildTitleLabelText("ID Number"),
+          KycTitleLabel("ID Number"),
           buildIdTextInput(),
           // ID Picture
-          buildTitleLabelText("ID Picture"),
+          KycTitleLabel("ID Picture"),
           buildIDPhotoSelection(),
           const SizedBox(height: 32),
           buildSubmitButton(context),
           const SizedBox(height: 40),
         ],
-      ),
-    );
-  }
-
-  Padding buildTitleLabelText(String titleText) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 16, bottom: 8),
-      child: Text(
-        titleText,
-        style: TextStyle(
-          fontFamily: 'Inter',
-          fontWeight: FontWeight.w400,
-          fontSize: 14,
-          color: Color(0xFF2E3D5B),
-        ),
       ),
     );
   }
@@ -1276,11 +1171,9 @@ class KycPersonalInformationPage extends StatelessWidget {
                   final success = await controller.submitKyc(); // 🧠
 
                   if (success) {
-                    Get.snackbar(
-                      "Success",
-                      "KYC Information Submitted!",
-                      backgroundColor: const Color(0xFF10B981),
-                      colorText: Colors.white,
+                    CustomSnackbar.showError(
+                      title: "Success",
+                      message: "KYC Information Submitted!",
                     );
                     // //TODO:   getLatestIdentifyOrderList getLatestIdentifyOrderList getLatestIdentifyOrderList getLatestIdentifyOrderList
                     //       await getLatestIdentifyOrderList();
@@ -1291,11 +1184,9 @@ class KycPersonalInformationPage extends StatelessWidget {
                     //       }
                     // Get.back(result: true); // 🔁 return result
                   } else {
-                    Get.snackbar(
-                      "Error",
-                      "Submission failed",
-                      backgroundColor: Colors.red,
-                      colorText: Colors.white,
+                    CustomSnackbar.showError(
+                      title: "Error",
+                      message: "Submission failed",
                     );
                   }
 

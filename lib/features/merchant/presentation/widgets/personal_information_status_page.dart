@@ -1,5 +1,6 @@
 import 'package:BitOwi/features/merchant/presentation/widgets/reminder_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 
 class SuccessfullySubmittedKYCInfo extends StatelessWidget {
@@ -61,10 +62,13 @@ class SuccessfullySubmittedKYCInfo extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: const Color(0xFF22C55E).withOpacity(0.12),
                 ),
-                child: const Icon(
-                  Icons.check_circle,
-                  color: Color(0xFF22C55E),
-                  size: 36,
+                child: Center(
+                  child: SvgPicture.asset(
+                    'assets/icons/merchant_details/checked_circle.svg',
+                    width: 36,
+                    height: 36,
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
 
@@ -117,7 +121,7 @@ class SuccessfullySubmittedKYCInfo extends StatelessWidget {
         ReminderCard(
           merchantStatus: merchantStatus,
           identifyOrderLatestSubmittedInfoStatus:
-            identifyOrderLatestSubmittedInfoStatus , 
+              identifyOrderLatestSubmittedInfoStatus,
         ),
 
         const SizedBox(height: 32),

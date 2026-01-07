@@ -1,5 +1,8 @@
+import 'dart:io';
 import 'package:BitOwi/api/common_api.dart';
 import 'package:BitOwi/api/user_api.dart';
+import 'package:BitOwi/core/widgets/custom_snackbar.dart';
+import 'package:BitOwi/features/merchant/presentation/widgets/image_picker_modal.dart';
 import 'package:BitOwi/models/country_list_res.dart';
 import 'package:BitOwi/models/dict.dart';
 import 'package:BitOwi/models/identify_order_list_res.dart';
@@ -38,7 +41,6 @@ class UserKycInformationController extends GetxController {
   late final Worker _idWorker;
 
   final faceUrl = RxnString();
-  final uploadedFileName = RxnString();
 
   final topTip = ''.obs;
 
@@ -141,34 +143,98 @@ class UserKycInformationController extends GetxController {
   }
 
   /// ───────────────── IMAGE PICK ─────────────────
-  Future<void> pickImage() async {
-    if (isIdImageUploading.value) return; // ⛔️ GUARD (HERE)
+  // Future<void> pickImageFromGallery() async {
+  //   if (isIdImageUploading.value) return; // ⛔️ GUARD (HERE)
+  //   try {
+  //     isIdImageUploading.value = true;
+
+  //     final ImagePicker picker = ImagePicker();
+  //     final XFile? picked = await picker.pickImage(
+  //       source: ImageSource.gallery,
+  //       imageQuality: 85,
+  //     );
+
+  //     if (picked == null) {
+  //       isIdImageUploading.value = false;
+  //       return;
+  //     }
+
+  //     final bytes = await picked.readAsBytes();
+  //     if (bytes.lengthInBytes > 5 * 1024 * 1024) {
+  //       CustomSnackbar.showError(
+  //         title: "Error",
+  //         message: "Image size cannot exceed 5MB",
+  //       );
+  //       isIdImageUploading.value = false;
+  //       return;
+  //     }
+
+  //     // ---------- UPLOAD ----------
+  //     final url = await AwsUploadUtil().upload(file: picked);
+  //     faceUrl.value = url;
+  //   } catch (e) {
+  //     CustomSnackbar.showError(
+  //       title: "Image Upload Failed",
+  //       message: "Image upload failed, please try again",
+  //     );
+  //     print(e);
+  //   } finally {
+  //     isIdImageUploading.value = false;
+  //   }
+  // }
+
+  void removeIdImage() {
+    faceUrl.value = null;
+  }
+
+  Future<void> pickKYCImage(ValueChanged<String> onPicked) async {
+    if (isIdImageUploading.value) return; // ⛔️ GUARD
+
+    isIdImageUploading.value = true;
+
     try {
-      isIdImageUploading.value = true;
+      final XFile? pickedFile = await ImagePickerModal.showModal(Get.context!);
+      if (pickedFile == null) {
+        isIdImageUploading.value = false;
+        return;
+      }
+      removeIdImage();
 
-      final ImagePicker picker = ImagePicker();
-      final XFile? picked = await picker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 85,
-      );
+      final file = File(pickedFile.path);
+      final size = await file.length();
+      const maxSize = 5 * 1024 * 1024;
 
-      if (picked == null) {
+      if (size > maxSize) {
+        CustomSnackbar.showError(
+          title: "Upload Failed",
+          message: "Image is too large. Please upload an image under 5MB.",
+        );
         isIdImageUploading.value = false;
         return;
       }
 
-      final bytes = await picked.readAsBytes();
-      if (bytes.lengthInBytes > 5 * 1024 * 1024) {
-        Get.snackbar('Error', 'Image size cannot exceed 5MB');
-        return;
-      }
-
-      final url = await AwsUploadUtil().upload(file: picked);
-      faceUrl.value = url;
-      uploadedFileName.value = picked.name;
+      // ---------- UPLOAD ----------
+      final url = await AwsUploadUtil().upload(file: pickedFile);
+      onPicked(url);
+    } on UploadTooLargeException {
+      CustomSnackbar.showError(
+        title: "Upload Failed",
+        message: "Image is too large. Please upload an image under 5MB.",
+      );
+    } catch (e) {
+      CustomSnackbar.showError(
+        title: "Upload Failed",
+        message: "Image upload failed, please try again",
+      );
     } finally {
       isIdImageUploading.value = false;
     }
+  }
+
+  Future<void> onPickIdImage() async {
+    await pickKYCImage((String key) {
+      faceUrl.value = key;
+    });
   }
 
   /// ───────────────── SUBMIT ─────────────────
@@ -182,7 +248,10 @@ class UserKycInformationController extends GetxController {
       final formattedDate = ExpiryDateUtils.format(selectedExpiryDate.value);
 
       if (!isFormReady) {
-        Get.snackbar('Error', 'Please complete all required fields');
+        CustomSnackbar.showError(
+          title: "Error",
+          message: "Please complete all required fields",
+        );
         return;
       }
 
@@ -197,9 +266,12 @@ class UserKycInformationController extends GetxController {
 
       if (res['errorCode'] == 'Success' || res['errorMsg'] == 'SUCCESS') {
         await getLatestIdentifyOrderList();
-        Get.snackbar('Success', 'KYC Information Submitted!');
+        CustomSnackbar.showSuccess(
+          title: "Success",
+          message: "KYC Information Submitted!",
+        );
       } else {
-        Get.snackbar('Error', res['errorMsg'] ?? 'Submission failed');
+        CustomSnackbar.showError(title: "Error", message: "Submission failed");
       }
     } finally {
       isLoading.value = false;

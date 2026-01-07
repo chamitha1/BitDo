@@ -1,3 +1,7 @@
+import 'dart:io';
+import 'package:BitOwi/core/widgets/custom_snackbar.dart';
+import 'package:BitOwi/features/merchant/presentation/widgets/image_picker_modal.dart';
+import 'package:BitOwi/utils/aws_upload_util.dart';
 import 'package:BitOwi/utils/date_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -6,6 +10,7 @@ import 'package:BitOwi/api/user_api.dart';
 import 'package:BitOwi/models/country_list_res.dart';
 import 'package:BitOwi/models/dict.dart';
 import 'package:BitOwi/models/identify_order_list_res.dart';
+import 'package:image_picker/image_picker.dart';
 
 class KycPersonalInformationController extends GetxController {
   /// 🔄 UI STATE
@@ -28,9 +33,7 @@ class KycPersonalInformationController extends GetxController {
     focusedDay.value = selectedExpiryDate.value ?? DateTime.now();
   }
 
-
   final faceUrl = RxnString();
-  final uploadedFileName = RxnString();
 
   final name = ''.obs;
   final idNumber = ''.obs;
@@ -129,6 +132,60 @@ class KycPersonalInformationController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void removeIdImage() {
+    faceUrl.value = null;
+  }
+
+  Future<void> pickKYCImage(ValueChanged<String> onPicked) async {
+    if (isIdImageUploading.value) return; // ⛔️ GUARD
+
+    isIdImageUploading.value = true;
+
+    try {
+      final XFile? pickedFile = await ImagePickerModal.showModal(Get.context!);
+      if (pickedFile == null) {
+        isIdImageUploading.value = false;
+        return;
+      }
+      removeIdImage();
+
+      final file = File(pickedFile.path);
+      final size = await file.length();
+      const maxSize = 5 * 1024 * 1024;
+
+      if (size > maxSize) {
+        CustomSnackbar.showError(
+          title: "Upload Failed",
+          message: "Image is too large. Please upload an image under 5MB.",
+        );
+        isIdImageUploading.value = false;
+        return;
+      }
+
+      // ---------- UPLOAD ----------
+      final url = await AwsUploadUtil().upload(file: pickedFile);
+      onPicked(url);
+    } on UploadTooLargeException {
+      CustomSnackbar.showError(
+        title: "Upload Failed",
+        message: "Image is too large. Please upload an image under 5MB.",
+      );
+    } catch (e) {
+      CustomSnackbar.showError(
+        title: "Upload Failed",
+        message: "Image upload failed, please try again",
+      );
+    } finally {
+      isIdImageUploading.value = false;
+    }
+  }
+
+  Future<void> onPickIdImage() async {
+    await pickKYCImage((String key) {
+      faceUrl.value = key;
+    });
   }
 
   /// 📝 SUBMIT KYC
