@@ -85,6 +85,7 @@ class _ChangeTransactionPasswordPageState
         email: _email,
         bizType: SmsBizType.bindTradePwd,
       );
+      print("ChangeTransactionPasswordPage: sendOtp success: $success");
 
       if (!mounted) return;
 
@@ -115,11 +116,12 @@ class _ChangeTransactionPasswordPageState
           //  API verify here
           onVerifyPin: (pin) async {
             try {
-              await _userApi.bindTradePwd(
+              final result = await _userApi.bindTradePwd(
                 email: _email,
                 smsCode: pin,
                 tradePwd: pendingPassword,
               );
+              print("ChangeTransactionPasswordPage: bindTradePwd result: $result");
               return true;
             } catch (e) {
               print(e);
@@ -172,6 +174,8 @@ class _ChangeTransactionPasswordPageState
             color: Color(0XFF151E2F),
           ),
         ),
+        centerTitle: false,
+        titleSpacing: 0,
       ),
       body: SafeArea(
         child: Column(
@@ -245,17 +249,19 @@ class _ChangeTransactionPasswordPageState
                     const SizedBox(height: 24),
 
                     _label("Transaction Password"),
-                    _passwordField(
-                      controller: _passController,
-                      placeholder: "Enter 6-Digit Password",
-                    ),
+                      _passwordField(
+                        controller: _passController,
+                        placeholder: "Enter 6-Digit Password",
+                        showSuffix: false,
+                      ),
                     const SizedBox(height: 24),
 
                     _label("Confirm Transaction Password"),
-                    _passwordField(
-                      controller: _confirmPassController,
-                      placeholder: "Re-enter 6-Digit Password",
-                    ),
+                      _passwordField(
+                        controller: _confirmPassController,
+                        placeholder: "Re-enter 6-Digit Password",
+                        showSuffix: true,
+                      ),
                   ],
                 ),
               ),
@@ -394,6 +400,7 @@ class _ChangeTransactionPasswordPageState
   Widget _passwordField({
     required TextEditingController controller,
     required String placeholder,
+    bool showSuffix = true,
   }) {
     return TextFormField(
       controller: controller,
@@ -407,10 +414,10 @@ class _ChangeTransactionPasswordPageState
       decoration: _inputDecoration(
         hint: placeholder,
         iconPath: "assets/icons/sign_up/lock.svg",
-        suffixIconPath: !_isPasswordVisible
+        suffixIconPath: showSuffix && !_isPasswordVisible
             ? "assets/icons/sign_up/eye.svg"
-            : "assets/icons/sign_up/eye-slash.svg",
-        isPassword: true,
+            : (showSuffix ? "assets/icons/sign_up/eye-slash.svg" : null),
+        isPassword: showSuffix,
         enabled: true,
       ),
     );

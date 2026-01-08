@@ -32,6 +32,7 @@ class _AddAuthenticatorPageState extends State<AddAuthenticatorPage> {
   Future<void> _fetchSecretKey() async {
     try {
       final secret = await UserApi.getGoogleSecret();
+      print("AddAuthenticatorPage: getGoogleSecret result: $secret");
       if (mounted) {
         setState(() {
           _secretKey = secret;
@@ -92,6 +93,7 @@ class _AddAuthenticatorPageState extends State<AddAuthenticatorPage> {
         email: email,
         bizType: SmsBizType.openGoogle,
       );
+      print("AddAuthenticatorPage: sendOtp success: $success");
 
       if (!mounted) return;
 
@@ -121,18 +123,21 @@ class _AddAuthenticatorPageState extends State<AddAuthenticatorPage> {
                 secret: _secretKey,
                 smsCaptcha: pin,
               );
+              print("AddAuthenticatorPage: bindGoogleSecret success");
               return true;
             } catch (e) {
-              print(e);
+              print("AddAuthenticatorPage: bindGoogleSecret error: $e");
               CustomSnackbar.showError(title: "Error", message: "$e");
               return false;
             }
           },
           onResend: () async {
-            return await _userApi.sendOtp(
+            final success = await _userApi.sendOtp(
               email: email,
               bizType: SmsBizType.openGoogle,
             );
+            print("AddAuthenticatorPage: Resend sendOtp success: $success");
+            return success;
           },
           onVerified: () {
             Navigator.pop(context); // Close OTP Sheet
@@ -185,6 +190,7 @@ class _AddAuthenticatorPageState extends State<AddAuthenticatorPage> {
           ),
         ),
         centerTitle: false,
+        titleSpacing: 0,
       ),
       body: SafeArea(
         child: LayoutBuilder(

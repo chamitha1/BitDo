@@ -137,7 +137,7 @@ class AccountAndSecurityPage extends StatelessWidget {
                   ProfileMenuItem(
                     iconPath:
                         'assets/icons/profile_page/account_security/security-safe.svg',
-                    title: "Add Authenticator",
+                    title: "Config Authenticator",
                     subtitle: "Enable 2 Factor Authentication",
                     onTap: () {
                       final googleStatus =

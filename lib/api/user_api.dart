@@ -247,12 +247,17 @@ class UserApi {
   // Modify Email
   Future<Map<String, dynamic>> modifyEmail({
     required String newEmail,
-    required String otp,
+    required String smsCaptchaOld,
+    required String smsCaptchaNew,
   }) async {
     try {
       final response = await ApiClient.dio.post(
         '/core/v1/user/modify_email',
-        data: {'newEmail': newEmail, 'otp': otp},
+        data: {
+          'newEmail': newEmail,
+          'smsCaptchaOld': smsCaptchaOld,
+          'smsCaptchaNew': smsCaptchaNew,
+        },
       );
       print("Modify Email Response: ${response.data}");
       return response.data as Map<String, dynamic>;

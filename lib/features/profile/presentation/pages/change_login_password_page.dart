@@ -106,6 +106,7 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
         email: _email,
         bizType: SmsBizType.forgetPwd,
       );
+      print("ChangeLoginPasswordPage: sendOtp success: $success");
 
       if (!mounted) return;
 
@@ -142,6 +143,7 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
                 smsCaptcha: pin,
                 loginPwd: newPassword,
               );
+              print("ChangeLoginPasswordPage: forgetLoginPwd success");
               return true;
             } catch (e) {
               print(e);
@@ -217,6 +219,8 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
             color: Color(0XFF151E2F),
           ),
         ),
+        centerTitle: false,
+        titleSpacing: 0,
       ),
       body: SafeArea(
         child: Column(
@@ -296,6 +300,7 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
                         controller: _passController,
                         placeholder: "Enter New Password",
                         validator: _validatePassword,
+                        showSuffix: false,
                       ),
                       const SizedBox(height: 24),
 
@@ -304,6 +309,7 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
                         controller: _confirmPassController,
                         placeholder: "Re-Enter New Password",
                         validator: _validateConfirmPassword,
+                        showSuffix: true,
                       ),
                     ],
                   ),
@@ -445,6 +451,7 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
     required TextEditingController controller,
     required String placeholder,
     String? Function(String?)? validator,
+    bool showSuffix = true,
   }) {
     return TextFormField(
       controller: controller,
@@ -452,10 +459,10 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
       decoration: _inputDecoration(
         hint: placeholder,
         iconPath: "assets/icons/sign_up/lock.svg",
-        suffixIconPath: !_isPasswordVisible
+        suffixIconPath: showSuffix && !_isPasswordVisible
             ? "assets/icons/sign_up/eye.svg"
-            : "assets/icons/sign_up/eye-slash.svg",
-        isPassword: true,
+            : (showSuffix ? "assets/icons/sign_up/eye-slash.svg" : null),
+        isPassword: showSuffix,
         enabled: true,
       ),
       validator: validator ?? (value) {

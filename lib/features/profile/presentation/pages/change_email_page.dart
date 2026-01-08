@@ -21,10 +21,38 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
   String _currentEmail = "";
   bool _isLoading = false;
 
+  String _oldEmailOtp = "";
+  bool _isOldEmailVerified = false;
+  bool _isSendingOtpOld = false;
+
+  String _newEmailOtp = "";
+  bool _isNewEmailVerified = false;
+  bool _isSendingOtpNew = false;
+
+  bool _isNewEmailPopulated = false;
+
   @override
   void initState() {
     super.initState();
     _loadUserEmail();
+    _newEmailController.addListener(_onNewEmailChanged);
+  }
+
+  void _onNewEmailChanged() {
+    final text = _newEmailController.text.trim();
+    final populated = text.isNotEmpty;
+    if (_isNewEmailPopulated != populated) {
+      if (mounted) setState(() => _isNewEmailPopulated = populated);
+    }
+
+    // Reset verification if email changes
+    if (_isNewEmailVerified) {
+      if (mounted)
+        setState(() {
+          _isNewEmailVerified = false;
+          _newEmailOtp = "";
+        });
+    }
   }
 
   Future<void> _loadUserEmail() async {
@@ -41,19 +69,128 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
 
   @override
   void dispose() {
+    _newEmailController.removeListener(_onNewEmailChanged);
     _newEmailController.dispose();
     super.dispose();
   }
 
   Future<void> _onUpdate() async {
-    final newEmail = _newEmailController.text.trim();
-    if (!GetUtils.isEmail(newEmail)) {
+    // Final check
+    if (!_isOldEmailVerified || !_isNewEmailVerified) {
       CustomSnackbar.showError(
         title: "Error",
-        message: "Please enter a valid email address",
+        message: "Please verify both emails first.",
       );
       return;
     }
+
+    final newEmail = _newEmailController.text.trim();
+
+    if (_isLoading) return;
+    setState(() => _isLoading = true);
+
+    try {
+      final result = await _userApi.modifyEmail(
+        newEmail: newEmail,
+        smsCaptchaOld: _oldEmailOtp,
+        smsCaptchaNew: _newEmailOtp,
+      );
+      print("ChangeEmailPage: modifyEmail result: $result");
+
+      if (result['code'] == 200 || result['code'] == '200') {
+        _showSuccessDialog();
+      } else {
+        CustomSnackbar.showError(
+          title: "Error",
+          message: result['errorMsg'] ?? "Update Failed",
+        );
+      }
+    } catch (e) {
+      print("ChangeEmailPage: modifyEmail error: $e");
+      CustomSnackbar.showError(title: "Error", message: "$e");
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  // Verify Old Email
+  Future<void> _verifyOldEmail() async {
+    if (_isSendingOtpOld || _isOldEmailVerified) return;
+    if (_currentEmail.isEmpty) return;
+
+    setState(() => _isSendingOtpOld = true);
+
+    try {
+      final success = await _userApi.sendOtp(
+        email: _currentEmail,
+        bizType: SmsBizType.modifyEmail,
+      );
+      print("ChangeEmailPage: sendOtp (OLD) success: $success");
+
+      if (!mounted) return;
+
+      if (!success) {
+        CustomSnackbar.showError(
+          title: "Error",
+          message: "Failed to send OTP to current email.",
+        );
+        return;
+      }
+
+      CustomSnackbar.showSuccess(
+        title: "Success",
+        message: "OTP sent to your current email!",
+      );
+
+      await showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) => OtpBottomSheet(
+          email: _currentEmail,
+          otpLength: 6,
+          bizType: SmsBizType.modifyEmail,
+          onVerifyPin: (pin) async {
+            // Local verify only - save OTP
+            _oldEmailOtp = pin;
+            return true;
+          },
+          onResend: () async {
+            return await _userApi.sendOtp(
+              email: _currentEmail,
+              bizType: SmsBizType.modifyEmail,
+            );
+          },
+          onVerified: () {
+            Navigator.pop(context);
+            setState(() => _isOldEmailVerified = true);
+            CustomSnackbar.showSuccess(
+              title: "Verified",
+              message: "Current email verified!",
+            );
+          },
+        ),
+      );
+    } catch (e) {
+      if (mounted) CustomSnackbar.showError(title: "Error", message: "$e");
+    } finally {
+      if (mounted) setState(() => _isSendingOtpOld = false);
+    }
+  }
+
+  // Verify New Email
+  Future<void> _verifyNewEmail() async {
+    if (_isSendingOtpNew || _isNewEmailVerified) return;
+    final newEmail = _newEmailController.text.trim();
+
+    if (!GetUtils.isEmail(newEmail)) {
+      CustomSnackbar.showError(
+        title: "Error",
+        message: "Invalid email address",
+      );
+      return;
+    }
+
     if (newEmail == _currentEmail) {
       CustomSnackbar.showError(
         title: "Error",
@@ -62,33 +199,31 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
       return;
     }
 
-    _openOtpSheet(newEmail);
-  }
-
-  Future<void> _openOtpSheet(String newEmail) async {
-    if (_isLoading) return;
-    setState(() => _isLoading = true);
+    setState(() => _isSendingOtpNew = true);
 
     try {
       final success = await _userApi.sendOtp(
         email: newEmail,
         bizType: SmsBizType.modifyEmail,
       );
+      print("ChangeEmailPage: sendOtp (NEW) success: $success");
 
       if (!mounted) return;
 
       if (!success) {
         CustomSnackbar.showError(
           title: "Error",
-          message: "Failed to send OTP. Please try again.",
+          message: "Failed to send OTP to new email.",
         );
-        setState(() => _isLoading = false);
         return;
       }
 
-      setState(() => _isLoading = false);
+      CustomSnackbar.showSuccess(
+        title: "Success",
+        message: "OTP sent to new email!",
+      );
 
-      showModalBottomSheet(
+      await showModalBottomSheet(
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
@@ -97,13 +232,9 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
           otpLength: 6,
           bizType: SmsBizType.modifyEmail,
           onVerifyPin: (pin) async {
-            try {
-              await _userApi.modifyEmail(newEmail: newEmail, otp: pin);
-              return true;
-            } catch (e) {
-              print(e);
-              return false;
-            }
+            // Local verify only - save OTP
+            _newEmailOtp = pin;
+            return true;
           },
           onResend: () async {
             return await _userApi.sendOtp(
@@ -112,16 +243,19 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
             );
           },
           onVerified: () {
-            Navigator.pop(context); // Close OTP Sheet
-            _showSuccessDialog();
+            Navigator.pop(context);
+            setState(() => _isNewEmailVerified = true);
+            CustomSnackbar.showSuccess(
+              title: "Verified",
+              message: "New email verified!",
+            );
           },
         ),
       );
     } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        CustomSnackbar.showError(title: "Error", message: "$e");
-      }
+      if (mounted) CustomSnackbar.showError(title: "Error", message: "$e");
+    } finally {
+      if (mounted) setState(() => _isSendingOtpNew = false);
     }
   }
 
@@ -162,6 +296,7 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
           ),
         ),
         centerTitle: false,
+        titleSpacing: 0,
       ),
       body: SafeArea(
         child: Padding(
@@ -181,7 +316,7 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
               ),
               const SizedBox(height: 32),
 
-              // Current Email disabled
+              // Current Email
               const Text(
                 "Current Email",
                 style: TextStyle(
@@ -194,7 +329,7 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
               const SizedBox(height: 8),
               TextFormField(
                 initialValue: _currentEmail,
-                enabled: false,
+                readOnly: true,
                 style: const TextStyle(
                   color: Color(0xFF151E2F),
                   fontSize: 16,
@@ -223,16 +358,14 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
                     ),
                   ),
                   suffixIcon: Padding(
-                    padding: const EdgeInsets.only(
-                      right: 6,
-                      top: 6,
-                      bottom: 6,
-                    ),
+                    padding: const EdgeInsets.only(right: 6, top: 6, bottom: 6),
                     child: _verifyButton(
-                      text: "Verified",
-                      onPressed: () {},
-                      isEnabled: false,
-                      isVerified: true,
+                      text: _isOldEmailVerified
+                          ? "Verified"
+                          : (_isSendingOtpOld ? "Sending..." : "Verify"),
+                      onPressed: _verifyOldEmail,
+                      isEnabled: _currentEmail.isNotEmpty && !_isSendingOtpOld,
+                      isVerified: _isOldEmailVerified,
                     ),
                   ),
                   // Borders
@@ -277,6 +410,17 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
                   hint: "Enter New Email",
                   iconPath: "assets/icons/login/sms.svg",
                   enabled: true,
+                  suffixWidget: Padding(
+                    padding: const EdgeInsets.only(right: 6, top: 6, bottom: 6),
+                    child: _verifyButton(
+                      text: _isNewEmailVerified
+                          ? "Verified"
+                          : (_isSendingOtpNew ? "Sending..." : "Verify"),
+                      onPressed: _verifyNewEmail,
+                      isEnabled: _isNewEmailPopulated && !_isSendingOtpNew,
+                      isVerified: _isNewEmailVerified,
+                    ),
+                  ),
                 ),
               ),
 
@@ -287,9 +431,16 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : _onUpdate,
+                  onPressed:
+                      (_isOldEmailVerified &&
+                          _isNewEmailVerified &&
+                          !_isLoading)
+                      ? _onUpdate
+                      : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF1D5DE5),
+                    disabledBackgroundColor: const Color(0xFFB9C6E2),
+                    disabledForegroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -329,7 +480,7 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
     bool isVerified = false,
   }) {
     return SizedBox(
-      height: 38,
+      height: 32,
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: isVerified
@@ -355,7 +506,7 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
             elevation: 0,
             disabledBackgroundColor: Colors.transparent,
             disabledForegroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.symmetric(horizontal: isVerified ? 10 : 16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),
@@ -367,16 +518,19 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
                   children: [
                     SvgPicture.asset(
                       "assets/icons/forgot_password/check_circle.svg",
-                      width: 16,
-                      height: 16,
-                      color: const Color(0xFF40A372),
+                      width: 20,
+                      height: 20,
+                      colorFilter: const ColorFilter.mode(
+                        Color(0xFF40A372),
+                        BlendMode.srcIn,
+                      ),
                     ),
                     const SizedBox(width: 6),
                     Text(
                       text,
                       style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
                         fontFamily: 'Inter',
                         color: Color(0xFF40A372),
                       ),
@@ -386,7 +540,7 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
               : Text(
                   text,
                   style: const TextStyle(
-                    fontSize: 14,
+                    fontSize: 16,
                     fontWeight: FontWeight.w400,
                     fontFamily: 'Inter',
                     color: Colors.white,
@@ -411,7 +565,7 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
         fontSize: 16,
         fontFamily: 'Inter',
         fontWeight: FontWeight.w400,
-        color: Color(0xFF717F9A), 
+        color: Color(0xFF717F9A),
       ),
       contentPadding: const EdgeInsets.symmetric(vertical: 14),
       errorStyle: const TextStyle(
@@ -452,8 +606,7 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
           ? Padding(
               padding: const EdgeInsets.only(right: 4.0),
               child: IconButton(
-                onPressed: enabled
-                    ? null  : null,
+                onPressed: enabled ? null : null,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 icon: Padding(
