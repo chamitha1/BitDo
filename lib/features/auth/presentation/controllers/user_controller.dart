@@ -1,6 +1,7 @@
 import 'package:BitOwi/core/storage/storage_service.dart';
 import 'package:BitOwi/api/c2c_api.dart';
 import 'package:BitOwi/api/user_api.dart';
+import 'package:BitOwi/api/common_api.dart'; // Added
 import 'package:get/get.dart';
 import 'package:BitOwi/models/ads_home_res.dart';
 import 'package:BitOwi/models/user_model.dart';
@@ -11,6 +12,7 @@ class UserController extends GetxController {
   final userName = 'User'.obs;
   // Expose full user object
   final Rx<User?> user = Rx<User?>(null);
+  final RxInt notificationCount = 0.obs;
 
   @override
   void onInit() {
@@ -25,7 +27,8 @@ class UserController extends GetxController {
     if (tradeInfo.value!.commentCount == 0) {
       return '0';
     }
-    return ((tradeInfo.value!.commentGoodCount / tradeInfo.value!.commentCount) *
+    return ((tradeInfo.value!.commentGoodCount /
+                tradeInfo.value!.commentCount) *
             100)
         .toStringAsFixed(1);
   }
@@ -67,7 +70,9 @@ class UserController extends GetxController {
       print("Fetching C2C Ads Info for master: $userId");
       final res = await C2CApi.getOtherUserAdsHome(userId);
       tradeInfo.value = res;
-      print("Trade Info Fetched: OrderCount=${res.orderCount}, FinishCount=${res.orderFinishCount}");
+      print(
+        "Trade Info Fetched: OrderCount=${res.orderCount}, FinishCount=${res.orderFinishCount}",
+      );
       print("Calculated Good Rate: $goodRate");
       print("Calculated Finish Rate: $finishRate");
       print("Trade Info Fetched: OrderCount=$res");
@@ -78,6 +83,28 @@ class UserController extends GetxController {
 
   Future<void> setUserName(String name) async {
     userName.value = name;
+  }
+
+  Future<void> fetchNotificationCount() async {
+    try {
+      print("Fetching notification count...");
+      final res = await CommonApi.getSmsPageByType(
+        pageNum: 1,
+        pageSize: 10,
+        type: "2", //notifications
+      );
+      print("Notification API Response: $res");
+
+      if (res['code'] == 200 || res['code'] == '200') {
+        final data = res['data'];
+        if (data != null && data['total'] != null) {
+          notificationCount.value = int.tryParse(data['total'].toString()) ?? 0;
+          print("Notification count updated: ${notificationCount.value}");
+        }
+      }
+    } catch (e) {
+      print("Error fetching notification count: $e");
+    }
   }
 
   Future<void> logout() async {

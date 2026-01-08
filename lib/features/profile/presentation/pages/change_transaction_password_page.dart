@@ -183,7 +183,6 @@ class _ChangeTransactionPasswordPageState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _label("Email"),
-                    _label("Email"),
                     TextFormField(
                       initialValue: _email,
                       enabled: false,
@@ -196,7 +195,9 @@ class _ChangeTransactionPasswordPageState
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: const Color(0xFFECEFF5),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                        ),
                         prefixIcon: Padding(
                           padding: const EdgeInsets.all(12),
                           child: SvgPicture.asset(
@@ -224,11 +225,15 @@ class _ChangeTransactionPasswordPageState
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFFDAE0EE)),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFDAE0EE),
+                          ),
                         ),
                         disabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFFDAE0EE)),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFDAE0EE),
+                          ),
                         ),
                       ),
                     ),
@@ -365,6 +370,7 @@ class _ChangeTransactionPasswordPageState
       ),
     );
   }
+
   Widget _label(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),

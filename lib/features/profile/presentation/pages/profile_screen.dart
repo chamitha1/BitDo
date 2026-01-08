@@ -27,7 +27,7 @@ class ProfileScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 56, child: _buildTopBar()),
+              SizedBox(height: 56, child: _buildTopBar(userController)),
               const SizedBox(height: 20),
               _buildProfileCard(userController),
               const SizedBox(height: 24),
@@ -42,7 +42,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTopBar() {
+  Widget _buildTopBar(UserController userController) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -62,13 +62,15 @@ class ProfileScreen extends StatelessWidget {
             //   onTap: () {},
             // ),
             const SizedBox(width: 12),
-            _buildCircleIconButton(
+            Obx(() => _buildCircleIconButton(
               icon: SvgPicture.asset(
                 'assets/icons/profile_page/notification.svg',
               ),
               onTap: () => Get.to(() => const NotificationsPage()),
-              badgeCount: 99,
-            ),
+              badgeCount: userController.notificationCount.value > 0 
+                  ? userController.notificationCount.value 
+                  : null,
+            )),
           ],
         ),
       ],

@@ -109,4 +109,26 @@ class CommonApi {
       return []; // Return an empty list in case of error
     }
   }
+
+  /// Get SMS Page By Type
+  static Future<Map<String, dynamic>> getSmsPageByType({
+    required int pageNum,
+    required int pageSize,
+    required String type,
+  }) async {
+    try {
+      final response = await ApiClient.dio.post(
+        '/core/v1/mySms/public/my_sms_page_by_type',
+        data: {
+          'pageNum': pageNum,
+          'pageSize': pageSize,
+          'type': type,
+        },
+      );
+      return response.data as Map<String, dynamic>;
+    } catch (e) {
+      print("Get SMS Page By Type error: $e");
+      rethrow;
+    }
+  }
 }

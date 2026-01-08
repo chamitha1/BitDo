@@ -8,6 +8,7 @@ import '../widgets/merchant_banner.dart';
 import '../widgets/balance_section.dart';
 import '../widgets/home_bottom_nav_bar.dart';
 import '../../../../features/profile/presentation/pages/profile_screen.dart';
+import 'package:BitOwi/features/auth/presentation/controllers/user_controller.dart';
 import '../../../../features/p2p/presentation/pages/p2p_page.dart';
 import 'dart:convert';
 
@@ -104,7 +105,12 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       bottomNavigationBar: HomeBottomNavBar(
         currentIndex: _navIndex,
-        onTap: (index) => setState(() => _navIndex = index),
+        onTap: (index) {
+          setState(() => _navIndex = index);
+          if (index == 1) { // Profile index
+             Get.find<UserController>().fetchNotificationCount();
+          }
+        },
       ),
     );
   }
