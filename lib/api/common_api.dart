@@ -1,4 +1,5 @@
 import 'package:BitOwi/config/api_client.dart';
+import 'package:BitOwi/models/article_type.dart';
 import 'package:BitOwi/models/config.dart';
 import 'package:BitOwi/models/country_list_res.dart';
 import 'package:BitOwi/models/dict.dart';
@@ -77,6 +78,35 @@ class CommonApi {
     } catch (e) {
       print("getConfig Error: $e");
       rethrow;
+    }
+  }
+
+  /// Get list of article types for help center
+  static Future<List<ArticleType>> getArticleList(String location) async {
+    try {
+      final res = await ApiClient.dio.post(
+        '/core/v1/article_type/public/list',
+        data: {"status": '1', "location": location},
+      );
+      final data = res.data['data'];
+
+      // Check if the response is null or not a list
+      if (data is! List) {
+        print("API returned null or invalid data: $res");
+        return []; // Return an empty list in case of error
+      }
+
+      // Safely map the response to the ArticleType list
+      // List<ArticleType> list = (res as List<dynamic>)
+      List<ArticleType> list = data
+          .map((item) => ArticleType.fromJson(item))
+          .toList();
+      return list;
+    } catch (e) {
+      // ToastUtil.showError('暂无数据'.tr); //No Records
+      print("getCountryList Error: $e");
+      // rethrow;
+      return []; // Return an empty list in case of error
     }
   }
 }
