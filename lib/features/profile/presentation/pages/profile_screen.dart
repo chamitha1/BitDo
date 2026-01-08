@@ -62,15 +62,17 @@ class ProfileScreen extends StatelessWidget {
             //   onTap: () {},
             // ),
             const SizedBox(width: 12),
-            Obx(() => _buildCircleIconButton(
-              icon: SvgPicture.asset(
-                'assets/icons/profile_page/notification.svg',
+            Obx(
+              () => _buildCircleIconButton(
+                icon: SvgPicture.asset(
+                  'assets/icons/profile_page/notification.svg',
+                ),
+                onTap: () => Get.to(() => const NotificationsPage()),
+                badgeCount: userController.notificationCount.value > 0
+                    ? userController.notificationCount.value
+                    : null,
               ),
-              onTap: () => Get.to(() => const NotificationsPage()),
-              badgeCount: userController.notificationCount.value > 0 
-                  ? userController.notificationCount.value 
-                  : null,
-            )),
+            ),
           ],
         ),
       ],
@@ -324,7 +326,6 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildMenuCards(BuildContext context) {
     return Column(
       children: [
-        // Account and security and address book (kyc?)
         ProfileGroupCard(
           children: [
             ProfileMenuItem(
@@ -340,6 +341,13 @@ class ProfileScreen extends StatelessWidget {
                 );
               },
             ),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        // Account and security and address book
+        ProfileGroupCard(
+          children: [
             const Divider(height: 1, color: Color(0xFFF0F4FF)),
             ProfileMenuItem(
               iconPath: 'assets/icons/profile_page/security.svg',

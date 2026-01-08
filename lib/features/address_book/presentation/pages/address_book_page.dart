@@ -9,7 +9,9 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 class AddressBookPage extends StatefulWidget {
-  const AddressBookPage({super.key});
+  final bool isSelectionMode;
+
+  const AddressBookPage({super.key, this.isSelectionMode = false});
 
   @override
   State<AddressBookPage> createState() => _AddressBookPageState();
@@ -77,6 +79,7 @@ class _AddressBookPageState extends State<AddressBookPage> {
       appBar: AppBar(
         backgroundColor: const Color(0xFFF6F9FF),
         elevation: 0,
+        scrolledUnderElevation: 0,
         automaticallyImplyLeading: false,
         titleSpacing: 20,
         title: Row(
@@ -187,7 +190,14 @@ class _AddressBookPageState extends State<AddressBookPage> {
                               ),
                             );
 
-                        return AddressCard(apiItem: item);
+                        return GestureDetector(
+                          onTap: () {
+                            if (widget.isSelectionMode) {
+                              Get.back(result: item.address);
+                            }
+                          },
+                          child: AddressCard(apiItem: item),
+                        );
                       },
                     ),
             ),

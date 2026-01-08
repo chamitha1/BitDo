@@ -19,7 +19,7 @@ class AddAuthenticatorPage extends StatefulWidget {
 class _AddAuthenticatorPageState extends State<AddAuthenticatorPage> {
   final TextEditingController _codeController = TextEditingController();
   final UserApi _userApi = UserApi();
-  
+
   String _secretKey = "";
   bool _isLoading = false;
 
@@ -61,7 +61,10 @@ class _AddAuthenticatorPageState extends State<AddAuthenticatorPage> {
     }
 
     if (_secretKey.isEmpty) {
-      CustomSnackbar.showError(title: "Error", message: "Secret key not loaded");
+      CustomSnackbar.showError(
+        title: "Error",
+        message: "Secret key not loaded",
+      );
       return;
     }
 
@@ -70,7 +73,10 @@ class _AddAuthenticatorPageState extends State<AddAuthenticatorPage> {
 
   Future<void> _openOtpSheet(String googleCode) async {
     final userController = Get.find<UserController>();
-    final email = userController.user.value?.loginName ?? userController.user.value?.email ?? "";
+    final email =
+        userController.user.value?.loginName ??
+        userController.user.value?.email ??
+        "";
 
     if (email.isEmpty) {
       CustomSnackbar.showError(title: "Error", message: "User email not found");
@@ -107,7 +113,7 @@ class _AddAuthenticatorPageState extends State<AddAuthenticatorPage> {
         builder: (context) => OtpBottomSheet(
           email: email,
           otpLength: 6,
-          bizType: SmsBizType.openGoogle, 
+          bizType: SmsBizType.openGoogle,
           onVerifyPin: (pin) async {
             try {
               await UserApi.bindGoogleSecret(
@@ -170,7 +176,7 @@ class _AddAuthenticatorPageState extends State<AddAuthenticatorPage> {
           onPressed: () => Get.back(),
         ),
         title: const Text(
-          "Add Authenticator App",
+          "Add Authenticator",
           style: TextStyle(
             fontSize: 18,
             fontFamily: 'Inter',
@@ -187,7 +193,7 @@ class _AddAuthenticatorPageState extends State<AddAuthenticatorPage> {
               padding: const EdgeInsets.all(20.0),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight - 40, 
+                  minHeight: constraints.maxHeight - 40,
                 ),
                 child: IntrinsicHeight(
                   child: Column(
@@ -229,7 +235,9 @@ class _AddAuthenticatorPageState extends State<AddAuthenticatorPage> {
                           children: [
                             Expanded(
                               child: Text(
-                                _secretKey.isNotEmpty ? _secretKey : "Loading...",
+                                _secretKey.isNotEmpty
+                                    ? _secretKey
+                                    : "Loading...",
                                 style: const TextStyle(
                                   fontSize: 14,
                                   fontFamily: 'Inter',
@@ -257,7 +265,7 @@ class _AddAuthenticatorPageState extends State<AddAuthenticatorPage> {
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 12,
                                   vertical: 6,
-                                  ),
+                                ),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFE9F6FF),
                                   borderRadius: BorderRadius.circular(8),
@@ -327,7 +335,7 @@ class _AddAuthenticatorPageState extends State<AddAuthenticatorPage> {
                           prefixIcon: Padding(
                             padding: const EdgeInsets.all(12),
                             child: SvgPicture.asset(
-                              'assets/icons/profile_page/account_security/hashtag.svg', 
+                              'assets/icons/profile_page/account_security/hashtag.svg',
                               width: 24,
                               height: 24,
                               colorFilter: const ColorFilter.mode(
@@ -340,15 +348,21 @@ class _AddAuthenticatorPageState extends State<AddAuthenticatorPage> {
                           fillColor: Colors.white,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFFDAE0EE)),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFDAE0EE),
+                            ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFFDAE0EE)),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFDAE0EE),
+                            ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF1D5DE5)),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF1D5DE5),
+                            ),
                           ),
                         ),
                       ),
@@ -441,7 +455,7 @@ class _AddAuthenticatorPageState extends State<AddAuthenticatorPage> {
                 ),
               ),
             );
-          }
+          },
         ),
       ),
     );

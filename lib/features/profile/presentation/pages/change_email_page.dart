@@ -204,13 +204,18 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: const Color(0xFFECEFF5), // Disabled color
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 15),
                   prefixIcon: Padding(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.only(
+                      left: 10.0,
+                      top: 14.0,
+                      bottom: 14.0,
+                      right: 4.0,
+                    ),
                     child: SvgPicture.asset(
                       'assets/icons/login/sms.svg',
-                      width: 20,
-                      height: 20,
+                      width: 24,
+                      height: 24,
                       colorFilter: const ColorFilter.mode(
                         Color(0xFF717F9A),
                         BlendMode.srcIn,
@@ -268,41 +273,10 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
                   fontWeight: FontWeight.w400,
                   fontFamily: 'Inter',
                 ),
-                decoration: InputDecoration(
-                  hintText: "Enter New Email",
-                  hintStyle: const TextStyle(
-                    fontSize: 16,
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF717F9A),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                  prefixIcon: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: SvgPicture.asset(
-                      'assets/icons/login/sms.svg',
-                      width: 20,
-                      height: 20,
-                      colorFilter: const ColorFilter.mode(
-                        Color(0xFF717F9A), // Matched Signup color
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFFDAE0EE)),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFFDAE0EE)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF1D5DE5)),
-                  ),
+                decoration: _inputDecoration(
+                  hint: "Enter New Email",
+                  iconPath: "assets/icons/login/sms.svg",
+                  enabled: true,
                 ),
               ),
 
@@ -355,7 +329,7 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
     bool isVerified = false,
   }) {
     return SizedBox(
-      height: 36,
+      height: 38,
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: isVerified
@@ -391,18 +365,18 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
               ? Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Image.asset(
-                      "assets/icons/sign_up/check_circle.png",
-                      width: 14,
-                      height: 14,
+                    SvgPicture.asset(
+                      "assets/icons/forgot_password/check_circle.svg",
+                      width: 16,
+                      height: 16,
                       color: const Color(0xFF40A372),
                     ),
                     const SizedBox(width: 6),
                     Text(
                       text,
                       style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
                         fontFamily: 'Inter',
                         color: Color(0xFF40A372),
                       ),
@@ -418,6 +392,107 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
                     color: Colors.white,
                   ),
                 ),
+        ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration({
+    required String hint,
+    required String iconPath,
+    bool enabled = true,
+    String? suffixIconPath,
+    Widget? suffixWidget,
+    bool isPassword = false,
+  }) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: const TextStyle(
+        fontSize: 16,
+        fontFamily: 'Inter',
+        fontWeight: FontWeight.w400,
+        color: Color(0xFF717F9A), 
+      ),
+      contentPadding: const EdgeInsets.symmetric(vertical: 14),
+      errorStyle: const TextStyle(
+        fontSize: 12,
+        fontFamily: 'Inter',
+        fontWeight: FontWeight.w400,
+        color: Color(0xFFE74C3C),
+      ),
+
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFE74C3C), width: 1.0),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFE74C3C), width: 1.0),
+      ),
+
+      prefixIcon: Padding(
+        padding: const EdgeInsets.only(
+          left: 10.0,
+          top: 14.0,
+          bottom: 14.0,
+          right: 6.0,
+        ),
+        child: SvgPicture.asset(
+          iconPath,
+          width: 24,
+          height: 24,
+          colorFilter: const ColorFilter.mode(
+            Color(0XFF717F9A),
+            BlendMode.srcIn,
+          ),
+        ),
+      ),
+
+      suffixIcon: isPassword && suffixIconPath != null
+          ? Padding(
+              padding: const EdgeInsets.only(right: 4.0),
+              child: IconButton(
+                onPressed: enabled
+                    ? null  : null,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                icon: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SvgPicture.asset(
+                    suffixIconPath ?? "",
+                    width: 20,
+                    height: 20,
+                    colorFilter: const ColorFilter.mode(
+                      Color(0xff2E3D5B),
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : suffixWidget,
+
+      filled: true,
+      fillColor: MaterialStateColor.resolveWith((states) {
+        if (states.contains(MaterialState.disabled))
+          return const Color(0xFFECEFF5);
+        return Colors.white;
+      }),
+
+      // ✅ normal + focused (blue) borders
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFDAE0EE), width: 1.0),
+      ),
+      disabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFDAE0EE), width: 1.0),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(
+          color: Color.fromARGB(255, 112, 152, 221),
+          width: 1.0,
         ),
       ),
     );

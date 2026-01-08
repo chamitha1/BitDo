@@ -306,4 +306,24 @@ class UserApi {
   }
 
 
+  // Close Google Secret
+  static Future<void> closeGoogleSecret({
+    required String googleCaptcha,
+    required String smsCaptcha,
+  }) async {
+    try {
+      final response = await ApiClient.dio.post(
+        '/core/v1/user/close_google_secret',
+        data: {'googleCaptcha': googleCaptcha, 'smsCaptcha': smsCaptcha},
+      );
+      print("Close Google Secret Response: ${response.data}");
+      final data = response.data;
+      if (data['code'] != 200 && data['code'] != '200') {
+        throw Exception(data['errorMsg'] ?? 'Failed to close google secret');
+      }
+    } catch (e) {
+      print("Close Google Secret error: $e");
+      rethrow;
+    }
+  }
 }

@@ -12,6 +12,7 @@ import 'package:BitOwi/features/wallet/presentation/pages/qr_scanner_page.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:BitOwi/features/wallet/presentation/widgets/coin_selector_card.dart';
+import 'package:BitOwi/features/address_book/presentation/pages/address_book_page.dart';
 import 'package:get/get.dart';
 
 class WithdrawScreen extends StatefulWidget {
@@ -67,6 +68,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
 
   @override
   void dispose() {
+    Get.delete<WithdrawController>();
     super.dispose();
   }
 
@@ -208,19 +210,24 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                         suffixIcon: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            GestureDetector(
-                              onTap: () {
-                                // Address book logic
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(4),
-                                child: SvgPicture.asset(
-                                  'assets/icons/withdrawal/book.svg',
-                                  width: 20,
-                                  height: 20,
+                              GestureDetector(
+                                onTap: () async {
+                                  final result = await Get.to(
+                                    () => const AddressBookPage(isSelectionMode: true),
+                                  );
+                                  if (result != null && result is String) {
+                                    controller.addrController.text = result;
+                                  }
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4),
+                                  child: SvgPicture.asset(
+                                    'assets/icons/withdrawal/book.svg',
+                                    width: 20,
+                                    height: 20,
+                                  ),
                                 ),
                               ),
-                            ),
                             GestureDetector(
                               onTap: () async {
                                 var status = await Permission.camera.request();

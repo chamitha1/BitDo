@@ -196,14 +196,19 @@ class _ChangeTransactionPasswordPageState
                         filled: true,
                         fillColor: const Color(0xFFECEFF5),
                         contentPadding: const EdgeInsets.symmetric(
-                          vertical: 12,
+                          vertical: 15,
                         ),
                         prefixIcon: Padding(
-                          padding: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.only(
+                            left: 10.0,
+                            top: 14.0,
+                            bottom: 14.0,
+                            right: 4.0,
+                          ),
                           child: SvgPicture.asset(
                             "assets/icons/sign_up/sms.svg",
-                            width: 20,
-                            height: 20,
+                            width: 24,
+                            height: 24,
                             colorFilter: const ColorFilter.mode(
                               Color(0xFF717F9A),
                               BlendMode.srcIn,
@@ -303,7 +308,7 @@ class _ChangeTransactionPasswordPageState
     bool isVerified = false,
   }) {
     return SizedBox(
-      height: 36,
+      height: 38,
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: isVerified
@@ -329,7 +334,7 @@ class _ChangeTransactionPasswordPageState
             elevation: 0,
             disabledBackgroundColor: Colors.transparent,
             disabledForegroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 10),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),
@@ -339,18 +344,18 @@ class _ChangeTransactionPasswordPageState
               ? Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Image.asset(
-                      "assets/icons/sign_up/check_circle.png",
-                      width: 14,
-                      height: 14,
+                    SvgPicture.asset(
+                      "assets/icons/forgot_password/check_circle.svg",
+                      width: 16,
+                      height: 16,
                       color: const Color(0xFF40A372),
                     ),
                     const SizedBox(width: 6),
                     Text(
                       text,
                       style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
                         fontFamily: 'Inter',
                         color: Color(0xFF40A372),
                       ),
@@ -390,65 +395,126 @@ class _ChangeTransactionPasswordPageState
     required TextEditingController controller,
     required String placeholder,
   }) {
-    return TextField(
+    return TextFormField(
       controller: controller,
       obscureText: !_isPasswordVisible,
       keyboardType: TextInputType.number,
-      decoration: InputDecoration(
-        hintText: placeholder,
-        hintStyle: const TextStyle(
-          color: Color(0xFF717F9A),
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-          fontFamily: 'Inter',
+      validator: (val) {
+        if (val == null || val.isEmpty) return "Required";
+        if (val.length != 6) return "Must be 6 digits";
+        return null;
+      },
+      decoration: _inputDecoration(
+        hint: placeholder,
+        iconPath: "assets/icons/sign_up/lock.svg",
+        suffixIconPath: !_isPasswordVisible
+            ? "assets/icons/sign_up/eye.svg"
+            : "assets/icons/sign_up/eye-slash.svg",
+        isPassword: true,
+        enabled: true,
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration({
+    required String hint,
+    required String iconPath,
+    bool enabled = true,
+    String? suffixIconPath,
+    Widget? suffixWidget,
+    bool isPassword = false,
+  }) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: const TextStyle(
+        fontSize: 16,
+        fontFamily: 'Inter',
+        fontWeight: FontWeight.w400,
+        color: Color(0xFF717F9A),
+      ),
+      contentPadding: const EdgeInsets.symmetric(vertical: 14),
+      errorStyle: const TextStyle(
+        fontSize: 12,
+        fontFamily: 'Inter',
+        fontWeight: FontWeight.w400,
+        color: Color(0xFFE74C3C),
+      ),
+
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFE74C3C), width: 1.0),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFE74C3C), width: 1.0),
+      ),
+
+      prefixIcon: Padding(
+        padding: const EdgeInsets.only(
+          left: 10.0,
+          top: 14.0,
+          bottom: 14.0,
+          right: 6.0,
         ),
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(vertical: 12),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFDAE0EE)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFDAE0EE)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF1D5DE5)),
-        ),
-        prefixIcon: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: SvgPicture.asset(
-            "assets/icons/sign_up/lock.svg",
-            width: 20,
-            height: 20,
-            colorFilter: const ColorFilter.mode(
-              Color(0xFF717F9A),
-              BlendMode.srcIn,
-            ),
+        child: SvgPicture.asset(
+          iconPath,
+          width: 24,
+          height: 24,
+          colorFilter: const ColorFilter.mode(
+            Color(0XFF717F9A),
+            BlendMode.srcIn,
           ),
         ),
-        suffixIcon: Padding(
-          padding: const EdgeInsets.only(right: 6, top: 6, bottom: 6),
-          child: IconButton(
-            icon: SvgPicture.asset(
-              !_isPasswordVisible
-                  ? "assets/icons/sign_up/eye.svg"
-                  : "assets/icons/sign_up/eye-slash.svg",
-              width: 20,
-              height: 20,
-              colorFilter: const ColorFilter.mode(
-                Color(0xFF2E3D5B),
-                BlendMode.srcIn,
+      ),
+
+      suffixIcon: isPassword && suffixIconPath != null
+          ? Padding(
+              padding: const EdgeInsets.only(right: 4.0),
+              child: IconButton(
+                onPressed: enabled
+                    ? () => setState(
+                        () => _isPasswordVisible = !_isPasswordVisible,
+                      )
+                    : null,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                icon: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SvgPicture.asset(
+                    suffixIconPath,
+                    width: 20,
+                    height: 20,
+                    colorFilter: const ColorFilter.mode(
+                      Color(0xff2E3D5B),
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                ),
               ),
-            ),
-            onPressed: () {
-              setState(() {
-                _isPasswordVisible = !_isPasswordVisible;
-              });
-            },
-          ),
+            )
+          : suffixWidget,
+
+      filled: true,
+      fillColor: MaterialStateColor.resolveWith((states) {
+        if (states.contains(MaterialState.disabled))
+          return const Color(0xFFECEFF5);
+        return Colors.white;
+      }),
+
+      // ✅ normal + focused (blue) borders
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFDAE0EE), width: 1.0),
+      ),
+      disabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFDAE0EE), width: 1.0),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(
+          color: Color.fromARGB(255, 112, 152, 221),
+          width: 1.0,
         ),
       ),
     );

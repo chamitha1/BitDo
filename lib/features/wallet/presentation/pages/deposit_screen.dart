@@ -2,6 +2,7 @@ import 'package:BitOwi/features/wallet/presentation/controllers/deposit_controll
 import 'package:BitOwi/core/widgets/custom_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import '../widgets/coin_selector_card.dart';
 import 'transaction_history_page.dart';
@@ -37,11 +38,11 @@ class DepositScreen extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                       child: Center(
-                        child: Image.asset(
-                          "assets/icons/deposit/arrow_back.png",
-                          width: 20,
-                          height: 20,
-                          color: const Color(0xff151E2F),
+                        child: SvgPicture.asset(
+                          "assets/icons/withdrawal/arrow-left.svg",
+                          width: 24,
+                          height: 24,
+                          // color: const Color(0xff151E2F),
                         ),
                       ),
                     ),

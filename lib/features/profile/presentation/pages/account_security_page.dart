@@ -4,6 +4,7 @@ import 'package:BitOwi/features/profile/presentation/widgets/profile_widgets.dar
 import 'package:BitOwi/features/profile/presentation/pages/add_authenticator_page.dart';
 import 'package:BitOwi/features/profile/presentation/pages/change_email_page.dart';
 import 'package:BitOwi/features/profile/presentation/pages/change_login_password_page.dart';
+import 'package:BitOwi/features/profile/presentation/pages/disable_authenticator_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -136,10 +137,16 @@ class AccountAndSecurityPage extends StatelessWidget {
                   ProfileMenuItem(
                     iconPath:
                         'assets/icons/profile_page/account_security/security-safe.svg',
-                    title: "Authenticator App",
+                    title: "Add Authenticator",
                     subtitle: "Enable 2 Factor Authentication",
                     onTap: () {
-                      Get.to(() => const AddAuthenticatorPage());
+                      final googleStatus =
+                          userController.user.value?.googleStatus;
+                      if (googleStatus == '0' || googleStatus == 0) {
+                        Get.to(() => const AddAuthenticatorPage());
+                      } else {
+                        Get.to(() => const DisableAuthenticatorPage());
+                      }
                     },
                   ),
                   const _Divider(),

@@ -45,8 +45,6 @@
     easy_refresh: ^3.4.0
     flutter_widget_from_html: ^0.17.1
 
-    flutter_html: ^3.0.0
-
     flutter_localizations:
       sdk: flutter
     
@@ -136,15 +134,15 @@
     # example:
     fonts:
       - family: Inter
-        fonts:
-          - asset: assets/fonts/Inter.ttf
-            weight: 400
-          - asset: assets/fonts/Inter.ttf
-            weight: 500
-          - asset: assets/fonts/Inter.ttf
-            weight: 600
-          - asset: assets/fonts/Inter.ttf
-            weight: 700
+        # fonts:
+        #   - asset: assets/fonts/Inter.ttf
+        #     weight: 400
+        #   - asset: assets/fonts/Inter.ttf
+        #     weight: 500
+        #   - asset: assets/fonts/Inter.ttf
+        #     weight: 600
+        #   - asset: assets/fonts/Inter.ttf
+        #     weight: 700
       - family: Poppins
         fonts:
           - asset: assets/fonts/Poppins-Regular.ttf

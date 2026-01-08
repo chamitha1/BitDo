@@ -820,8 +820,8 @@ class _SignupScreenState extends State<SignupScreen> {
               ? Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Image.asset(
-                      "assets/icons/sign_up/check_circle.png",
+                    SvgPicture.asset(
+                      "assets/icons/forgot_password/check_circle.svg",
                       width: 14,
                       height: 14,
                       color: const Color(0xFF40A372),
