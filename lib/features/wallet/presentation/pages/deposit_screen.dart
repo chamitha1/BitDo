@@ -84,7 +84,7 @@ class DepositScreen extends StatelessWidget {
                   children: [
                     Obx(
                       () => CoinSelectorCard(
-                        coinList: controller.coinList,
+                        coinList: controller.nameList,
                         selectedCoin: controller.selectedCoin.value,
                         onCoinSelected: controller.onCoinSelected,
                         isLoading: controller.isLoading.value,

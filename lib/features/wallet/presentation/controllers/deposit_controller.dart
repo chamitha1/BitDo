@@ -11,15 +11,17 @@ import 'package:screenshot/screenshot.dart';
 
 class DepositController extends GetxController {
   var isLoading = false.obs;
-  var coinList = <ChainSymbolListRes>[].obs;
+
+  //coins: key = symbol, value = list of coins
+  var realCoinEnum = <String, List<ChainSymbolListRes>>{}.obs;
+
+  //coin list for dropdown
+  var nameList = <ChainSymbolListRes>[].obs;
+
   var selectedCoin = Rxn<ChainSymbolListRes>();
   var depositAddress = ''.obs;
-  var networkList = <String>[
-    'Bitcoin (BTC)',
-    'Bitcoin SegWit',
-    'Bitcoin Taproot',
-    'BTC Lightning'
-  ].obs;
+
+  var networkList = <String>[].obs;
   var selectedNetwork = ''.obs;
 
   @override
@@ -33,11 +35,22 @@ class DepositController extends GetxController {
       isLoading.value = true;
       final list = await AccountApi.getChainSymbolList(chargeFlag: '1');
 
-      coinList.value = list;
+      realCoinEnum.clear();
+      nameList.clear();
 
-      if (coinList.isNotEmpty) {
-        selectedCoin.value = coinList.first;
-        fetchAddress();
+      for (var element in list) {
+        if (element.symbol == null) continue;
+
+        if (!realCoinEnum.containsKey(element.symbol)) {
+          realCoinEnum[element.symbol!] = [];
+          nameList.add(element);
+        }
+        realCoinEnum[element.symbol]!.add(element);
+      }
+
+      if (nameList.isNotEmpty) {
+        selectedCoin.value = nameList.first;
+        updateNetworkList();
       }
     } catch (e) {
       print("Error fetching coin list: $e");
@@ -46,15 +59,54 @@ class DepositController extends GetxController {
     }
   }
 
+  void updateNetworkList() {
+    if (selectedCoin.value == null || selectedCoin.value!.symbol == null)
+      return;
+
+    final symbol = selectedCoin.value!.symbol!;
+    final chains = realCoinEnum[symbol];
+
+    if (chains != null && chains.isNotEmpty) {
+      // get chainTags
+      networkList.value = chains
+          .map((e) => e.chainTag ?? '')
+          .where((e) => e.isNotEmpty)
+          .toList();
+
+      if (networkList.isNotEmpty) {
+        selectedNetwork.value = networkList.first;
+        fetchAddress();
+      } else {
+        selectedNetwork.value = '';
+        depositAddress.value = '';
+      }
+    } else {
+      networkList.clear();
+      selectedNetwork.value = '';
+      depositAddress.value = '';
+    }
+  }
+
   Future<void> fetchAddress() async {
-    if (selectedCoin.value == null) return;
+    if (selectedCoin.value == null || selectedNetwork.value.isEmpty) return;
+
     try {
       isLoading.value = true;
+      final symbol = selectedCoin.value!.symbol!;
+      final chains = realCoinEnum[symbol];
 
-      String? symbolToUse = selectedCoin.value?.chainSymbol;
-      if (symbolToUse != null) {
-        final address = await AccountApi.getChainAddress(symbolToUse);
-        depositAddress.value = address;
+      if (chains != null) {
+        final chainObj = chains.firstWhere(
+          (element) => element.chainTag == selectedNetwork.value,
+          orElse: () => chains.first,
+        );
+
+        if (chainObj.chainSymbol != null) {
+          final address = await AccountApi.getChainAddress(
+            chainObj.chainSymbol!,
+          );
+          depositAddress.value = address;
+        }
       }
     } catch (e) {
       print("Error fetching address: $e");
@@ -65,11 +117,12 @@ class DepositController extends GetxController {
 
   void onCoinSelected(ChainSymbolListRes coin) {
     selectedCoin.value = coin;
-    fetchAddress();
+    updateNetworkList();
   }
 
   void onNetworkSelected(String network) {
     selectedNetwork.value = network;
+    fetchAddress();
   }
 
   final ScreenshotController screenshotController = ScreenshotController();

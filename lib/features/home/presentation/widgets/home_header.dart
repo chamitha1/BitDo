@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:BitOwi/core/storage/storage_service.dart';
+import 'package:BitOwi/features/notifications/presentation/pages/notifications_page.dart';
 
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key});
@@ -62,7 +63,10 @@ class HomeHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        _headerIconButton("assets/icons/home/notification.svg"),
+        GestureDetector(
+          onTap: () => Get.to(() => const NotificationsPage()),
+          child: _headerIconButton("assets/icons/home/notification.svg"),
+        ),
         const SizedBox(width: 12),
         // _headerIconButton("assets/icons/home/headphones.png"),
       ],

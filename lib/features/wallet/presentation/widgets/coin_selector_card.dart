@@ -83,10 +83,7 @@ class CoinSelectorCard extends StatelessWidget {
                 ),
               const SizedBox(width: 8),
               Text(
-                currency.chainTag != null &&
-                        currency.chainTag != currency.symbol
-                    ? "${currency.symbol}-${currency.chainTag}"
-                    : "${currency.symbol}",
+                "${currency.symbol}",
                 style: const TextStyle(
                   fontWeight: FontWeight.w500,
                   fontSize: 14,
@@ -126,10 +123,7 @@ class CoinSelectorCard extends StatelessWidget {
               ),
             const SizedBox(width: 8),
             Text(
-              displayCoin.chainTag != null &&
-                      displayCoin.chainTag != displayCoin.symbol
-                  ? "${displayCoin.symbol}-${displayCoin.chainTag}"
-                  : "${displayCoin.symbol}",
+              "${displayCoin.symbol}",
               style: const TextStyle(
                 fontFamily: 'Inter',
                 fontSize: 14,

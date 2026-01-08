@@ -122,15 +122,6 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
       setState(() => _isLoading = false);
 
       final newPassword = _passController.text.trim();
-      
-      // Clear fields before showing sheet as per requirement
-      // _passController.clear();
-      // _confirmPassController.clear();
-      // WARNING: If we clear here, if user cancels OTP sheet, they have to re-type.
-      // Requirement says "clear textfields--> success dialog". So clearing AFTER success seems more appropriate or right before success dialog.
-      // However, "clear textfields" is listed in the flow arrow chain: 
-      // API called -> clear textfields -> success dialog
-      // So I will clear them upon successful verification.
 
       // Show Sheet
       showModalBottomSheet(
@@ -142,7 +133,7 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
           otpLength: 6,
           // Using forgetPwd biztype
           bizType: SmsBizType.forgetPwd,
-          
+
           // API verification
           onVerifyPin: (pin) async {
             try {
@@ -155,13 +146,10 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
               return true;
             } catch (e) {
               print(e);
-              // Error snackbar is often handled by caller or we can show it here if we return false
-              // OtpBottomSheet usually shows error if this returns false? 
-              // Looking at OtpBottomSheet implementation (not provided in context but inferred), 
-              // if onVerifyPin throws or returns false, it might handle UI.
-              // Requirement: "If the otp verification fails --> show error snack bar with errorMsg from response."
-              // The API method rethrows, so we catch it here.
-              CustomSnackbar.showError(title: "Error", message: e.toString().replaceAll("Exception: ", ""));
+              CustomSnackbar.showError(
+                title: "Error",
+                message: e.toString().replaceAll("Exception: ", ""),
+              );
               return false;
             }
           },
@@ -184,7 +172,8 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
             Get.dialog(
               SuccessDialog(
                 title: "Successfully Changed",
-                description: "Your login password has changed successfully. Please use the new password for future logins.",
+                description:
+                    "Your login password has changed successfully. Please use the new password for future logins.",
                 buttonText: "Done",
                 onButtonTap: () {
                   Get.back(); // close dialog
@@ -254,7 +243,9 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: const Color(0xFFECEFF5),
-                          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                          ),
                           prefixIcon: Padding(
                             padding: const EdgeInsets.all(12),
                             child: SvgPicture.asset(
@@ -282,11 +273,15 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
                           ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFFDAE0EE)),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFDAE0EE),
+                            ),
                           ),
                           disabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFFDAE0EE)),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFDAE0EE),
+                            ),
                           ),
                         ),
                       ),
@@ -426,6 +421,7 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
       ),
     );
   }
+
   Widget _label(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
@@ -449,7 +445,6 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
     return TextFormField(
       controller: controller,
       obscureText: !_isPasswordVisible,
-      // Removed keyboardType: TextInputType.number to allow alphanumeric passwords as per example "1qaz!QAZ"
       decoration: InputDecoration(
         hintText: placeholder,
         hintStyle: const TextStyle(
@@ -460,7 +455,7 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
         ),
         filled: true,
         fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(vertical: 10),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Color(0xFFDAE0EE)),
@@ -516,10 +511,7 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
         ),
       ),
       validator: validator,
-      onChanged: (_) {
-         // Optionally clear validation errors on type
-         // _formKey.currentState?.validate();
-      },
+      onChanged: (_) {},
     );
   }
 }

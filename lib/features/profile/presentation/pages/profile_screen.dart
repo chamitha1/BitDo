@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 import 'package:BitOwi/features/profile/presentation/widgets/profile_widgets.dart';
 import 'package:BitOwi/features/profile/presentation/pages/account_security_page.dart';
 import 'package:BitOwi/features/merchant/presentation/controllers/user_kyc_personal_information_controller.dart';
+import 'package:BitOwi/features/notifications/presentation/pages/notifications_page.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -65,7 +66,7 @@ class ProfileScreen extends StatelessWidget {
               icon: SvgPicture.asset(
                 'assets/icons/profile_page/notification.svg',
               ),
-              onTap: () {},
+              onTap: () => Get.to(() => const NotificationsPage()),
               badgeCount: 99,
             ),
           ],
