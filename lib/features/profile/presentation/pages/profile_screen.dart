@@ -3,6 +3,7 @@ import 'package:BitOwi/features/address_book/presentation/pages/address_book_pag
 import 'package:BitOwi/features/auth/presentation/controllers/user_controller.dart';
 import 'package:BitOwi/features/merchant/presentation/pages/user_kyc_information_page.dart';
 import 'package:BitOwi/features/profile/presentation/pages/change_transaction_password_page.dart';
+import 'package:BitOwi/features/profile/presentation/pages/help_center.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -369,7 +370,7 @@ class ProfileScreen extends StatelessWidget {
               iconPath: 'assets/icons/profile_page/info_circle.svg',
               title: "Help Center ",
               subtitle: "Support, FAQs, and assistance",
-              onTap: () => Get.to(() => const ChangeTransactionPasswordPage()),
+              onTap: () => Get.to(() => const HelpScreen()),
             ),
             const Divider(height: 1, color: Color(0xFFF0F4FF)),
 

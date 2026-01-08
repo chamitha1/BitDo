@@ -1,4 +1,5 @@
 import 'package:BitOwi/config/routes.dart';
+import 'package:BitOwi/core/widgets/common_appbar.dart';
 import 'package:BitOwi/features/merchant/presentation/controllers/become_merchant_controller.dart';
 import 'package:BitOwi/features/merchant/presentation/widgets/decertification_result_dialog.dart';
 import 'package:BitOwi/features/merchant/presentation/widgets/decertify_confirmation_bottom_sheet.dart';
@@ -20,32 +21,9 @@ class BecomeMerchantPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F9FF),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFF6F9FF),
-        surfaceTintColor: const Color(0xFFF6F9FF),
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: SvgPicture.asset(
-            'assets/icons/merchant_details/arrow_left.svg',
-            width: 24,
-            height: 24,
-            colorFilter: const ColorFilter.mode(
-              Color(0xFF151E2F),
-              BlendMode.srcIn,
-            ),
-          ),
-          onPressed: () => Get.back(),
-        ),
-        title: const Text(
-          "Merchant Details",
-          style: TextStyle(
-            fontFamily: 'Inter',
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-            color: Color(0xFF151E2F),
-          ),
-        ),
+      appBar: CommonAppBar(
+        title: "Merchant Details",
+        onBack: () => Get.back(),
       ),
 
       body: SafeArea(
@@ -328,7 +306,6 @@ _ActionButtonConfig? _getActionConfig(
         backgroundColor: const Color(0xFF1D5DE5),
         textColor: Colors.white,
         onPressed: () async {
-
           final result = await Get.toNamed(
             Routes.kycPersonalInformation,
             arguments: {'merchantStatus': merchantStatus, 'isEdit': false},
@@ -360,7 +337,6 @@ _ActionButtonConfig? _getActionConfig(
         backgroundColor: const Color(0xFF1D5DE5),
         textColor: Colors.white,
         onPressed: () async {
-       
           final result = await Get.toNamed(
             Routes.kycPersonalInformation,
             arguments: {'merchantStatus': merchantStatus, 'isEdit': true},

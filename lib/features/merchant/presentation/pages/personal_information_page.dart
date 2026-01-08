@@ -1,12 +1,13 @@
+import 'package:BitOwi/core/widgets/common_appbar.dart';
 import 'package:BitOwi/core/widgets/custom_snackbar.dart';
 import 'package:BitOwi/features/merchant/presentation/controllers/kyc_personal_information_controller.dart';
 import 'package:BitOwi/features/merchant/presentation/widgets/expiry_calendar.dart';
+import 'package:BitOwi/features/merchant/presentation/widgets/kyc_id_photo_ui.dart';
 import 'package:BitOwi/features/merchant/presentation/widgets/kyc_title_label.dart';
 import 'package:BitOwi/features/merchant/presentation/widgets/personal_information_status_page.dart';
 import 'package:BitOwi/models/country_list_res.dart';
 import 'package:BitOwi/models/dict.dart';
 import 'package:BitOwi/utils/string_utils.dart';
-import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -40,35 +41,13 @@ class KycPersonalInformationPage extends StatelessWidget {
       },
       child: Scaffold(
         backgroundColor: const Color(0xFFF6F9FF),
-        appBar: AppBar(
-          backgroundColor: const Color(0xFFF6F9FF),
-          surfaceTintColor: const Color(0xFFF6F9FF),
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          leading: IconButton(
-            icon: SvgPicture.asset(
-              'assets/icons/merchant_details/arrow_left.svg',
-              width: 24,
-              height: 24,
-              colorFilter: const ColorFilter.mode(
-                Color(0xFF151E2F),
-                BlendMode.srcIn,
-              ),
-            ),
-            onPressed: () =>
-                Get.back(result: controller.merchantStatus.value != '-1'), // 🔁
+        appBar: CommonAppBar(
+          title: "Personal Information",
+          onBack: () => Get.back(
+            result: controller.merchantStatus.value != '-1',
           ),
-          title: const Text(
-            "Personal Information",
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontWeight: FontWeight.w600,
-              fontSize: 18,
-              color: Color(0xFF151E2F),
-            ),
-          ),
-          centerTitle: false,
         ),
+
         body: SafeArea(
           child: Obx(() {
             // 👀 replaces setState rebuilds
@@ -768,294 +747,304 @@ class KycPersonalInformationPage extends StatelessWidget {
   //* -- select ID picture methods --
   Widget buildIDPhotoSelection() {
     return Obx(() {
-      if (controller.faceUrl.value != null &&
-          controller.faceUrl.value!.isNotEmpty) {
-        return _buildUploadedIDPreview();
+      // 🔁 reactive wrapper
+      final faceUrl = controller.faceUrl.value;
+
+      if (faceUrl != null && faceUrl.isNotEmpty) {
+        return buildUploadedIdPreview(
+          faceUrl: faceUrl,
+          onPick: controller.onPickIdImage,
+          onRemove: controller.removeIdImage,
+        );
       }
-      return _buildUploadPlaceholder();
+      return buildIdUploadPlaceholder(
+        isUploading: controller.isIdImageUploading.value,
+        onPick: controller.onPickIdImage,
+      );
     });
   }
 
-  DottedBorder _buildUploadPlaceholder() {
-    return DottedBorder(
-      options: RoundedRectDottedBorderOptions(
-        dashPattern: [2, 4],
-        strokeWidth: 1.5,
-        radius: Radius.circular(16),
-        color: Color(0xFFB9C6E2),
-      ),
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: controller.isIdImageUploading.value
-            ? const SizedBox(
-                height: 274,
-                child: Center(
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Color(0xFF1D5DE5),
-                  ),
-                ),
-              )
-            : Column(
-                children: [
-                  Container(
-                    width: 56,
-                    height: 56,
-                    padding: const EdgeInsets.all(18),
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Color(0xFFEFF6FF),
-                    ),
-                    child: SvgPicture.asset(
-                      'assets/icons/merchant_details/upload.svg',
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    "Upload ID Picture",
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                      color: Color(0xFF151E2F),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    "Drag and drop your file here or",
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w400,
-                      fontSize: 12,
-                      color: Color(0xFF717F9A),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    onPressed: controller.onPickIdImage,
-                    icon: SvgPicture.asset(
-                      'assets/icons/merchant_details/upload.svg',
-                      height: 16,
-                      width: 16,
-                      colorFilter: const ColorFilter.mode(
-                        Colors.white,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                    label: Text(
-                      "Click to Upload",
-                      style: const TextStyle(
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16,
-                        color: Colors.white,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1D5DE5),
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SvgPicture.asset(
-                        'assets/icons/merchant_details/personalcard.svg',
-                      ),
-                      const SizedBox(width: 4),
-                      const Text(
-                        "JPG or PNG only • Max 5MB",
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w400,
-                          fontSize: 12,
-                          color: Color(0xFF717F9A),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  _buildRequirement("Clear, readable text on the document"),
-                  const SizedBox(height: 8),
-                  _buildRequirement(
-                    "All four corners of the ID must be visible",
-                  ),
-                  const SizedBox(height: 8),
-                  _buildRequirement("Photo taken in good lighting"),
-                ],
-              ),
-      ),
-    );
-  }
+  // DottedBorder _buildUploadPlaceholder() {
+  //   return DottedBorder(
+  //     options: RoundedRectDottedBorderOptions(
+  //       dashPattern: [2, 4],
+  //       strokeWidth: 1.5,
+  //       radius: Radius.circular(16),
+  //       color: Color(0xFFB9C6E2),
+  //     ),
+  //     child: Container(
+  //       padding: const EdgeInsets.all(24),
+  //       decoration: BoxDecoration(
+  //         color: Colors.white,
+  //         borderRadius: BorderRadius.circular(12),
+  //       ),
+  //       child: controller.isIdImageUploading.value
+  //           ? const SizedBox(
+  //               height: 274,
+  //               child: Center(
+  //                 child: CircularProgressIndicator(
+  //                   strokeWidth: 2,
+  //                   color: Color(0xFF1D5DE5),
+  //                 ),
+  //               ),
+  //             )
+  //           : Column(
+  //               children: [
+  //                 Container(
+  //                   width: 56,
+  //                   height: 56,
+  //                   padding: const EdgeInsets.all(18),
+  //                   decoration: const BoxDecoration(
+  //                     shape: BoxShape.circle,
+  //                     color: Color(0xFFEFF6FF),
+  //                   ),
+  //                   child: SvgPicture.asset(
+  //                     'assets/icons/merchant_details/upload.svg',
+  //                   ),
+  //                 ),
+  //                 const SizedBox(height: 16),
+  //                 const Text(
+  //                   "Upload ID Picture",
+  //                   style: TextStyle(
+  //                     fontFamily: 'Inter',
+  //                     fontWeight: FontWeight.w600,
+  //                     fontSize: 16,
+  //                     color: Color(0xFF151E2F),
+  //                   ),
+  //                 ),
+  //                 const SizedBox(height: 8),
+  //                 const Text(
+  //                   "Drag and drop your file here or",
+  //                   style: TextStyle(
+  //                     fontFamily: 'Inter',
+  //                     fontWeight: FontWeight.w400,
+  //                     fontSize: 12,
+  //                     color: Color(0xFF717F9A),
+  //                   ),
+  //                 ),
+  //                 const SizedBox(height: 16),
 
-  Widget _buildUploadedIDPreview() {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF),
-        // color: Colors.red,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-          // ---------- IMAGE PREVIEW ----------
-          Stack(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.network(
-                    controller.faceUrl.value!,
-                    width: double.infinity,
-                    height: 274,
-                    fit: BoxFit.cover,
-                    //  SHOW LOADING UNTIL IMAGE IS READY
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) {
-                        return child; // image fully loaded
-                      }
+  //                 /// ⬆️ UPLOAD BUTTON
+  //                 ElevatedButton.icon(
+  //                   onPressed: controller.onPickIdImage, // 🔁
+  //                   icon: SvgPicture.asset(
+  //                     'assets/icons/merchant_details/upload.svg',
+  //                     height: 16,
+  //                     width: 16,
+  //                     colorFilter: const ColorFilter.mode(
+  //                       Colors.white,
+  //                       BlendMode.srcIn,
+  //                     ),
+  //                   ),
+  //                   label: Text(
+  //                     "Click to Upload",
+  //                     style: const TextStyle(
+  //                       fontFamily: 'Inter',
+  //                       fontWeight: FontWeight.w500,
+  //                       fontSize: 16,
+  //                       color: Colors.white,
+  //                     ),
+  //                     overflow: TextOverflow.ellipsis,
+  //                   ),
+  //                   style: ElevatedButton.styleFrom(
+  //                     backgroundColor: const Color(0xFF1D5DE5),
+  //                     elevation: 0,
+  //                     padding: const EdgeInsets.symmetric(
+  //                       horizontal: 16,
+  //                       vertical: 12,
+  //                     ),
+  //                     shape: RoundedRectangleBorder(
+  //                       borderRadius: BorderRadius.circular(12),
+  //                     ),
+  //                   ),
+  //                 ),
+  //                 const SizedBox(height: 16),
+  //                 Row(
+  //                   mainAxisAlignment: MainAxisAlignment.center,
+  //                   children: [
+  //                     SvgPicture.asset(
+  //                       'assets/icons/merchant_details/personalcard.svg',
+  //                     ),
+  //                     const SizedBox(width: 4),
+  //                     const Text(
+  //                       "JPG or PNG only • Max 5MB",
+  //                       style: TextStyle(
+  //                         fontFamily: 'Inter',
+  //                         fontWeight: FontWeight.w400,
+  //                         fontSize: 12,
+  //                         color: Color(0xFF717F9A),
+  //                       ),
+  //                     ),
+  //                   ],
+  //                 ),
+  //                 const SizedBox(height: 16),
+  //                 _buildRequirement("Clear, readable text on the document"),
+  //                 const SizedBox(height: 8),
+  //                 _buildRequirement(
+  //                   "All four corners of the ID must be visible",
+  //                 ),
+  //                 const SizedBox(height: 8),
+  //                 _buildRequirement("Photo taken in good lighting"),
+  //               ],
+  //             ),
+  //     ),
+  //   );
+  // }
 
-                      return Container(
-                        height: 274,
-                        alignment: Alignment.center,
-                        color: const Color(0xFFEFF6FF),
-                        child: const CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Color(0xFF1D5DE5),
-                        ),
-                      );
-                    },
-                    errorBuilder: (_, _, _) {
-                      return Container(
-                        height: 274,
-                        alignment: Alignment.center,
-                        color: const Color(0xFFEFF6FF),
-                        child: const Text("Failed to load image"),
-                      );
-                    },
-                  ),
-                ),
-              ),
+  // Widget _buildUploadedIDPreview() {
+  //   return Container(
+  //     decoration: BoxDecoration(
+  //       color: const Color(0xFFFFFFFF),
+  //       // color: Colors.red,
+  //       borderRadius: BorderRadius.circular(16),
+  //     ),
+  //     child: Column(
+  //       children: [
+  //         // ---------- IMAGE PREVIEW ----------
+  //         Stack(
+  //           children: [
+  //             Padding(
+  //               padding: const EdgeInsets.all(8.0),
+  //               child: ClipRRect(
+  //                 borderRadius: BorderRadius.circular(16),
+  //                 child: Image.network(
+  //                   controller.faceUrl.value!,
+  //                   width: double.infinity,
+  //                   height: 274,
+  //                   fit: BoxFit.cover,
+  //                   //  SHOW LOADING UNTIL IMAGE IS READY
+  //                   loadingBuilder: (context, child, loadingProgress) {
+  //                     if (loadingProgress == null) {
+  //                       return child; // image fully loaded
+  //                     }
 
-              // ---------- UPLOADED BADGE ----------
-              Positioned(
-                top: 14,
-                left: 14,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEAF9F0),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: const [
-                      Icon(
-                        Icons.check_circle,
-                        size: 16,
-                        color: Color(0xFF40A372),
-                      ),
-                      SizedBox(width: 6),
-                      Text(
-                        "Uploaded",
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF40A372),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+  //                     return Container(
+  //                       height: 274,
+  //                       alignment: Alignment.center,
+  //                       color: const Color(0xFFEFF6FF),
+  //                       child: const CircularProgressIndicator(
+  //                         strokeWidth: 2,
+  //                         color: Color(0xFF1D5DE5),
+  //                       ),
+  //                     );
+  //                   },
+  //                   errorBuilder: (_, _, _) {
+  //                     return Container(
+  //                       height: 274,
+  //                       alignment: Alignment.center,
+  //                       color: const Color(0xFFEFF6FF),
+  //                       child: const Text("Failed to load image"),
+  //                     );
+  //                   },
+  //                 ),
+  //               ),
+  //             ),
 
-              // ---------- REMOVE BUTTON ----------
-              // ❌ Remove
-              Positioned(
-                top: 14,
-                right: 14,
-                child: GestureDetector(
-                  onTap: controller.removeIdImage,
-                  child: Container(
-                    width: 24,
-                    height: 24,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFE74C3C),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.close,
-                      size: 18,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
+  //             // ---------- UPLOADED BADGE ----------
+  //             Positioned(
+  //               top: 14,
+  //               left: 14,
+  //               child: Container(
+  //                 padding: const EdgeInsets.symmetric(
+  //                   horizontal: 8,
+  //                   vertical: 4,
+  //                 ),
+  //                 decoration: BoxDecoration(
+  //                   color: const Color(0xFFEAF9F0),
+  //                   borderRadius: BorderRadius.circular(8),
+  //                 ),
+  //                 child: Row(
+  //                   children: const [
+  //                     Icon(
+  //                       Icons.check_circle,
+  //                       size: 16,
+  //                       color: Color(0xFF40A372),
+  //                     ),
+  //                     SizedBox(width: 6),
+  //                     Text(
+  //                       "Uploaded",
+  //                       style: TextStyle(
+  //                         fontSize: 12,
+  //                         fontWeight: FontWeight.w600,
+  //                         color: Color(0xFF40A372),
+  //                       ),
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ),
+  //             ),
 
-              // ---------- BOTTOM ACTION BAR ----------
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                  child: Container(
-                    height: 82,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFECEFF5),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Center(
-                      child: SizedBox(
-                        height: 48,
-                        child: OutlinedButton.icon(
-                          onPressed: controller.onPickIdImage,
-                          icon: SvgPicture.asset(
-                            'assets/icons/merchant_details/upload.svg',
-                            height: 16,
-                            width: 16,
-                          ),
-                          label: const Text(
-                            "Upload Different Photo",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                            ),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFF1D5DE5),
-                            side: const BorderSide(color: Color(0xFF1D5DE5)),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+  //             // ---------- REMOVE BUTTON ----------
+  //             Positioned(
+  //               top: 14,
+  //               right: 14,
+  //               child: GestureDetector(
+  //                 onTap: controller.removeIdImage,
+  //                 child: Container(
+  //                   width: 24,
+  //                   height: 24,
+  //                   decoration: const BoxDecoration(
+  //                     color: Color(0xFFE74C3C),
+  //                     shape: BoxShape.circle,
+  //                   ),
+  //                   child: const Icon(
+  //                     Icons.close,
+  //                     size: 18,
+  //                     color: Colors.white,
+  //                   ),
+  //                 ),
+  //               ),
+  //             ),
+
+  //             // ---------- BOTTOM ACTION BAR ----------
+  //             Positioned(
+  //               left: 0,
+  //               right: 0,
+  //               bottom: 0,
+  //               child: Padding(
+  //                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
+  //                 child: Container(
+  //                   height: 82,
+  //                   decoration: BoxDecoration(
+  //                     color: const Color(0xFFECEFF5),
+  //                     borderRadius: BorderRadius.circular(16),
+  //                   ),
+  //                   child: Center(
+  //                     child: SizedBox(
+  //                       height: 48,
+  //                       child: OutlinedButton.icon(
+  //                         onPressed: controller.onPickIdImage, // 🔁
+  //                         icon: SvgPicture.asset(
+  //                           'assets/icons/merchant_details/upload.svg',
+  //                           height: 16,
+  //                           width: 16,
+  //                         ),
+  //                         label: const Text(
+  //                           "Upload Different Photo",
+  //                           style: TextStyle(
+  //                             fontWeight: FontWeight.w600,
+  //                             fontSize: 16,
+  //                           ),
+  //                         ),
+  //                         style: OutlinedButton.styleFrom(
+  //                           foregroundColor: const Color(0xFF1D5DE5),
+  //                           side: const BorderSide(color: Color(0xFF1D5DE5)),
+  //                           shape: RoundedRectangleBorder(
+  //                             borderRadius: BorderRadius.circular(12),
+  //                           ),
+  //                         ),
+  //                       ),
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget personalInfoInputContent(BuildContext context) {
     return Form(
@@ -1263,30 +1252,6 @@ class KycPersonalInformationPage extends StatelessWidget {
           ),
         );
       }),
-    );
-  }
-
-  Widget _buildRequirement(String text) {
-    return Row(
-      children: [
-        const Icon(
-          Icons.check_circle_outline,
-          color: Color(0xFF40A372),
-          size: 14,
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(
-              fontFamily: 'Inter',
-              fontWeight: FontWeight.w400,
-              fontSize: 12,
-              color: Color(0xFF717F9A),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
