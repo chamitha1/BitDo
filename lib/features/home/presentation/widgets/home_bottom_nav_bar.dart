@@ -18,7 +18,7 @@ class HomeBottomNavBar extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Color(0xff0E2B680F).withOpacity(0.05),
+            color: const Color(0xff0E2B680F).withOpacity(0.05),
             blurRadius: 18,
             offset: const Offset(0, -4),
           ),
@@ -26,20 +26,10 @@ class HomeBottomNavBar extends StatelessWidget {
       ),
       child: SafeArea(
         child: SizedBox(
-          height: 90,
-          child: BottomNavigationBar(
-            currentIndex: currentIndex,
-            onTap: onTap,
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: Colors.white,
-            showSelectedLabels: false,
-            showUnselectedLabels: false,
-            selectedFontSize: 0,
-            unselectedFontSize: 0,
-            selectedItemColor: const Color(0xffFFFFFF),
-            unselectedItemColor: const Color(0xff717F9A),
-            elevation: 0,
-            items: [
+          height: 68,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
               _navItem(
                 "assets/icons/home/home.svg",
                 "assets/icons/home/homeSelected.svg",
@@ -59,7 +49,7 @@ class HomeBottomNavBar extends StatelessWidget {
     );
   }
 
-  BottomNavigationBarItem _navItem(
+  Widget _navItem(
     String iconPath,
     String selectedIconPath,
     String label,
@@ -67,8 +57,10 @@ class HomeBottomNavBar extends StatelessWidget {
   ) {
     final isSelected = currentIndex == index;
 
-    return BottomNavigationBarItem(
-      icon: isSelected
+    return GestureDetector(
+      onTap: () => onTap(index),
+      behavior: HitTestBehavior.opaque,
+      child: isSelected
           ? Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
@@ -109,7 +101,6 @@ class HomeBottomNavBar extends StatelessWidget {
                 ),
               ],
             ),
-      label: '',
     );
   }
 }
