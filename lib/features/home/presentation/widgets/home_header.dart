@@ -1,8 +1,8 @@
+import 'package:BitOwi/core/widgets/common_image.dart';
 import 'package:BitOwi/features/auth/presentation/controllers/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:BitOwi/core/storage/storage_service.dart';
 import 'package:BitOwi/features/notifications/presentation/pages/notifications_page.dart';
 
 class HomeHeader extends StatelessWidget {
@@ -14,10 +14,22 @@ class HomeHeader extends StatelessWidget {
 
     return Row(
       children: [
-        const CircleAvatar(
-          radius: 22,
-          backgroundImage: AssetImage("assets/images/home/avatar.png"),
-          backgroundColor: Color(0xffD9D9D9),
+        Obx(
+          () => Container(
+            height: 52,
+            width: 52,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Color(0xFFD9D9D9),
+            ),
+            padding: const EdgeInsets.all(3),
+            child: ClipOval(
+              child: CommonImage(
+                controller.user.value?.avatar ?? '',
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
         ),
         const SizedBox(width: 12),
         Expanded(

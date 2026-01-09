@@ -1,9 +1,8 @@
 import 'package:BitOwi/config/routes.dart';
+import 'package:BitOwi/core/widgets/common_image.dart';
 import 'package:BitOwi/features/address_book/presentation/pages/address_book_page.dart';
 import 'package:BitOwi/features/auth/presentation/controllers/user_controller.dart';
 import 'package:BitOwi/features/merchant/presentation/pages/user_kyc_information_page.dart';
-import 'package:BitOwi/features/profile/presentation/pages/change_transaction_password_page.dart';
-import 'package:BitOwi/features/profile/presentation/pages/help_center.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -141,24 +140,9 @@ class ProfileScreen extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             child: Row(
               children: [
-                Container(
-                  width: 66,
-                  height: 66,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Color(0xff779DEF), width: 3),
-                  ),
-                  child: Obx(() {
-                    final avatarUrl = controller.user.value?.avatar;
-                    return const CircleAvatar(
-                      radius: 22,
-                      backgroundImage: AssetImage(
-                        "assets/images/home/avatar.png",
-                      ),
-                      backgroundColor: Color(0xffD9D9D9),
-                    );
-                  }),
-                ),
+                Obx(() {
+                  return buildAvatar(controller.user.value?.avatar ?? '');
+                }),
                 const SizedBox(width: 16),
                 // Info
                 Expanded(
@@ -300,6 +284,24 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+  Widget buildAvatar(String avatar) {
+    return GestureDetector(
+      onTap: () {
+        Get.toNamed(Routes.mePage);
+      },
+      child: Container(
+        height: 64,
+        width: 64,
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          color: Color(0xFF779DEF),
+        ),
+        padding: const EdgeInsets.all(3),
+        child: ClipOval(child: CommonImage(avatar, fit: BoxFit.cover)),
+      ),
+    );
+  }
+
   TextStyle _statTextStyle({required FontWeight fontWeight}) {
     return TextStyle(
       fontSize: 12,
@@ -377,27 +379,25 @@ class ProfileScreen extends StatelessWidget {
               iconPath: 'assets/icons/profile_page/info_circle.svg',
               title: "Help Center ",
               subtitle: "Support, FAQs, and assistance",
-              onTap: () => Get.to(() => const HelpCenter()),
+              onTap: () => Get.toNamed(Routes.helpCenter),
             ),
             const Divider(height: 1, color: Color(0xFFF0F4FF)),
-
             ProfileMenuItem(
               iconPath: 'assets/icons/profile_page/about.svg',
               title: "About us",
               subtitle: "Learn more about the app",
-              onTap: () => Get.to(() => const ChangeTransactionPasswordPage()),
+              onTap: () => Get.toNamed(Routes.aboutUs),
             ),
           ],
         ),
         const SizedBox(height: 16),
-
         ProfileGroupCard(
           children: [
             ProfileMenuItem(
               iconPath: 'assets/icons/profile_page/setting.svg',
               title: "Settings",
               subtitle: "Account and application prefer",
-              onTap: () => Get.to(() => const ChangeTransactionPasswordPage()),
+              onTap: () => Get.toNamed(Routes.settings),
             ),
           ],
         ),

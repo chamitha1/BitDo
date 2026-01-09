@@ -1,5 +1,6 @@
 import 'package:BitOwi/api/common_api.dart';
 import 'package:BitOwi/core/widgets/common_appbar.dart';
+import 'package:BitOwi/core/widgets/common_image.dart';
 import 'package:BitOwi/features/auth/presentation/controllers/user_controller.dart';
 import 'package:BitOwi/models/article_type.dart';
 import 'package:easy_refresh/easy_refresh.dart';
@@ -19,7 +20,7 @@ class _HelpCenterState extends State<HelpCenter> with TickerProviderStateMixin {
   List<ArticleType> helpCententList = [];
   late EasyRefreshController _controller;
 
-  bool isLoading = true;
+  bool isLoading = false;
 
   final userController = Get.find<UserController>();
 
@@ -37,6 +38,9 @@ class _HelpCenterState extends State<HelpCenter> with TickerProviderStateMixin {
   }
 
   Future<void> onRefresh() async {
+    setState(() {
+      isLoading = true;
+    });
     try {
       final list = await CommonApi.getArticleList("0");
       if (!mounted) return;
@@ -153,7 +157,7 @@ class _HelpCenterState extends State<HelpCenter> with TickerProviderStateMixin {
             ),
           ),
           SvgPicture.asset(
-            "assets/icons/merchant_details/help_question.svg",
+            "assets/icons/public/help_question.svg",
             height: 105,
             width: 100,
           ),
@@ -168,8 +172,6 @@ class _HelpCenterState extends State<HelpCenter> with TickerProviderStateMixin {
     required int sectionIndex,
   }) {
     final isExpanded = expandedSectionIndex == sectionIndex;
-    final SectionIconConfig config =
-        sectionIconConfigMap[section.name] ?? defaultSectionIconConfig;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -191,10 +193,7 @@ class _HelpCenterState extends State<HelpCenter> with TickerProviderStateMixin {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  _sectionIcon(
-                    svgPath: config.svgPath,
-                    backgroundColor: config.backgroundColor,
-                  ),
+                  _sectionIcon(iconUrl: section.icon ?? ''),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -209,6 +208,7 @@ class _HelpCenterState extends State<HelpCenter> with TickerProviderStateMixin {
                             color: Color(0xFF151E2F),
                           ),
                         ),
+                        const SizedBox(height: 2),
                         Text(
                           "${section.articleList.length.toString()} Questions",
                           style: const TextStyle(
@@ -390,26 +390,8 @@ class _HelpCenterState extends State<HelpCenter> with TickerProviderStateMixin {
     );
   }
 
-  Widget _sectionIcon({
-    required Color backgroundColor,
-    required String svgPath,
-  }) {
-    return Container(
-      height: 40,
-      width: 40,
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      alignment: Alignment.center,
-      padding: const EdgeInsets.all(8),
-      child: SvgPicture.asset(
-        svgPath,
-        height: 24,
-        width: 24,
-        fit: BoxFit.contain,
-      ),
-    );
+  Widget _sectionIcon({required String iconUrl}) {
+    return CommonImage(iconUrl, width: 40, height: 40);
   }
 }
 
@@ -454,31 +436,3 @@ class SectionIconConfig {
     required this.backgroundColor,
   });
 }
-
-const Map<String, SectionIconConfig> sectionIconConfigMap = {
-  "General": SectionIconConfig(
-    svgPath: "assets/icons/merchant_details/help_general.svg",
-    backgroundColor: Color(0xFFE9F6FF),
-  ),
-  "Authentication": SectionIconConfig(
-    svgPath: "assets/icons/merchant_details/help_auth.svg",
-    backgroundColor: Color(0xFFF4E9FE),
-  ),
-  "Trading": SectionIconConfig(
-    svgPath: "assets/icons/merchant_details/help_trading.svg",
-    backgroundColor: Color(0xFFE8EFFF),
-  ),
-  "Security": SectionIconConfig(
-    svgPath: "assets/icons/merchant_details/help_security.svg",
-    backgroundColor: Color(0xFFFFFBF6),
-  ),
-  "Support": SectionIconConfig(
-    svgPath: "assets/icons/merchant_details/help_support.svg",
-    backgroundColor: Color(0xFFEAF9F0),
-  ),
-};
-
-const SectionIconConfig defaultSectionIconConfig = SectionIconConfig(
-  svgPath: "assets/icons/merchant_details/help_general.svg",
-  backgroundColor: Color(0xFFE9F6FF),
-);

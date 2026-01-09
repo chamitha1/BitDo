@@ -140,7 +140,7 @@ class UserApi {
     }
   }
 
-  // Get User Info
+  /// Get User Info
   static Future<User> getUserInfo() async {
     try {
       final response = await ApiClient.dio.post("/core/v1/cuser/my");
@@ -154,6 +154,16 @@ class UserApi {
         return User.fromJson(userData);
       }
       throw Exception(responseData['errorMsg'] ?? 'Unknown error');
+    } catch (e) {
+      e.printError();
+      rethrow;
+    }
+  }
+
+  /// Modify user information
+  static Future<void> modifyUser(Map<String, dynamic> data) async {
+    try {
+      await ApiClient.dio.post("/core/v1/user/edit_profile", data: data);
     } catch (e) {
       e.printError();
       rethrow;
@@ -257,14 +267,14 @@ class UserApi {
   }) async {
     try {
       final data = {
-          'newEmail': newEmail,
-          'smsCaptchaOld': smsCaptchaOld,
-          'smsCaptchaNew': smsCaptchaNew,
+        'newEmail': newEmail,
+        'smsCaptchaOld': smsCaptchaOld,
+        'smsCaptchaNew': smsCaptchaNew,
       };
-      
+
       // Print as Map (default toString)
       print(data);
-      
+
       // Print as formatted JSON
       try {
         JsonEncoder encoder = const JsonEncoder.withIndent('  ');
@@ -327,7 +337,6 @@ class UserApi {
       rethrow;
     }
   }
-
 
   // Close Google Secret
   static Future<void> closeGoogleSecret({

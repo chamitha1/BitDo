@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:BitOwi/core/widgets/custom_snackbar.dart';
-import 'package:BitOwi/features/merchant/presentation/widgets/image_picker_modal.dart';
+import 'package:BitOwi/core/widgets/image_picker_modal.dart';
 import 'package:BitOwi/utils/aws_upload_util.dart';
 import 'package:BitOwi/utils/date_utils.dart';
 import 'package:flutter/material.dart';

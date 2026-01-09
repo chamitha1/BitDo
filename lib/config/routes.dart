@@ -4,7 +4,10 @@ import 'package:BitOwi/features/merchant/presentation/controllers/user_kyc_perso
 import 'package:BitOwi/features/merchant/presentation/pages/become_merchant_page.dart';
 import 'package:BitOwi/features/merchant/presentation/pages/personal_information_page.dart';
 import 'package:BitOwi/features/merchant/presentation/pages/user_kyc_information_page.dart';
+import 'package:BitOwi/features/profile/presentation/pages/about_us.dart';
 import 'package:BitOwi/features/profile/presentation/pages/help_center.dart';
+import 'package:BitOwi/features/profile/presentation/pages/me_page.dart';
+import 'package:BitOwi/features/profile/presentation/pages/settings.dart';
 import 'package:get/get.dart';
 import 'package:BitOwi/features/auth/presentation/pages/login_screen.dart';
 import 'package:BitOwi/features/auth/presentation/pages/signup_screen.dart';
@@ -37,6 +40,9 @@ class Routes {
   static const String userKycPersonalInformation =
       '/userKycPersonalInformation';
   static const String helpCenter = '/helpCenter';
+  static const String aboutUs = '/aboutUs';
+  static const String settings = '/settings';
+  static const String mePage = '/mePage';
 }
 
 class AppPages {
@@ -104,5 +110,8 @@ class AppPages {
       },
     ),
     GetPage(name: Routes.helpCenter, page: () => HelpCenter()),
+    GetPage(name: Routes.aboutUs, page: () => AboutUs()),
+    GetPage(name: Routes.settings, page: () => Settings()),
+    GetPage(name: Routes.mePage, page: () => MePage()),
   ];
 }

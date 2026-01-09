@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:BitOwi/api/common_api.dart';
 import 'package:BitOwi/api/user_api.dart';
 import 'package:BitOwi/core/widgets/custom_snackbar.dart';
-import 'package:BitOwi/features/merchant/presentation/widgets/image_picker_modal.dart';
+import 'package:BitOwi/core/widgets/image_picker_modal.dart';
 import 'package:BitOwi/models/country_list_res.dart';
 import 'package:BitOwi/models/dict.dart';
 import 'package:BitOwi/models/identify_order_list_res.dart';
