@@ -23,7 +23,8 @@ class _ChangeTransactionPasswordPageState
   final _userApi = UserApi();
 
   String _email = '';
-  bool _isPasswordVisible = false;
+  bool _isTransactionPasswordVisible = false;
+  bool _isConfirmTransactionPasswordVisible = false;
   bool _isLoading = false;
 
   String _verifiedOtp = "";
@@ -286,8 +287,15 @@ class _ChangeTransactionPasswordPageState
                     _passwordField(
                       controller: _passController,
                       placeholder: "Enter 6-Digit Password",
-                      showSuffix: false,
+                      showSuffix: true,
                       enabled: _isEmailVerified,
+                      isVisible: _isTransactionPasswordVisible,
+                      onToggleVisibility: () {
+                        setState(() {
+                          _isTransactionPasswordVisible =
+                              !_isTransactionPasswordVisible;
+                        });
+                      },
                     ),
                     const SizedBox(height: 24),
 
@@ -297,6 +305,13 @@ class _ChangeTransactionPasswordPageState
                       placeholder: "Re-enter 6-Digit Password",
                       showSuffix: true,
                       enabled: _isEmailVerified,
+                      isVisible: _isConfirmTransactionPasswordVisible,
+                      onToggleVisibility: () {
+                        setState(() {
+                          _isConfirmTransactionPasswordVisible =
+                              !_isConfirmTransactionPasswordVisible;
+                        });
+                      },
                     ),
                   ],
                 ),
@@ -433,11 +448,13 @@ class _ChangeTransactionPasswordPageState
     required String placeholder,
     bool showSuffix = true,
     bool enabled = true,
+    bool isVisible = false,
+    VoidCallback? onToggleVisibility,
   }) {
     return TextFormField(
       controller: controller,
       enabled: enabled,
-      obscureText: !_isPasswordVisible,
+      obscureText: !isVisible,
       keyboardType: TextInputType.number,
       validator: (val) {
         if (val == null || val.isEmpty) return "Required";
@@ -447,11 +464,13 @@ class _ChangeTransactionPasswordPageState
       decoration: _inputDecoration(
         hint: placeholder,
         iconPath: "assets/icons/sign_up/lock.svg",
-        suffixIconPath: showSuffix && !_isPasswordVisible
+        suffixIconPath: showSuffix && !isVisible
             ? "assets/icons/sign_up/eye.svg"
             : (showSuffix ? "assets/icons/sign_up/eye-slash.svg" : null),
         isPassword: showSuffix,
         enabled: enabled,
+        isVisible: isVisible,
+        onToggleVisibility: onToggleVisibility,
       ),
     );
   }
@@ -463,6 +482,8 @@ class _ChangeTransactionPasswordPageState
     String? suffixIconPath,
     Widget? suffixWidget,
     bool isPassword = false,
+    bool isVisible = false,
+    VoidCallback? onToggleVisibility,
   }) {
     return InputDecoration(
       hintText: hint,
@@ -511,11 +532,7 @@ class _ChangeTransactionPasswordPageState
           ? Padding(
               padding: const EdgeInsets.only(right: 4.0),
               child: IconButton(
-                onPressed: enabled
-                    ? () => setState(
-                        () => _isPasswordVisible = !_isPasswordVisible,
-                      )
-                    : null,
+                onPressed: enabled ? onToggleVisibility : null,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 icon: Padding(

@@ -29,7 +29,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final FocusNode _passFocus = FocusNode();
   final FocusNode _confirmFocus = FocusNode();
 
-  bool _isPasswordVisible = false;
+  bool _isNewPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
   bool _isEmailPopulated = false;
   bool _isEmailVerified = false;
 
@@ -355,44 +356,56 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             const SizedBox(height: 24),
 
                             _textLabel("New Password"),
-                            TextFormField(
-                              controller: _passController,
-                              focusNode: _passFocus,
-                              enabled: _isEmailVerified,
-                              obscureText: !_isPasswordVisible,
-                              validator: _validatePassword,
-                              onChanged: (_) {
-                                if (_submitted) setState(() {});
-                              },
-                              decoration: _inputDecoration(
-                                hint: "Enter New Password",
-                                iconPath: "assets/icons/sign_up/lock.svg",
-                                suffixIconPath: !_isPasswordVisible
-                                    ? "assets/icons/sign_up/eye.svg"
-                                    : "assets/icons/sign_up/eye-slash.svg",
-                                isPassword: true,
+                              TextFormField(
+                                controller: _passController,
+                                focusNode: _passFocus,
                                 enabled: _isEmailVerified,
+                                obscureText: !_isNewPasswordVisible,
+                                validator: _validatePassword,
+                                onChanged: (_) {
+                                  if (_submitted) setState(() {});
+                                },
+                                decoration: _inputDecoration(
+                                  hint: "Enter New Password",
+                                  iconPath: "assets/icons/sign_up/lock.svg",
+                                  suffixIconPath: !_isNewPasswordVisible
+                                      ? "assets/icons/sign_up/eye.svg"
+                                      : "assets/icons/sign_up/eye-slash.svg",
+                                  isPassword: true,
+                                  enabled: _isEmailVerified,
+                                  onToggleVisibility: () {
+                                    setState(() {
+                                      _isNewPasswordVisible =
+                                          !_isNewPasswordVisible;
+                                    });
+                                  },
+                                ),
                               ),
-                            ),
                             const SizedBox(height: 24),
 
                             _textLabel("Confirm Password"),
-                            TextFormField(
-                              controller: _confirmPassController,
-                              focusNode: _confirmFocus,
-                              enabled: _isEmailVerified,
-                              obscureText: !_isPasswordVisible,
-                              validator: _validateConfirm,
-                              decoration: _inputDecoration(
-                                hint: "Re-Enter New Password",
-                                iconPath: "assets/icons/sign_up/lock.svg",
-                                suffixIconPath: !_isPasswordVisible
-                                    ? "assets/icons/sign_up/eye.svg"
-                                    : "assets/icons/sign_up/eye-slash.svg",
-                                isPassword: true,
+                              TextFormField(
+                                controller: _confirmPassController,
+                                focusNode: _confirmFocus,
                                 enabled: _isEmailVerified,
+                                obscureText: !_isConfirmPasswordVisible,
+                                validator: _validateConfirm,
+                                decoration: _inputDecoration(
+                                  hint: "Re-Enter New Password",
+                                  iconPath: "assets/icons/sign_up/lock.svg",
+                                  suffixIconPath: !_isConfirmPasswordVisible
+                                      ? "assets/icons/sign_up/eye.svg"
+                                      : "assets/icons/sign_up/eye-slash.svg",
+                                  isPassword: true,
+                                  enabled: _isEmailVerified,
+                                  onToggleVisibility: () {
+                                    setState(() {
+                                      _isConfirmPasswordVisible =
+                                          !_isConfirmPasswordVisible;
+                                    });
+                                  },
+                                ),
                               ),
-                            ),
 
                             const Spacer(),
                             const SizedBox(height: 40),
@@ -443,6 +456,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     bool isPassword = false,
     bool enabled = true,
     String? suffixIconPath,
+    VoidCallback? onToggleVisibility,
   }) {
     return InputDecoration(
       hintText: hint,
@@ -482,11 +496,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ? Padding(
               padding: const EdgeInsets.only(right: 4.0),
               child: IconButton(
-                onPressed: enabled
-                    ? () => setState(
-                        () => _isPasswordVisible = !_isPasswordVisible,
-                      )
-                    : null,
+                onPressed: enabled ? onToggleVisibility : null,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 icon: Padding(

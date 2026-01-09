@@ -24,36 +24,37 @@ class HomeBottomNavBar extends StatelessWidget {
           ),
         ],
       ),
-      child: BottomNavigationBar(
-        currentIndex: currentIndex,
-        onTap: onTap,
-        showSelectedLabels: false,
-        showUnselectedLabels: true,
-        selectedItemColor: const Color(0xffFFFFFF),
-        unselectedItemColor: const Color(0xff717F9A),
-        selectedLabelStyle: const TextStyle(
-          fontSize: 0, //hide
-        ),
-        unselectedLabelStyle: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: Color(0xff717F9A),
-        ),
-        elevation: 0,
-        items: [
-          _navItem(
-            "assets/icons/home/home.svg",
-            "assets/icons/home/homeSelected.svg",
-            "Home",
-            0,
+      child: SafeArea(
+        child: SizedBox(
+          height: 90,
+          child: BottomNavigationBar(
+            currentIndex: currentIndex,
+            onTap: onTap,
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: Colors.white,
+            showSelectedLabels: false,
+            showUnselectedLabels: false,
+            selectedFontSize: 0,
+            unselectedFontSize: 0,
+            selectedItemColor: const Color(0xffFFFFFF),
+            unselectedItemColor: const Color(0xff717F9A),
+            elevation: 0,
+            items: [
+              _navItem(
+                "assets/icons/home/home.svg",
+                "assets/icons/home/homeSelected.svg",
+                "Home",
+                0,
+              ),
+              _navItem(
+                "assets/icons/home/profile.svg",
+                "assets/icons/home/profileSelected.svg",
+                "Profile",
+                1,
+              ),
+            ],
           ),
-          _navItem(
-            "assets/icons/home/profile.svg",
-            "assets/icons/home/profileSelected.svg",
-            "Profile",
-            1,
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -82,7 +83,6 @@ class HomeBottomNavBar extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SvgPicture.asset(selectedIconPath, width: 20, height: 20),
-                  const SizedBox(height: 2),
                   Text(
                     label,
                     style: const TextStyle(
@@ -94,8 +94,22 @@ class HomeBottomNavBar extends StatelessWidget {
                 ],
               ),
             )
-          : SvgPicture.asset(iconPath, width: 22, height: 22),
-      label: label,
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SvgPicture.asset(iconPath, width: 22, height: 22),
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Color(0xff717F9A),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+      label: '',
     );
   }
 }

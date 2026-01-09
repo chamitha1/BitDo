@@ -31,7 +31,8 @@ class _SignupScreenState extends State<SignupScreen> {
   FocusNode? _autocompleteFocusNode;
 
   bool _agreedToTerms = false;
-  bool _isPasswordVisible = false;
+  bool _isNewPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
   bool _isEmailPopulated = false;
   bool _isEmailVerified = false;
 
@@ -363,7 +364,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           TextFormField(
                             controller: _passController,
                             enabled: _isEmailVerified,
-                            obscureText: !_isPasswordVisible,
+                            obscureText: !_isNewPasswordVisible,
                             validator: _validatePassword,
                             onChanged: (_) {
                               if (_submitted) setState(() {});
@@ -371,11 +372,16 @@ class _SignupScreenState extends State<SignupScreen> {
                             decoration: _inputDecoration(
                               hint: "Enter Password",
                               iconPath: "assets/icons/sign_up/lock.svg",
-                              suffixIconPath: !_isPasswordVisible
+                              suffixIconPath: !_isNewPasswordVisible
                                   ? "assets/icons/sign_up/eye.svg"
                                   : "assets/icons/sign_up/eye-slash.svg",
                               isPassword: true,
                               enabled: _isEmailVerified,
+                              onToggleVisibility: () {
+                                setState(() {
+                                  _isNewPasswordVisible = !_isNewPasswordVisible;
+                                });
+                              },
                             ),
                           ),
                           const SizedBox(height: 30),
@@ -384,16 +390,22 @@ class _SignupScreenState extends State<SignupScreen> {
                           TextFormField(
                             controller: _confirmPassController,
                             enabled: _isEmailVerified,
-                            obscureText: !_isPasswordVisible,
+                            obscureText: !_isConfirmPasswordVisible,
                             validator: _validateConfirm,
                             decoration: _inputDecoration(
                               hint: "Re-Enter Password",
                               iconPath: "assets/icons/sign_up/lock.svg",
-                              suffixIconPath: !_isPasswordVisible
+                              suffixIconPath: !_isConfirmPasswordVisible
                                   ? "assets/icons/sign_up/eye.svg"
                                   : "assets/icons/sign_up/eye-slash.svg",
                               isPassword: true,
                               enabled: _isEmailVerified,
+                              onToggleVisibility: () {
+                                setState(() {
+                                  _isConfirmPasswordVisible =
+                                      !_isConfirmPasswordVisible;
+                                });
+                              },
                             ),
                           ),
                           const SizedBox(height: 30),
@@ -687,6 +699,7 @@ class _SignupScreenState extends State<SignupScreen> {
     bool isPassword = false,
     bool enabled = true,
     String? suffixIconPath,
+    VoidCallback? onToggleVisibility,
   }) {
     return InputDecoration(
       hintText: hint,
@@ -730,11 +743,7 @@ class _SignupScreenState extends State<SignupScreen> {
           ? Padding(
               padding: const EdgeInsets.only(right: 4.0),
               child: IconButton(
-                onPressed: enabled
-                    ? () => setState(
-                        () => _isPasswordVisible = !_isPasswordVisible,
-                      )
-                    : null,
+                onPressed: enabled ? onToggleVisibility : null,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 icon: Padding(
