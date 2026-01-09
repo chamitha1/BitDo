@@ -59,6 +59,8 @@
     qr_code_scanner_plus: ^2.0.14
     table_calendar: ^3.2.0  
     flutter_html: ^3.0.0
+
+    cached_network_image: ^3.4.1
     
   dev_dependencies:
     flutter_test:
@@ -119,7 +121,11 @@
       - assets/icons/profile_page/account_security/
       - assets/icons/profile_page/address/
       - assets/icons/p2p/
+      - assets/icons/public/
       - assets/app_icons/
+      - assets/images/public/
+      - assets/icons/profile_page/about_us/
+
 
     # An image asset can refer to one or more resolution-specific "variants", see
     # https://flutter.dev/to/resolution-aware-images
