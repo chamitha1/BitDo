@@ -85,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           controller.homeAssetData.value?.merchantStatus ?? '';
                       return MerchantBanner(merchantStatus: status);
                     }),
-                    const SizedBox(height: 24),
+                    // const SizedBox(height: 24),
                     // const TabSection(),
                     const SizedBox(height: 24),
                     const BalanceSection(),
