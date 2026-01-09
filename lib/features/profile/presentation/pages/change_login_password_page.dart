@@ -26,6 +26,11 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
   bool _isPasswordVisible = false;
   bool _isLoading = false;
 
+  // Verification State
+  String _verifiedOtp = "";
+  bool _isEmailVerified = false;
+  bool _isSendingOtp = false;
+
   @override
   void initState() {
     super.initState();
@@ -72,7 +77,120 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
       return;
     }
 
-    _openOtpSheet();
+    
+    if (!_isEmailVerified) {
+       CustomSnackbar.showError(
+        title: "Error",
+        message: "Please verify your email first",
+      );
+      return;
+    }
+
+    if (_isLoading) return;
+    setState(() => _isLoading = true);
+
+    try {
+       final newPassword = _passController.text.trim();
+       await UserApi.forgetLoginPwd(
+          email: _email,
+          smsCaptcha: _verifiedOtp,
+          loginPwd: newPassword,
+        );
+        print("ChangeLoginPasswordPage: forgetLoginPwd success");
+
+        setState(() => _isLoading = false);
+
+        // Success Dialog
+        Get.dialog(
+          SuccessDialog(
+            title: "Successfully Changed",
+            description:
+                "Your login password has changed successfully. Please use the new password for future logins.",
+            buttonText: "Done",
+            onButtonTap: () {
+              Get.back(); // close dialog
+              Get.back(); // navigate back from Change Page
+            },
+          ),
+          barrierDismissible: false,
+        );
+
+        CustomSnackbar.showSuccess(
+          title: "Success",
+          message: "Login Password Changed Successfully!",
+        );
+
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+         CustomSnackbar.showError(
+          title: "Error", 
+          message: e.toString().replaceAll("Exception: ", "")
+        );
+      }
+    }
+  }
+
+  Future<void> _verifyEmail() async {
+    if (_isSendingOtp || _isEmailVerified) return;
+    setState(() => _isSendingOtp = true);
+
+    try {
+      final success = await _userApi.sendOtp(
+        email: _email,
+        bizType: SmsBizType.forgetPwd,
+      );
+      print("ChangeLoginPasswordPage: sendOtp success: $success");
+
+      if (!mounted) return;
+
+      if (!success) {
+        CustomSnackbar.showError(
+          title: "Error",
+          message: "Failed to send OTP. Please try again.",
+        );
+        return;
+      }
+      
+      CustomSnackbar.showSuccess(
+        title: "Success",
+        message: "OTP sent to your email!",
+      );
+
+       await showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) => OtpBottomSheet(
+          email: _email,
+          otpLength: 6,
+           bizType: SmsBizType.forgetPwd,
+           onVerifyPin: (pin) async {
+            // Local verify only - save OTP
+            _verifiedOtp = pin;
+            return true;
+          },
+          onResend: () async {
+            return await _userApi.sendOtp(
+              email: _email,
+              bizType: SmsBizType.forgetPwd,
+            );
+          },
+          onVerified: () {
+            Navigator.pop(context); // Close OTP sheet
+            setState(() => _isEmailVerified = true);
+             CustomSnackbar.showSuccess(
+              title: "Verified",
+              message: "Email verified successfully!",
+            );
+          },
+        ),
+      );
+    } catch (e) {
+      if (mounted) CustomSnackbar.showError(title: "Error", message: "$e");
+    } finally {
+       if (mounted) setState(() => _isSendingOtp = false);
+    }
   }
 
   String? _validatePassword(String? value) {
@@ -96,108 +214,7 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
     return null;
   }
 
-  Future<void> _openOtpSheet() async {
-    if (_isLoading) return;
-    setState(() => _isLoading = true);
 
-    try {
-      // Send OTP first
-      final success = await _userApi.sendOtp(
-        email: _email,
-        bizType: SmsBizType.forgetPwd,
-      );
-      print("ChangeLoginPasswordPage: sendOtp success: $success");
-
-      if (!mounted) return;
-
-      if (!success) {
-        CustomSnackbar.showError(
-          title: "Error",
-          message: "Failed to send OTP. Please try again.",
-        );
-        setState(() => _isLoading = false);
-        return;
-      }
-
-      setState(() => _isLoading = false);
-
-      final newPassword = _passController.text.trim();
-
-      // Show Sheet
-      showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (context) => OtpBottomSheet(
-          email: _email,
-          otpLength: 6,
-          // Using forgetPwd biztype
-          bizType: SmsBizType.forgetPwd,
-
-          // API verification
-          onVerifyPin: (pin) async {
-            try {
-              // Call forgetLoginPwd
-              await UserApi.forgetLoginPwd(
-                email: _email,
-                smsCaptcha: pin,
-                loginPwd: newPassword,
-              );
-              print("ChangeLoginPasswordPage: forgetLoginPwd success");
-              return true;
-            } catch (e) {
-              print(e);
-              CustomSnackbar.showError(
-                title: "Error",
-                message: e.toString().replaceAll("Exception: ", ""),
-              );
-              return false;
-            }
-          },
-          // resend api
-          onResend: () async {
-            return await _userApi.sendOtp(
-              email: _email,
-              bizType: SmsBizType.forgetPwd,
-            );
-          },
-          onVerified: () {
-            // Close OTP sheet
-            Navigator.pop(context); // or Get.back();
-
-            // Clear textfields
-            _passController.clear();
-            _confirmPassController.clear();
-
-            // Success Dialog
-            Get.dialog(
-              SuccessDialog(
-                title: "Successfully Changed",
-                description:
-                    "Your login password has changed successfully. Please use the new password for future logins.",
-                buttonText: "Done",
-                onButtonTap: () {
-                  Get.back(); // close dialog
-                  Get.back(); // navigate back from Change Page
-                },
-              ),
-              barrierDismissible: false,
-            );
-
-            CustomSnackbar.showSuccess(
-              title: "Success",
-              message: "Login Password Changed Successfully!",
-            );
-          },
-        ),
-      );
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        CustomSnackbar.showError(title: "Error", message: "$e");
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -236,62 +253,76 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
                       _label("Email"),
                       TextFormField(
                         initialValue: _email,
-                        enabled: false,
+                      readOnly: true,
                         style: const TextStyle(
                           color: Color(0xFF151E2F),
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
                           fontFamily: 'Inter',
                         ),
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: const Color(0xFFECEFF5),
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 15,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: const Color(0xFFECEFF5),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 15,
+                        ),
+                        prefixIcon: Padding(
+                          padding: const EdgeInsets.only(
+                            left: 10.0,
+                            top: 14.0,
+                            bottom: 14.0,
+                            right: 4.0,
                           ),
-                          prefixIcon: Padding(
-                            padding: const EdgeInsets.only(
-                              left: 10.0,
-                              top: 14.0,
-                              bottom: 14.0,
-                              right: 4.0,
-                            ),
-                            child: SvgPicture.asset(
-                              "assets/icons/sign_up/sms.svg",
-                              width: 24,
-                              height: 24,
-                              colorFilter: const ColorFilter.mode(
-                                Color(0xFF717F9A),
-                                BlendMode.srcIn,
-                              ),
-                            ),
-                          ),
-                          suffixIcon: Padding(
-                            padding: const EdgeInsets.only(
-                              right: 6,
-                              top: 6,
-                              bottom: 6,
-                            ),
-                            child: _verifyButton(
-                              text: "Verified",
-                              onPressed: () {},
-                              isEnabled: false,
-                              isVerified: true,
-                            ),
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color(0xFFDAE0EE),
-                            ),
-                          ),
-                          disabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color(0xFFDAE0EE),
+                          child: SvgPicture.asset(
+                            "assets/icons/sign_up/sms.svg",
+                            width: 24,
+                            height: 24,
+                            colorFilter: const ColorFilter.mode(
+                              Color(0xFF717F9A),
+                              BlendMode.srcIn,
                             ),
                           ),
                         ),
+                        suffixIcon: Padding(
+                          padding: const EdgeInsets.only(
+                            right: 6,
+                            top: 6,
+                            bottom: 6,
+                          ),
+                          child: _verifyButton(
+                            text: _isEmailVerified
+                                ? "Verified"
+                                : (_isSendingOtp ? "Sending..." : "Verify"),
+                            onPressed: _verifyEmail,
+                            isEnabled: _email.isNotEmpty && !_isSendingOtp,
+                            isVerified: _isEmailVerified,
+                          ),
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFDAE0EE),
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFDAE0EE),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFDAE0EE),
+                          ),
+                        ),
+                        disabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFDAE0EE),
+                          ),
+                        ),
+                      ),
                       ),
                       const SizedBox(height: 24),
 
@@ -301,6 +332,7 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
                         placeholder: "Enter New Password",
                         validator: _validatePassword,
                         showSuffix: false,
+                        enabled: _isEmailVerified,
                       ),
                       const SizedBox(height: 24),
 
@@ -310,6 +342,7 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
                         placeholder: "Re-Enter New Password",
                         validator: _validateConfirmPassword,
                         showSuffix: true,
+                        enabled: _isEmailVerified,
                       ),
                     ],
                   ),
@@ -322,7 +355,7 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : _onUpdate,
+                  onPressed: (_isEmailVerified && !_isLoading) ? _onUpdate : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF1D5DE5),
                     shape: RoundedRectangleBorder(
@@ -364,7 +397,7 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
     bool isVerified = false,
   }) {
     return SizedBox(
-      height: 38,
+      height: 32,
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: isVerified
@@ -390,7 +423,7 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
             elevation: 0,
             disabledBackgroundColor: Colors.transparent,
             disabledForegroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.symmetric(horizontal: isVerified ? 10 : 16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),
@@ -402,8 +435,8 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
                   children: [
                     SvgPicture.asset(
                       "assets/icons/forgot_password/check_circle.svg",
-                      width: 16,
-                      height: 16,
+                      width: 20,
+                      height: 20,
                       color: const Color(0xFF40A372),
                     ),
                     const SizedBox(width: 6),
@@ -452,9 +485,11 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
     required String placeholder,
     String? Function(String?)? validator,
     bool showSuffix = true,
+    bool enabled = true,
   }) {
     return TextFormField(
       controller: controller,
+      enabled: enabled,
       obscureText: !_isPasswordVisible,
       decoration: _inputDecoration(
         hint: placeholder,
@@ -463,7 +498,7 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
             ? "assets/icons/sign_up/eye.svg"
             : (showSuffix ? "assets/icons/sign_up/eye-slash.svg" : null),
         isPassword: showSuffix,
-        enabled: true,
+        enabled: enabled,
       ),
       validator: validator ?? (value) {
         if (value == null || value.isEmpty) {

@@ -26,6 +26,10 @@ class _ChangeTransactionPasswordPageState
   bool _isPasswordVisible = false;
   bool _isLoading = false;
 
+  String _verifiedOtp = "";
+  bool _isEmailVerified = false;
+  bool _isSendingOtp = false;
+
   @override
   void initState() {
     super.initState();
@@ -34,7 +38,6 @@ class _ChangeTransactionPasswordPageState
 
   Future<void> _loadUserEmail() async {
     final userController = Get.find<UserController>();
-    // Ensure user data is loaded
     if (userController.user.value == null) {
       await userController.loadUser();
     }
@@ -72,15 +75,46 @@ class _ChangeTransactionPasswordPageState
       );
       return;
     }
-    _openOtpSheet();
-  }
 
-  Future<void> _openOtpSheet() async {
+    if (!_isEmailVerified) {
+      CustomSnackbar.showError(
+        title: "Error",
+        message: "Please verify your email first",
+      );
+      return;
+    }
+
     if (_isLoading) return;
     setState(() => _isLoading = true);
 
     try {
-      // Send OTP first
+      final result = await _userApi.bindTradePwd(
+        email: _email,
+        smsCode: _verifiedOtp,
+        tradePwd: pass,
+      );
+      print("ChangeTransactionPasswordPage: bindTradePwd result: $result");
+
+      setState(() => _isLoading = false);
+
+      Navigator.pop(context); // Go back
+      CustomSnackbar.showSuccess(
+        title: "Success",
+        message: "Transaction Password Updated Successfully!",
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        CustomSnackbar.showError(title: "Error", message: "$e");
+      }
+    }
+  }
+
+  Future<void> _verifyEmail() async {
+    if (_isSendingOtp || _isEmailVerified) return;
+    setState(() => _isSendingOtp = true);
+
+    try {
       final success = await _userApi.sendOtp(
         email: _email,
         bizType: SmsBizType.bindTradePwd,
@@ -94,18 +128,15 @@ class _ChangeTransactionPasswordPageState
           title: "Error",
           message: "Failed to send OTP. Please try again.",
         );
-        setState(() => _isLoading = false);
         return;
       }
 
-      setState(() => _isLoading = false);
+      CustomSnackbar.showSuccess(
+        title: "Success",
+        message: "OTP sent to your email!",
+      );
 
-      final pendingPassword = _passController.text.trim();
-      _passController.clear();
-      _confirmPassController.clear();
-
-      // Show Sheet
-      showModalBottomSheet(
+      await showModalBottomSheet(
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
@@ -113,22 +144,11 @@ class _ChangeTransactionPasswordPageState
           email: _email,
           otpLength: 6,
           bizType: SmsBizType.bindTradePwd,
-          //  API verify here
           onVerifyPin: (pin) async {
-            try {
-              final result = await _userApi.bindTradePwd(
-                email: _email,
-                smsCode: pin,
-                tradePwd: pendingPassword,
-              );
-              print("ChangeTransactionPasswordPage: bindTradePwd result: $result");
-              return true;
-            } catch (e) {
-              print(e);
-              return false;
-            }
+            // Local verify only - save OTP
+            _verifiedOtp = pin;
+            return true;
           },
-          // resend api
           onResend: () async {
             return await _userApi.sendOtp(
               email: _email,
@@ -137,20 +157,18 @@ class _ChangeTransactionPasswordPageState
           },
           onVerified: () {
             Navigator.pop(context);
-            Get.back();
+            setState(() => _isEmailVerified = true);
             CustomSnackbar.showSuccess(
-              title: "Success",
-              message: "Transaction Password Updated Successfully!",
+              title: "Verified",
+              message: "Email verified successfully!",
             );
           },
         ),
       );
     } catch (e) {
-      if (mounted) {
-        // setState(() => _isLoading = false);
-        setState(() => _isLoading = false);
-        CustomSnackbar.showError(title: "Error", message: "$e");
-      }
+      if (mounted) CustomSnackbar.showError(title: "Error", message: "$e");
+    } finally {
+      if (mounted) setState(() => _isSendingOtp = false);
     }
   }
 
@@ -189,7 +207,7 @@ class _ChangeTransactionPasswordPageState
                     _label("Email"),
                     TextFormField(
                       initialValue: _email,
-                      enabled: false,
+                      readOnly: true,
                       style: const TextStyle(
                         color: Color(0xFF151E2F),
                         fontSize: 16,
@@ -226,13 +244,27 @@ class _ChangeTransactionPasswordPageState
                             bottom: 6,
                           ),
                           child: _verifyButton(
-                            text: "Verified",
-                            onPressed: () {},
-                            isEnabled: false,
-                            isVerified: true,
+                            text: _isEmailVerified
+                                ? "Verified"
+                                : (_isSendingOtp ? "Sending..." : "Verify"),
+                            onPressed: _verifyEmail,
+                            isEnabled: _email.isNotEmpty && !_isSendingOtp,
+                            isVerified: _isEmailVerified,
                           ),
                         ),
                         border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFDAE0EE),
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFDAE0EE),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(
                             color: Color(0xFFDAE0EE),
@@ -249,19 +281,21 @@ class _ChangeTransactionPasswordPageState
                     const SizedBox(height: 24),
 
                     _label("Transaction Password"),
-                      _passwordField(
-                        controller: _passController,
-                        placeholder: "Enter 6-Digit Password",
-                        showSuffix: false,
-                      ),
+                    _passwordField(
+                      controller: _passController,
+                      placeholder: "Enter 6-Digit Password",
+                      showSuffix: false,
+                      enabled: _isEmailVerified,
+                    ),
                     const SizedBox(height: 24),
 
                     _label("Confirm Transaction Password"),
-                      _passwordField(
-                        controller: _confirmPassController,
-                        placeholder: "Re-enter 6-Digit Password",
-                        showSuffix: true,
-                      ),
+                    _passwordField(
+                      controller: _confirmPassController,
+                      placeholder: "Re-enter 6-Digit Password",
+                      showSuffix: true,
+                      enabled: _isEmailVerified,
+                    ),
                   ],
                 ),
               ),
@@ -272,7 +306,9 @@ class _ChangeTransactionPasswordPageState
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : _onUpdate,
+                  onPressed: (_isEmailVerified && !_isLoading)
+                      ? _onUpdate
+                      : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF1D5DE5),
                     shape: RoundedRectangleBorder(
@@ -314,7 +350,7 @@ class _ChangeTransactionPasswordPageState
     bool isVerified = false,
   }) {
     return SizedBox(
-      height: 38,
+      height: 32,
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: isVerified
@@ -340,7 +376,7 @@ class _ChangeTransactionPasswordPageState
             elevation: 0,
             disabledBackgroundColor: Colors.transparent,
             disabledForegroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 10),
+            padding: EdgeInsets.symmetric(horizontal: isVerified ? 10 : 16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),
@@ -352,15 +388,15 @@ class _ChangeTransactionPasswordPageState
                   children: [
                     SvgPicture.asset(
                       "assets/icons/forgot_password/check_circle.svg",
-                      width: 16,
-                      height: 16,
+                      width: 20,
+                      height: 20,
                       color: const Color(0xFF40A372),
                     ),
                     const SizedBox(width: 6),
                     Text(
                       text,
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.w400,
                         fontFamily: 'Inter',
                         color: Color(0xFF40A372),
@@ -401,9 +437,11 @@ class _ChangeTransactionPasswordPageState
     required TextEditingController controller,
     required String placeholder,
     bool showSuffix = true,
+    bool enabled = true,
   }) {
     return TextFormField(
       controller: controller,
+      enabled: enabled,
       obscureText: !_isPasswordVisible,
       keyboardType: TextInputType.number,
       validator: (val) {
@@ -418,7 +456,7 @@ class _ChangeTransactionPasswordPageState
             ? "assets/icons/sign_up/eye.svg"
             : (showSuffix ? "assets/icons/sign_up/eye-slash.svg" : null),
         isPassword: showSuffix,
-        enabled: true,
+        enabled: enabled,
       ),
     );
   }

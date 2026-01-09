@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:BitOwi/config/api_client.dart';
 import 'package:BitOwi/features/auth/presentation/pages/login_screen.dart';
 import 'package:BitOwi/models/identify_order_list_res.dart';
@@ -59,10 +60,14 @@ class UserApi {
     SmsBizType bizType = SmsBizType.register,
   }) async {
     try {
+      final reqData = {'email': email, 'bizType': bizType.value};
+      print("Send OTP Request: $reqData");
+
       final response = await ApiClient.dio.post(
         '/core/v1/sms_out/permission_none/email_code',
-        data: {'email': email, 'bizType': bizType.value},
+        data: reqData,
       );
+      print("Send OTP Response: ${response.data}");
 
       Map<String, dynamic> data;
       if (response.data is Map) {
@@ -251,13 +256,26 @@ class UserApi {
     required String smsCaptchaNew,
   }) async {
     try {
-      final response = await ApiClient.dio.post(
-        '/core/v1/user/modify_email',
-        data: {
+      final data = {
           'newEmail': newEmail,
           'smsCaptchaOld': smsCaptchaOld,
           'smsCaptchaNew': smsCaptchaNew,
-        },
+      };
+      
+      // Print as Map (default toString)
+      print(data);
+      
+      // Print as formatted JSON
+      try {
+        JsonEncoder encoder = const JsonEncoder.withIndent('  ');
+        print(encoder.convert(data));
+      } catch (e) {
+        print("Error printing JSON: $e");
+      }
+
+      final response = await ApiClient.dio.post(
+        '/core/v1/user/modify_email',
+        data: data,
       );
       print("Modify Email Response: ${response.data}");
       return response.data as Map<String, dynamic>;
