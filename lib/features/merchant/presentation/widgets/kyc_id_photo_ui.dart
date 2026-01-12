@@ -1,3 +1,4 @@
+import 'package:BitOwi/core/widgets/soft_circular_loader.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -22,12 +23,7 @@ Widget buildIdUploadPlaceholder({
       child: isUploading
           ? const SizedBox(
               height: 274,
-              child: Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Color(0xFF1D5DE5),
-                ),
-              ),
+              child: Center(child: SoftCircularLoader()),
             )
           : Column(
               children: [
@@ -182,10 +178,7 @@ Widget buildUploadedIdPreview({
                       height: 274,
                       alignment: Alignment.center,
                       color: const Color(0xFFEFF6FF),
-                      child: const CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Color(0xFF1D5DE5),
-                      ),
+                      child: SoftCircularLoader(),
                     );
                   },
 
@@ -213,10 +206,7 @@ Widget buildUploadedIdPreview({
               top: 14,
               left: 14,
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 4,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: const Color(0xFFEAF9F0),
                   borderRadius: BorderRadius.circular(8),
@@ -255,11 +245,7 @@ Widget buildUploadedIdPreview({
                     color: Color(0xFFE74C3C),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.close,
-                    size: 18,
-                    color: Colors.white,
-                  ),
+                  child: const Icon(Icons.close, size: 18, color: Colors.white),
                 ),
               ),
             ),
@@ -296,9 +282,7 @@ Widget buildUploadedIdPreview({
                           ),
                         ),
                         style: OutlinedButton.styleFrom(
-                          side: const BorderSide(
-                            color: Color(0xFF1D5DE5),
-                          ),
+                          side: const BorderSide(color: Color(0xFF1D5DE5)),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),

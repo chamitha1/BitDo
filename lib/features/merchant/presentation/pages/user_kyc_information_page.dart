@@ -1,8 +1,11 @@
+import 'package:BitOwi/core/theme/app_input_decorations.dart';
 import 'package:BitOwi/core/widgets/common_appbar.dart';
+import 'package:BitOwi/core/widgets/common_image.dart';
+import 'package:BitOwi/core/widgets/soft_circular_loader.dart';
 import 'package:BitOwi/features/merchant/presentation/controllers/user_kyc_personal_information_controller.dart';
 import 'package:BitOwi/features/merchant/presentation/widgets/expiry_calendar.dart';
 import 'package:BitOwi/features/merchant/presentation/widgets/kyc_id_photo_ui.dart';
-import 'package:BitOwi/features/merchant/presentation/widgets/kyc_title_label.dart';
+import 'package:BitOwi/core/widgets/input_title_label.dart';
 import 'package:BitOwi/features/merchant/presentation/widgets/user_kyc_information_status_page.dart';
 import 'package:BitOwi/models/country_list_res.dart';
 import 'package:BitOwi/models/dict.dart';
@@ -17,20 +20,15 @@ class UserKycInformationPage extends StatelessWidget {
 
   final _formKey = GlobalKey<FormState>();
 
-  /// 🔁 GET CONTROLLER
   final UserKycInformationController controller =
       Get.find<UserKycInformationController>();
 
   @override
   Widget build(BuildContext context) {
-    // debugPrint("🚀${controller.latestIdentifyOrderStatus.value}🚀");
     return PopScope(
       canPop: false, // prevent automatic pop
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-        //todo: noo need
-        // final status = controller.latestIdentifyOrderStatus.value;
-        // Get.back(result: status != null && status != '-1');
         Get.back();
       },
       child: Scaffold(
@@ -38,21 +36,13 @@ class UserKycInformationPage extends StatelessWidget {
         appBar: CommonAppBar(
           title: "Personal Information",
           onBack: () {
-            //todo: noo need
-            // final status = controller.latestIdentifyOrderStatus.value;
-            // Get.back(result: status != null && status != '-1');
             Get.back();
           },
         ),
         body: SafeArea(
           child: Obx(() {
             if (controller.isLoading.value) {
-              return const Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Color(0xFF1D5DE5),
-                ),
-              );
+              return const Center(child: SoftCircularLoader());
             }
 
             final status = controller.latestIdentifyOrderStatus.value;
@@ -100,7 +90,7 @@ class UserKycInformationPage extends StatelessWidget {
     return GestureDetector(
       onTap: controller.countryList.isEmpty ? null : areaTapNationality,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
@@ -115,14 +105,11 @@ class UserKycInformationPage extends StatelessWidget {
                 if (hasSelection) ...[
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
+                    child: CommonImage(
                       country.pic,
+                      fit: BoxFit.cover,
                       width: 24,
                       height: 24,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) {
-                        return const SizedBox(width: 24, height: 24);
-                      },
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -246,17 +233,11 @@ class UserKycInformationPage extends StatelessWidget {
                             child: Row(
                               children: [
                                 ClipOval(
-                                  child: Image.network(
+                                  child: CommonImage(
                                     nationality.pic,
+                                    fit: BoxFit.cover,
                                     width: 48,
                                     height: 48,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) {
-                                      return const SizedBox(
-                                        width: 48,
-                                        height: 48,
-                                      );
-                                    },
                                   ),
                                 ),
                                 SizedBox(width: 12),
@@ -345,7 +326,7 @@ class UserKycInformationPage extends StatelessWidget {
       return GestureDetector(
         onTap: controller.idTypeList.isEmpty ? null : areaTapIdType, // 🔁,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
@@ -565,67 +546,17 @@ class UserKycInformationPage extends StatelessWidget {
     return TextFormField(
       controller: controller.nameController, // ✅
       onChanged: (v) => controller.name.value = v, // ✅
-      decoration: InputDecoration(
-        hintText: "Enter Your Name",
-        hintStyle: const TextStyle(
-          fontFamily: 'Inter',
-          fontWeight: FontWeight.w400,
-          fontSize: 14,
-          color: Color(0xFF717F9A),
-        ),
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF929EB8)),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
-        ),
-      ),
+      decoration: AppInputDecorations.textField(hintText: "Enter Your Name"),
     );
   }
 
   //* -- input Id methods --
   TextFormField buildIdTextInput() {
     return TextFormField(
-      controller: controller.idController, // ✅
-      onChanged: (v) => controller.idNumber.value = v, // ✅
-      decoration: InputDecoration(
+      controller: controller.idController,
+      onChanged: (v) => controller.idNumber.value = v,
+      decoration: AppInputDecorations.textField(
         hintText: "Enter Your ID Number",
-        hintStyle: const TextStyle(
-          fontFamily: 'Inter',
-          fontWeight: FontWeight.w400,
-          fontSize: 14,
-          color: Color(0xFF717F9A),
-        ),
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF929EB8)),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
-        ),
       ),
     );
   }
@@ -639,14 +570,14 @@ class UserKycInformationPage extends StatelessWidget {
         // Select Date Field
         GestureDetector(
           onTap: () {
-            controller.syncFocusedDay(); // ✅ focus today or selected date
+            controller.syncFocusedDay();
             controller.showCalendar.value = true;
           },
           child: Obx(() {
             final selectedDate = controller.selectedExpiryDate.value;
 
             return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
@@ -683,21 +614,21 @@ class UserKycInformationPage extends StatelessWidget {
           }
 
           return Container(
-            // margin: const EdgeInsets.only(top: 6),
-            // padding: const EdgeInsets.only(bottom: 12, left: 4, right: 4),
+            margin: const EdgeInsets.only(top: 6),
+            padding: const EdgeInsets.only(bottom: 12, left: 4, right: 4),
 
-            // decoration: BoxDecoration(
-            //   color: Colors.white,
-            //   borderRadius: BorderRadius.circular(12),
-            //   border: Border.all(color: const Color(0xFFE2E8F0)),
-            //   boxShadow: [
-            //     BoxShadow(
-            //       color: Colors.black.withOpacity(0.05),
-            //       blurRadius: 10,
-            //       offset: const Offset(0, 4),
-            //     ),
-            //   ],
-            // ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
             child: CommonExpiryCalendar(
               focusedDay: controller.focusedDay.value,
               selectedDate: controller.selectedExpiryDate.value,
@@ -749,22 +680,22 @@ class UserKycInformationPage extends StatelessWidget {
               controller.showWarning.value)
             buildTopTipWarningCard(),
           // Nationality
-          KycTitleLabel("Nationality"),
+          InputTitleLable("Nationality"),
           buildNationalitySelection(),
           // Name
-          KycTitleLabel("Name"),
+          InputTitleLable("Name"),
           buildNameTextInput(),
           // Type of ID
-          KycTitleLabel("Type of ID"),
+          InputTitleLable("Type of ID"),
           buildIdTypeSelection(),
           // Expiry Date
-          KycTitleLabel("Expiry Date"),
+          InputTitleLable("Expiry Date"),
           buildExpirySelection(context),
           // ID Number
-          KycTitleLabel("ID Number"),
+          InputTitleLable("ID Number"),
           buildIdTextInput(),
           // ID Picture
-          KycTitleLabel("ID Picture"),
+          InputTitleLable("ID Picture"),
           buildIDPhotoSelection(),
           const SizedBox(height: 32),
           buildSubmitButton(context),

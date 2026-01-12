@@ -21,6 +21,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       scrolledUnderElevation: 0,
       centerTitle: centerTitle,
+      titleSpacing: 0,
       leading: IconButton(
         icon: SvgPicture.asset(
           'assets/icons/merchant_details/arrow_left.svg',

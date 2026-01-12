@@ -1,19 +1,15 @@
 import 'package:BitOwi/config/routes.dart';
 import 'package:BitOwi/core/widgets/common_appbar.dart';
-import 'package:BitOwi/features/profile/presentation/pages/change_email_page.dart';
-import 'package:BitOwi/features/profile/presentation/pages/me_page.dart';
+import 'package:BitOwi/features/profile/presentation/controllers/settings_controller.dart';
 import 'package:BitOwi/features/profile/presentation/widgets/profile_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class Settings extends StatefulWidget {
-  const Settings({super.key});
+class Settings extends StatelessWidget {
+  Settings({super.key});
 
-  @override
-  State<Settings> createState() => _SettingsState();
-}
+  final settingsController = Get.find<SettingsController>();
 
-class _SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,7 +34,10 @@ class _SettingsState extends State<Settings> {
                   iconPath: 'assets/icons/profile_page/dollar_circle.svg',
                   title: "Local Currency",
                   subtitle: "Set your preferred currency",
-                  onTap: () => Get.toNamed(Routes.mePage),
+                  onTap: () {
+                    settingsController.getCurrency();
+                    Get.toNamed(Routes.localCurrency);
+                  },
                 ),
               ],
             ),

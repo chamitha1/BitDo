@@ -1,6 +1,8 @@
 import 'package:BitOwi/api/common_api.dart';
+import 'package:BitOwi/core/widgets/app_text.dart';
 import 'package:BitOwi/core/widgets/common_appbar.dart';
 import 'package:BitOwi/core/widgets/common_image.dart';
+import 'package:BitOwi/core/widgets/soft_circular_loader.dart';
 import 'package:BitOwi/features/auth/presentation/controllers/user_controller.dart';
 import 'package:BitOwi/models/article_type.dart';
 import 'package:easy_refresh/easy_refresh.dart';
@@ -83,7 +85,7 @@ class _HelpCenterState extends State<HelpCenter> with TickerProviderStateMixin {
                 Center(
                   child: Padding(
                     padding: const EdgeInsets.only(top: 100.0),
-                    child: CircularProgressIndicator(),
+                    child: SoftCircularLoader(),
                   ),
                 )
               else
@@ -200,22 +202,11 @@ class _HelpCenterState extends State<HelpCenter> with TickerProviderStateMixin {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          section.name,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFF151E2F),
-                          ),
-                        ),
+                        AppText.p2Medium(section.name),
                         const SizedBox(height: 2),
-                        Text(
+                        AppText.p3Regular(
                           "${section.articleList.length.toString()} Questions",
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xFF717F9A),
-                          ),
+                          color: Color(0xFF717F9A),
                         ),
                       ],
                     ),
@@ -258,15 +249,7 @@ class _HelpCenterState extends State<HelpCenter> with TickerProviderStateMixin {
                 vertical: 4,
               ),
               // Question Title
-              title: Text(
-                section.articleList[qIndex].title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF151E2F),
-                  fontFamily: 'Inter',
-                ),
-              ),
+              title: AppText.p2Medium(section.articleList[qIndex].title),
               trailing: AnimatedRotation(
                 duration: const Duration(milliseconds: 500),
                 turns: isOpen ? -0.25 : 0,
@@ -294,11 +277,9 @@ class _HelpCenterState extends State<HelpCenter> with TickerProviderStateMixin {
                           cleanHtml(section.articleList[qIndex].content ?? ''),
                           textStyle: const TextStyle(
                             fontSize: 14,
-                            height: 1.6,
                             color: Color(0xFF151E2F),
                             fontFamily: 'Inter',
                           ),
-
                           //  ✅ Prevent oversized images breaking accordion width
                           customWidgetBuilder: (element) {
                             if (element.localName == 'img') {

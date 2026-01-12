@@ -141,7 +141,7 @@ class ProfileScreen extends StatelessWidget {
             child: Row(
               children: [
                 Obx(() {
-                  return buildAvatar(controller.user.value?.avatar ?? '');
+                  return buildAvatar(controller.userAvatar.value);
                 }),
                 const SizedBox(width: 16),
                 // Info
@@ -150,11 +150,8 @@ class ProfileScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Obx(() {
-                        final name =
-                            controller.user.value?.nickname ??
-                            controller.userName.value;
                         return Text(
-                          name,
+                          controller.userName.value,
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w600,
@@ -163,7 +160,6 @@ class ProfileScreen extends StatelessWidget {
                           ),
                         );
                       }),
-                      const SizedBox(height: 8),
                       // Certified Badge
                       Obx(
                         () => (controller.user.value?.merchantStatus == '1')

@@ -25,7 +25,7 @@ class HomeHeader extends StatelessWidget {
             padding: const EdgeInsets.all(3),
             child: ClipOval(
               child: CommonImage(
-                controller.user.value?.avatar ?? '',
+                controller.userAvatar.value,
                 fit: BoxFit.cover,
               ),
             ),

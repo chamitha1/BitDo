@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-class KycTitleLabel extends StatelessWidget {
+class InputTitleLable extends StatelessWidget {
   final String text;
-  const KycTitleLabel(this.text, {super.key});
+  const InputTitleLable(this.text, {super.key});
 
   @override
   Widget build(BuildContext context) {

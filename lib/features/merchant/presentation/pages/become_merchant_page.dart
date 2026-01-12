@@ -1,5 +1,6 @@
 import 'package:BitOwi/config/routes.dart';
 import 'package:BitOwi/core/widgets/common_appbar.dart';
+import 'package:BitOwi/core/widgets/soft_circular_loader.dart';
 import 'package:BitOwi/features/merchant/presentation/controllers/become_merchant_controller.dart';
 import 'package:BitOwi/features/merchant/presentation/widgets/decertification_result_dialog.dart';
 import 'package:BitOwi/features/merchant/presentation/widgets/decertify_confirmation_bottom_sheet.dart';
@@ -21,10 +22,7 @@ class BecomeMerchantPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F9FF),
-      appBar: CommonAppBar(
-        title: "Merchant Details",
-        onBack: () => Get.back(),
-      ),
+      appBar: CommonAppBar(title: "Merchant Details", onBack: () => Get.back()),
 
       body: SafeArea(
         top: false,
@@ -38,12 +36,7 @@ class BecomeMerchantPage extends StatelessWidget {
             if (controller.isLoading.value) {
               return SizedBox(
                 height: MediaQuery.of(context).size.height,
-                child: const Center(
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Color(0xFF1D5DE5),
-                  ),
-                ),
+                child: const Center(child: SoftCircularLoader()),
               );
             }
 
@@ -96,7 +89,7 @@ class BecomeMerchantPage extends StatelessWidget {
                     style: TextStyle(
                       fontFamily: 'Inter',
                       fontWeight: FontWeight.w700,
-                      fontSize: 26,
+                      fontSize: 28,
                       color: Color(0xFF151E2F),
                     ),
                   ),
@@ -110,11 +103,11 @@ class BecomeMerchantPage extends StatelessWidget {
                       fontFamily: 'Inter',
                       fontWeight: FontWeight.w400,
                       fontSize: 14,
-                      color: Color(0xFF454F63),
+                      color: Color(0xFF717F9A),
                     ),
                   ),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 30),
 
                   // 🧾 STEP 1
                   StepCard(
@@ -155,7 +148,7 @@ class BecomeMerchantPage extends StatelessWidget {
                         latestInfo?.status ?? '',
                   ),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 30),
 
                   // 🔘 ACTION BUTTON (UNCHANGED LOGIC)
                   _buildActionButton(

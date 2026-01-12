@@ -1,9 +1,12 @@
+import 'package:BitOwi/core/theme/app_input_decorations.dart';
 import 'package:BitOwi/core/widgets/common_appbar.dart';
+import 'package:BitOwi/core/widgets/common_image.dart';
 import 'package:BitOwi/core/widgets/custom_snackbar.dart';
+import 'package:BitOwi/core/widgets/soft_circular_loader.dart';
 import 'package:BitOwi/features/merchant/presentation/controllers/kyc_personal_information_controller.dart';
 import 'package:BitOwi/features/merchant/presentation/widgets/expiry_calendar.dart';
 import 'package:BitOwi/features/merchant/presentation/widgets/kyc_id_photo_ui.dart';
-import 'package:BitOwi/features/merchant/presentation/widgets/kyc_title_label.dart';
+import 'package:BitOwi/core/widgets/input_title_label.dart';
 import 'package:BitOwi/features/merchant/presentation/widgets/personal_information_status_page.dart';
 import 'package:BitOwi/models/country_list_res.dart';
 import 'package:BitOwi/models/dict.dart';
@@ -16,62 +19,47 @@ import 'package:intl/intl.dart';
 class KycPersonalInformationPage extends StatelessWidget {
   KycPersonalInformationPage({super.key});
 
-  // 🧠 GetX controller (provided by Binding)
   final KycPersonalInformationController controller =
-      Get.find<KycPersonalInformationController>(); // 🧠
+      Get.find<KycPersonalInformationController>();
 
-  final _formKey = GlobalKey<FormState>(); // unchanged (UI concern)
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
-    // 🧠 INIT controller ONCE using Get.arguments
-    // final args = Get.arguments as Map<String, dynamic>; // 🧠
-    // controller.init(
-    //   isEdit: args['isEdit'],
-    //   merchantStatus: args['merchantStatus'],
-    // ); // 🧠
-
     return PopScope(
       canPop: false, // prevent automatic pop
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
 
         // Handle system back + gesture back
-        Get.back(result: controller.merchantStatus.value != '-1'); // 🔁
+        Get.back(result: controller.merchantStatus.value != '-1');
       },
       child: Scaffold(
         backgroundColor: const Color(0xFFF6F9FF),
         appBar: CommonAppBar(
           title: "Personal Information",
-          onBack: () => Get.back(
-            result: controller.merchantStatus.value != '-1',
-          ),
+          onBack: () =>
+              Get.back(result: controller.merchantStatus.value != '-1'),
         ),
 
         body: SafeArea(
           child: Obx(() {
-            // 👀 replaces setState rebuilds
             if (controller.isLoading.value) {
-              return const Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Color(0xFF1D5DE5),
-                ),
-              );
+              return const Center(child: SoftCircularLoader());
             }
 
             return SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: controller.merchantStatus.value == '-1'
-                  ? personalInfoInputContent(context) // unchanged
+                  ? personalInfoInputContent(context)
                   : SuccessfullySubmittedKYCInfo(
-                      countryIndex: controller.countryIndex.value, // 🔁
-                      countryList: controller.countryList, // 🔁
-                      idTypeIndex: controller.idTypeIndex.value, // 🔁
-                      idTypeList: controller.idTypeList, // 🔁
-                      name: controller.name.value, // 🔁
-                      idNumber: controller.idNumber.value, // 🔁
-                      expiryDate: controller.selectedExpiryDate.value, // 🔁
+                      countryIndex: controller.countryIndex.value, //
+                      countryList: controller.countryList, //
+                      idTypeIndex: controller.idTypeIndex.value, //
+                      idTypeList: controller.idTypeList, //
+                      name: controller.name.value, //
+                      idNumber: controller.idNumber.value, //
+                      expiryDate: controller.selectedExpiryDate.value, //
                       merchantStatus: controller.merchantStatus.value,
                       identifyOrderLatestSubmittedInfoStatus:
                           controller.latestSubmittedInfo?.status ?? '0',
@@ -101,7 +89,7 @@ class KycPersonalInformationPage extends StatelessWidget {
     // if (countryIndex >= 0 && countryIndex < countryList.length) {
     //   country = countryList[countryIndex];
     // }
-    // ✅ SAFE index access via controller
+    // SAFE index access via controller
     if (controller.countryIndex.value >= 0 &&
         controller.countryIndex.value < controller.countryList.length) {
       country = controller.countryList[controller.countryIndex.value];
@@ -121,7 +109,7 @@ class KycPersonalInformationPage extends StatelessWidget {
     return GestureDetector(
       onTap: controller.countryList.isEmpty ? () {} : areaTapNationality,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
@@ -136,14 +124,11 @@ class KycPersonalInformationPage extends StatelessWidget {
                 if (hasSelection) ...[
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
+                    child: CommonImage(
                       country.pic,
+                      fit: BoxFit.cover,
                       width: 24,
                       height: 24,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) {
-                        return const SizedBox(width: 24, height: 24);
-                      },
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -264,17 +249,11 @@ class KycPersonalInformationPage extends StatelessWidget {
                             child: Row(
                               children: [
                                 ClipOval(
-                                  child: Image.network(
+                                  child: CommonImage(
                                     nationality.pic,
+                                    fit: BoxFit.cover,
                                     width: 48,
                                     height: 48,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, _, _) {
-                                      return const SizedBox(
-                                        width: 48,
-                                        height: 48,
-                                      );
-                                    },
                                   ),
                                 ),
                                 SizedBox(width: 12),
@@ -363,7 +342,7 @@ class KycPersonalInformationPage extends StatelessWidget {
       return GestureDetector(
         onTap: controller.idTypeList.isEmpty ? () {} : areaTapIdType,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
@@ -575,37 +554,11 @@ class KycPersonalInformationPage extends StatelessWidget {
   }
 
   //* -- input name methods --
-  Widget buildNameTextInput() {
+  TextFormField buildNameTextInput() {
     return TextFormField(
       controller: controller.nameController,
       onChanged: (v) => controller.name.value = v.trim(),
-      decoration: InputDecoration(
-        hintText: "Enter Your Name",
-        hintStyle: const TextStyle(
-          fontFamily: 'Inter',
-          fontWeight: FontWeight.w400,
-          fontSize: 14,
-          color: Color(0xFF717F9A),
-        ),
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF929EB8)),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
-        ),
-      ),
+      decoration: AppInputDecorations.textField(hintText: "Enter Your Name"),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
           return "Name is required";
@@ -616,36 +569,12 @@ class KycPersonalInformationPage extends StatelessWidget {
   }
 
   //* -- input Id methods --
-  Widget buildIdTextInput() {
+  TextFormField buildIdTextInput() {
     return TextFormField(
       controller: controller.idController,
       onChanged: (v) => controller.idNumber.value = v.trim(),
-      decoration: InputDecoration(
+      decoration: AppInputDecorations.textField(
         hintText: "Enter Your ID Number",
-        hintStyle: const TextStyle(
-          fontFamily: 'Inter',
-          fontWeight: FontWeight.w400,
-          fontSize: 14,
-          color: Color(0xFF717F9A),
-        ),
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF929EB8)),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
-        ),
       ),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
@@ -672,7 +601,7 @@ class KycPersonalInformationPage extends StatelessWidget {
             final selectedDate = controller.selectedExpiryDate.value;
 
             return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
@@ -747,7 +676,7 @@ class KycPersonalInformationPage extends StatelessWidget {
   //* -- select ID picture methods --
   Widget buildIDPhotoSelection() {
     return Obx(() {
-      // 🔁 reactive wrapper
+      // reactive wrapper
       final faceUrl = controller.faceUrl.value;
 
       if (faceUrl != null && faceUrl.isNotEmpty) {
@@ -764,288 +693,6 @@ class KycPersonalInformationPage extends StatelessWidget {
     });
   }
 
-  // DottedBorder _buildUploadPlaceholder() {
-  //   return DottedBorder(
-  //     options: RoundedRectDottedBorderOptions(
-  //       dashPattern: [2, 4],
-  //       strokeWidth: 1.5,
-  //       radius: Radius.circular(16),
-  //       color: Color(0xFFB9C6E2),
-  //     ),
-  //     child: Container(
-  //       padding: const EdgeInsets.all(24),
-  //       decoration: BoxDecoration(
-  //         color: Colors.white,
-  //         borderRadius: BorderRadius.circular(12),
-  //       ),
-  //       child: controller.isIdImageUploading.value
-  //           ? const SizedBox(
-  //               height: 274,
-  //               child: Center(
-  //                 child: CircularProgressIndicator(
-  //                   strokeWidth: 2,
-  //                   color: Color(0xFF1D5DE5),
-  //                 ),
-  //               ),
-  //             )
-  //           : Column(
-  //               children: [
-  //                 Container(
-  //                   width: 56,
-  //                   height: 56,
-  //                   padding: const EdgeInsets.all(18),
-  //                   decoration: const BoxDecoration(
-  //                     shape: BoxShape.circle,
-  //                     color: Color(0xFFEFF6FF),
-  //                   ),
-  //                   child: SvgPicture.asset(
-  //                     'assets/icons/merchant_details/upload.svg',
-  //                   ),
-  //                 ),
-  //                 const SizedBox(height: 16),
-  //                 const Text(
-  //                   "Upload ID Picture",
-  //                   style: TextStyle(
-  //                     fontFamily: 'Inter',
-  //                     fontWeight: FontWeight.w600,
-  //                     fontSize: 16,
-  //                     color: Color(0xFF151E2F),
-  //                   ),
-  //                 ),
-  //                 const SizedBox(height: 8),
-  //                 const Text(
-  //                   "Drag and drop your file here or",
-  //                   style: TextStyle(
-  //                     fontFamily: 'Inter',
-  //                     fontWeight: FontWeight.w400,
-  //                     fontSize: 12,
-  //                     color: Color(0xFF717F9A),
-  //                   ),
-  //                 ),
-  //                 const SizedBox(height: 16),
-
-  //                 /// ⬆️ UPLOAD BUTTON
-  //                 ElevatedButton.icon(
-  //                   onPressed: controller.onPickIdImage, // 🔁
-  //                   icon: SvgPicture.asset(
-  //                     'assets/icons/merchant_details/upload.svg',
-  //                     height: 16,
-  //                     width: 16,
-  //                     colorFilter: const ColorFilter.mode(
-  //                       Colors.white,
-  //                       BlendMode.srcIn,
-  //                     ),
-  //                   ),
-  //                   label: Text(
-  //                     "Click to Upload",
-  //                     style: const TextStyle(
-  //                       fontFamily: 'Inter',
-  //                       fontWeight: FontWeight.w500,
-  //                       fontSize: 16,
-  //                       color: Colors.white,
-  //                     ),
-  //                     overflow: TextOverflow.ellipsis,
-  //                   ),
-  //                   style: ElevatedButton.styleFrom(
-  //                     backgroundColor: const Color(0xFF1D5DE5),
-  //                     elevation: 0,
-  //                     padding: const EdgeInsets.symmetric(
-  //                       horizontal: 16,
-  //                       vertical: 12,
-  //                     ),
-  //                     shape: RoundedRectangleBorder(
-  //                       borderRadius: BorderRadius.circular(12),
-  //                     ),
-  //                   ),
-  //                 ),
-  //                 const SizedBox(height: 16),
-  //                 Row(
-  //                   mainAxisAlignment: MainAxisAlignment.center,
-  //                   children: [
-  //                     SvgPicture.asset(
-  //                       'assets/icons/merchant_details/personalcard.svg',
-  //                     ),
-  //                     const SizedBox(width: 4),
-  //                     const Text(
-  //                       "JPG or PNG only • Max 5MB",
-  //                       style: TextStyle(
-  //                         fontFamily: 'Inter',
-  //                         fontWeight: FontWeight.w400,
-  //                         fontSize: 12,
-  //                         color: Color(0xFF717F9A),
-  //                       ),
-  //                     ),
-  //                   ],
-  //                 ),
-  //                 const SizedBox(height: 16),
-  //                 _buildRequirement("Clear, readable text on the document"),
-  //                 const SizedBox(height: 8),
-  //                 _buildRequirement(
-  //                   "All four corners of the ID must be visible",
-  //                 ),
-  //                 const SizedBox(height: 8),
-  //                 _buildRequirement("Photo taken in good lighting"),
-  //               ],
-  //             ),
-  //     ),
-  //   );
-  // }
-
-  // Widget _buildUploadedIDPreview() {
-  //   return Container(
-  //     decoration: BoxDecoration(
-  //       color: const Color(0xFFFFFFFF),
-  //       // color: Colors.red,
-  //       borderRadius: BorderRadius.circular(16),
-  //     ),
-  //     child: Column(
-  //       children: [
-  //         // ---------- IMAGE PREVIEW ----------
-  //         Stack(
-  //           children: [
-  //             Padding(
-  //               padding: const EdgeInsets.all(8.0),
-  //               child: ClipRRect(
-  //                 borderRadius: BorderRadius.circular(16),
-  //                 child: Image.network(
-  //                   controller.faceUrl.value!,
-  //                   width: double.infinity,
-  //                   height: 274,
-  //                   fit: BoxFit.cover,
-  //                   //  SHOW LOADING UNTIL IMAGE IS READY
-  //                   loadingBuilder: (context, child, loadingProgress) {
-  //                     if (loadingProgress == null) {
-  //                       return child; // image fully loaded
-  //                     }
-
-  //                     return Container(
-  //                       height: 274,
-  //                       alignment: Alignment.center,
-  //                       color: const Color(0xFFEFF6FF),
-  //                       child: const CircularProgressIndicator(
-  //                         strokeWidth: 2,
-  //                         color: Color(0xFF1D5DE5),
-  //                       ),
-  //                     );
-  //                   },
-  //                   errorBuilder: (_, _, _) {
-  //                     return Container(
-  //                       height: 274,
-  //                       alignment: Alignment.center,
-  //                       color: const Color(0xFFEFF6FF),
-  //                       child: const Text("Failed to load image"),
-  //                     );
-  //                   },
-  //                 ),
-  //               ),
-  //             ),
-
-  //             // ---------- UPLOADED BADGE ----------
-  //             Positioned(
-  //               top: 14,
-  //               left: 14,
-  //               child: Container(
-  //                 padding: const EdgeInsets.symmetric(
-  //                   horizontal: 8,
-  //                   vertical: 4,
-  //                 ),
-  //                 decoration: BoxDecoration(
-  //                   color: const Color(0xFFEAF9F0),
-  //                   borderRadius: BorderRadius.circular(8),
-  //                 ),
-  //                 child: Row(
-  //                   children: const [
-  //                     Icon(
-  //                       Icons.check_circle,
-  //                       size: 16,
-  //                       color: Color(0xFF40A372),
-  //                     ),
-  //                     SizedBox(width: 6),
-  //                     Text(
-  //                       "Uploaded",
-  //                       style: TextStyle(
-  //                         fontSize: 12,
-  //                         fontWeight: FontWeight.w600,
-  //                         color: Color(0xFF40A372),
-  //                       ),
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ),
-  //             ),
-
-  //             // ---------- REMOVE BUTTON ----------
-  //             Positioned(
-  //               top: 14,
-  //               right: 14,
-  //               child: GestureDetector(
-  //                 onTap: controller.removeIdImage,
-  //                 child: Container(
-  //                   width: 24,
-  //                   height: 24,
-  //                   decoration: const BoxDecoration(
-  //                     color: Color(0xFFE74C3C),
-  //                     shape: BoxShape.circle,
-  //                   ),
-  //                   child: const Icon(
-  //                     Icons.close,
-  //                     size: 18,
-  //                     color: Colors.white,
-  //                   ),
-  //                 ),
-  //               ),
-  //             ),
-
-  //             // ---------- BOTTOM ACTION BAR ----------
-  //             Positioned(
-  //               left: 0,
-  //               right: 0,
-  //               bottom: 0,
-  //               child: Padding(
-  //                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
-  //                 child: Container(
-  //                   height: 82,
-  //                   decoration: BoxDecoration(
-  //                     color: const Color(0xFFECEFF5),
-  //                     borderRadius: BorderRadius.circular(16),
-  //                   ),
-  //                   child: Center(
-  //                     child: SizedBox(
-  //                       height: 48,
-  //                       child: OutlinedButton.icon(
-  //                         onPressed: controller.onPickIdImage, // 🔁
-  //                         icon: SvgPicture.asset(
-  //                           'assets/icons/merchant_details/upload.svg',
-  //                           height: 16,
-  //                           width: 16,
-  //                         ),
-  //                         label: const Text(
-  //                           "Upload Different Photo",
-  //                           style: TextStyle(
-  //                             fontWeight: FontWeight.w600,
-  //                             fontSize: 16,
-  //                           ),
-  //                         ),
-  //                         style: OutlinedButton.styleFrom(
-  //                           foregroundColor: const Color(0xFF1D5DE5),
-  //                           side: const BorderSide(color: Color(0xFF1D5DE5)),
-  //                           shape: RoundedRectangleBorder(
-  //                             borderRadius: BorderRadius.circular(12),
-  //                           ),
-  //                         ),
-  //                       ),
-  //                     ),
-  //                   ),
-  //                 ),
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
   Widget personalInfoInputContent(BuildContext context) {
     return Form(
       key: _formKey,
@@ -1053,26 +700,25 @@ class KycPersonalInformationPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Warning Card
-          if (controller.topTip.isNotEmpty &&
-              controller.showWarning.value) // 🔁
+          if (controller.topTip.isNotEmpty && controller.showWarning.value) //
             buildTopTipWarningCard(),
           // Nationality
-          KycTitleLabel("Nationality"),
+          InputTitleLable("Nationality"),
           buildNationalitySelection(),
           // Name
-          KycTitleLabel("Name"),
+          InputTitleLable("Name"),
           buildNameTextInput(),
           // Type of ID
-          KycTitleLabel("Type of ID"),
+          InputTitleLable("Type of ID"),
           buildIdTypeSelection(),
           // Expiry Date
-          KycTitleLabel("Expiry Date"),
+          InputTitleLable("Expiry Date"),
           buildExpirySelection(context),
           // ID Number
-          KycTitleLabel("ID Number"),
+          InputTitleLable("ID Number"),
           buildIdTextInput(),
           // ID Picture
-          KycTitleLabel("ID Picture"),
+          InputTitleLable("ID Picture"),
           buildIDPhotoSelection(),
           const SizedBox(height: 32),
           buildSubmitButton(context),
@@ -1082,7 +728,7 @@ class KycPersonalInformationPage extends StatelessWidget {
     );
   }
 
-  // 🔁 CHANGED: setState → controller.showWarning
+  // CHANGED: setState → controller.showWarning
   Container buildTopTipWarningCard() {
     return Container(
       padding: const EdgeInsets.all(10),
@@ -1130,7 +776,7 @@ class KycPersonalInformationPage extends StatelessWidget {
           ),
           GestureDetector(
             onTap: () {
-              controller.showWarning.value = false; // 🔁
+              controller.showWarning.value = false; //
             },
             child: SvgPicture.asset(
               'assets/icons/merchant_details/close-square.svg',
@@ -1153,11 +799,11 @@ class KycPersonalInformationPage extends StatelessWidget {
         final canSubmit = controller.isFormReady;
         return ElevatedButton(
           onPressed:
-              canSubmit // 🔁
+              canSubmit //
               ? () async {
                   if (!_formKey.currentState!.validate()) return;
 
-                  final success = await controller.submitKyc(); // 🧠
+                  final success = await controller.submitKyc();
 
                   if (success) {
                     CustomSnackbar.showError(
@@ -1171,65 +817,13 @@ class KycPersonalInformationPage extends StatelessWidget {
                     //         widget.merchantStatus =
                     //             latestSubmittedInfo?.status ?? '0';
                     //       }
-                    // Get.back(result: true); // 🔁 return result
+                    // Get.back(result: true); // return result
                   } else {
                     CustomSnackbar.showError(
                       title: "Error",
                       message: "Submission failed",
                     );
                   }
-
-                  // try {
-                  //   setState(() {
-                  //     _isLoading = true;
-                  //   });
-
-                  //   final formattedDate = _selectedExpiryDate != null
-                  //       ? "${_selectedExpiryDate!.month.toString().padLeft(2, '0')}/${_selectedExpiryDate!.year}"
-                  //       : "00/0000";
-
-                  //   await UserApi.createIdentifyOrder({
-                  //     "countryId": countryList[countryIndex].id,
-                  //     "realName": _nameController.text,
-                  //     "kind": idTypeList[idTypeIndex].key,
-                  //     "expireDate": formattedDate,
-                  //     "idNo": _idNumberController.text,
-                  //     "frontImage": faceUrl,
-                  //   }).then((value) async {
-                  //     if (value['errorMsg'] == 'SUCCESS' ||
-                  //         value['errorCode'] == 'Success') {
-                  //       ScaffoldMessenger.of(context).showSnackBar(
-                  //         const SnackBar(
-                  //           content: Text("KYC Information Submitted!"),
-                  //           backgroundColor: Color(0xFF10B981),
-                  //         ),
-                  //       );
-
-                  //       await getLatestIdentifyOrderList();
-                  //       setState(() {
-                  //         _isLoading = false;
-                  //         widget.merchantStatus =
-                  //             latestSubmittedInfo?.status ?? '0';
-                  //       });
-                  //     } else {
-                  //       setState(() {
-                  //         _isLoading = false;
-                  //         ScaffoldMessenger.of(context).showSnackBar(
-                  //           SnackBar(
-                  //             content: Text(
-                  //               "${value['errorMsg']}",
-                  //               style: TextStyle(color: const Color(0xFFCF4436)),
-                  //             ),
-                  //             backgroundColor: const Color(0xFFFDF4F5),
-                  //           ),
-                  //         );
-                  //       });
-                  //     }
-                  //   });
-                  // } catch (e) {
-                  //   controller.isLoading.value = false;
-                  //   showRedToast(context, 'Submission failed. Please try again.');
-                  // }
                 }
               : null, //DISABLED
           style: ElevatedButton.styleFrom(

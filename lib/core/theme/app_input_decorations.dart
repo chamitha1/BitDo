@@ -1,0 +1,41 @@
+import 'package:flutter/material.dart';
+
+class AppInputDecorations {
+  static InputDecoration textField({
+    required String hintText,
+    Widget? suffixIcon,
+    Widget? prefixIcon,
+  }) {
+    return InputDecoration(
+      hintText: hintText,
+      hintStyle: const TextStyle(
+        fontFamily: 'Inter',
+        fontWeight: FontWeight.w400,
+        fontSize: 14,
+        color: Color(0xFF717F9A),
+      ),
+      filled: true,
+      fillColor: Colors.white,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      border: _border(),
+      enabledBorder: _border(),
+      focusedBorder: _focusedBorder(),
+      suffixIcon: suffixIcon,
+      prefixIcon: prefixIcon,
+    );
+  }
+
+  static OutlineInputBorder _border() {
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+    );
+  }
+
+  static OutlineInputBorder _focusedBorder() {
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(color: Color(0xFF929EB8)),
+    );
+  }
+}

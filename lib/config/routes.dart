@@ -4,8 +4,11 @@ import 'package:BitOwi/features/merchant/presentation/controllers/user_kyc_perso
 import 'package:BitOwi/features/merchant/presentation/pages/become_merchant_page.dart';
 import 'package:BitOwi/features/merchant/presentation/pages/personal_information_page.dart';
 import 'package:BitOwi/features/merchant/presentation/pages/user_kyc_information_page.dart';
+import 'package:BitOwi/features/profile/presentation/controllers/settings_controller.dart';
 import 'package:BitOwi/features/profile/presentation/pages/about_us.dart';
+import 'package:BitOwi/features/profile/presentation/pages/change_nickname.dart';
 import 'package:BitOwi/features/profile/presentation/pages/help_center.dart';
+import 'package:BitOwi/features/profile/presentation/pages/local_currency.dart';
 import 'package:BitOwi/features/profile/presentation/pages/me_page.dart';
 import 'package:BitOwi/features/profile/presentation/pages/settings.dart';
 import 'package:get/get.dart';
@@ -15,7 +18,6 @@ import 'package:BitOwi/features/home/presentation/pages/home_screen.dart';
 import 'package:BitOwi/features/onboarding/presentation/pages/onboarding_screen.dart';
 import 'package:BitOwi/features/splash/presentation/pages/splash_screen.dart';
 import 'package:BitOwi/features/splash/presentation/controllers/splash_controller.dart';
-import 'package:BitOwi/features/auth/presentation/controllers/user_controller.dart';
 import 'package:BitOwi/features/home/presentation/controllers/balance_controller.dart';
 import 'package:BitOwi/features/profile/presentation/pages/account_security_page.dart';
 import 'package:BitOwi/features/wallet/presentation/pages/transaction_detail_page.dart';
@@ -43,6 +45,8 @@ class Routes {
   static const String aboutUs = '/aboutUs';
   static const String settings = '/settings';
   static const String mePage = '/mePage';
+  static const String changeNickname = '/changeNickname';
+  static const String localCurrency = '/localCurrency';
 }
 
 class AppPages {
@@ -113,5 +117,7 @@ class AppPages {
     GetPage(name: Routes.aboutUs, page: () => AboutUs()),
     GetPage(name: Routes.settings, page: () => Settings()),
     GetPage(name: Routes.mePage, page: () => MePage()),
+    GetPage(name: Routes.changeNickname, page: () => ChangeNickname()),
+    GetPage(name: Routes.localCurrency, page: () => LocalCurrency()),
   ];
 }

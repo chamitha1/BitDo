@@ -1,3 +1,4 @@
+import 'package:BitOwi/features/profile/presentation/controllers/settings_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -41,6 +42,7 @@ class BitOwi extends StatelessWidget {
 
           initialBinding: BindingsBuilder(() {
             Get.put(UserController(), permanent: true);
+            Get.put(SettingsController(), permanent: true);
           }),
           home: null,
           initialRoute: Routes.splash,

@@ -1,5 +1,6 @@
 import 'package:BitOwi/api/common_api.dart';
 import 'package:BitOwi/core/widgets/common_appbar.dart';
+import 'package:BitOwi/core/widgets/soft_circular_loader.dart';
 import 'package:BitOwi/features/profile/presentation/pages/contact_us.dart';
 import 'package:BitOwi/features/profile/presentation/widgets/profile_widgets.dart';
 import 'package:BitOwi/features/rich_text_config.dart';
@@ -97,18 +98,16 @@ class _AboutUsState extends State<AboutUs> {
   Widget build(BuildContext context) {
     final articleWidgets = List.generate(articleType.length, (index) {
       final name = articleType[index].name;
-      final meta = articleMetaMap[name];
+      final meta = resolveArticleMeta(name);
 
-      debugPrint("🚀🚀 ${meta?['icon']}");
+      debugPrint("🚀🚀 ${meta['icon']}");
 
       return Column(
         children: [
           ProfileMenuItem(
-            iconPath:
-                meta?['icon'] ??
-                'assets/icons/public/help_general.svg',
+            iconPath: meta['icon'] ?? 'assets/icons/public/help_general.svg',
             title: name,
-            subtitle: meta?['subtitle'] ?? name,
+            subtitle: meta['subtitle'] ?? name,
             onTap: () {
               onLineTap(index);
             },
@@ -124,32 +123,27 @@ class _AboutUsState extends State<AboutUs> {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7FB),
 
-      appBar: CommonAppBar(title: "About Us", onBack: () => Get.back()),
+      appBar: CommonAppBar(title: "About us", onBack: () => Get.back()),
 
       body: SafeArea(
         child: isLoading
-            ? Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Color(0xFF1D5DE5),
-                ),
-              )
+            ? Center(child: SoftCircularLoader())
             : SingleChildScrollView(
                 child: Column(
                   children: [
                     Container(
-                      margin: EdgeInsets.only(top: 10),
+                      margin: EdgeInsets.only(top: 20),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(20),
                         child: Image.asset(
                           'assets/images/public/bitowi_app_icon.png',
-                          height: 80,
-                          width: 80,
+                          height: 87,
+                          width: 87,
                           fit: BoxFit.cover,
                         ),
                       ),
                     ),
-                    Container(height: 20),
+                    Container(height: 10),
                     Padding(
                       padding: const EdgeInsets.all(16),
                       child: ProfileGroupCard(children: [...articleWidgets]),
@@ -163,25 +157,38 @@ class _AboutUsState extends State<AboutUs> {
   }
 }
 
+const String _defaultAboutIcon =
+    'assets/icons/profile_page/about_us/ic_risk_policy.svg';
+
 final Map<String, Map<String, String>> articleMetaMap = {
-  'Risk Policy': {
+  'risk policy': {
     'subtitle': 'Understand how risks are managed',
     'icon': 'assets/icons/profile_page/about_us/ic_risk_policy.svg',
   },
-  'User Agreement': {
+  'user agreement': {
     'subtitle': 'Review terms governing platform usage',
     'icon': 'assets/icons/profile_page/about_us/ic_user_agreement.svg',
   },
-  'Privacy Policy': {
+  'privacy policy': {
     'subtitle': 'Learn how your data is protected',
     'icon': 'assets/icons/profile_page/about_us/ic_privacy_policy.svg',
   },
-  'Contact us': {
+  'contact us': {
     'subtitle': 'Get help or reach support',
     'icon': 'assets/icons/profile_page/about_us/ic_contact_us.svg',
   },
-  'Terms of use': {
+  'terms of use': {
     'subtitle': 'Rules and conditions for usage',
     'icon': 'assets/icons/profile_page/about_us/ic_terms_of_use.svg',
   },
 };
+
+Map<String, String> resolveArticleMeta(String name) {
+  final key = name.trim().toLowerCase(); // 👈 normalization
+  final meta = articleMetaMap[key];
+
+  return {
+    'icon': meta?['icon'] ?? _defaultAboutIcon,
+    'subtitle': meta?['subtitle'] ?? name,
+  };
+}

@@ -1,7 +1,7 @@
 import 'package:BitOwi/core/storage/storage_service.dart';
 import 'package:BitOwi/api/c2c_api.dart';
 import 'package:BitOwi/api/user_api.dart';
-import 'package:BitOwi/api/common_api.dart'; // Added
+import 'package:BitOwi/api/common_api.dart'; 
 import 'package:get/get.dart';
 import 'package:BitOwi/models/ads_home_res.dart';
 import 'package:BitOwi/models/user_model.dart';
@@ -13,6 +13,8 @@ class UserController extends GetxController {
   // Expose full user object
   final Rx<User?> user = Rx<User?>(null);
   final RxInt notificationCount = 0.obs;
+
+  final RxString userAvatar = ''.obs;
 
   @override
   void onInit() {
@@ -56,6 +58,12 @@ class UserController extends GetxController {
         setUserName(fetchedUser.realName!);
       }
 
+      if (fetchedUser.avatar != null && fetchedUser.avatar!.isNotEmpty) {
+        setUserAvatar(fetchedUser.avatar!);
+      } else {
+        setUserAvatar('');
+      }
+
       // Fetch Trade Info if user is loaded
       if (fetchedUser.id != null) {
         getTradeInfo(fetchedUser.id!);
@@ -83,6 +91,10 @@ class UserController extends GetxController {
 
   Future<void> setUserName(String name) async {
     userName.value = name;
+  }
+
+  Future<void> setUserAvatar(String avatarUrl) async {
+    userAvatar.value = avatarUrl;
   }
 
   Future<void> fetchNotificationCount() async {
