@@ -58,12 +58,11 @@ class BecomeMerchantPage extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 children: [
-                  const SizedBox(height: 24),
-
+                  const SizedBox(height: 50),
                   // 🟢 ICON
                   Container(
-                    width: 100,
-                    height: 100,
+                    width: 80,
+                    height: 80,
                     padding: const EdgeInsets.all(24),
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
@@ -82,7 +81,7 @@ class BecomeMerchantPage extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 10),
 
                   const Text(
                     "Become a Merchant",
@@ -94,7 +93,7 @@ class BecomeMerchantPage extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
 
                   const Text(
                     "Start accepting crypto payments and grow your business",
@@ -107,7 +106,7 @@ class BecomeMerchantPage extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 20),
 
                   // 🧾 STEP 1
                   StepCard(

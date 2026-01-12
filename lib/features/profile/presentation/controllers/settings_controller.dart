@@ -59,6 +59,11 @@ class SettingsController extends GetxController {
 
       final url = await AwsUploadUtil().upload(file: pickedFile);
       await setPhoto(url);
+    } on UploadTooLargeException {
+      CustomSnackbar.showError(
+        title: "Upload Failed",
+        message: "Image is too large. Please upload an image under 5MB.",
+      );
     } catch (e) {
       CustomSnackbar.showError(
         title: "Upload Failed",
@@ -174,7 +179,7 @@ class SettingsController extends GetxController {
 
   /// Persist on Update
   Future<void> onChoseUpdate() async {
-    if (selectedIndex.value == savedIndex.value ) {
+    if (selectedIndex.value == savedIndex.value) {
       Get.back(); // nothing changed
       return;
     }
@@ -184,7 +189,7 @@ class SettingsController extends GetxController {
     try {
       final currency = currencyList[selectedIndex.value];
       await StorageService.setCurrency(currency);
-      savedIndex.value  = selectedIndex.value;
+      savedIndex.value = selectedIndex.value;
       Get.back();
     } catch (e) {
       CustomSnackbar.showError(
