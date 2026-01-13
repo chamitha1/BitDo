@@ -2,6 +2,7 @@ import 'package:BitOwi/core/theme/app_input_decorations.dart';
 import 'package:BitOwi/core/widgets/app_text.dart';
 import 'package:BitOwi/core/widgets/common_appbar.dart';
 import 'package:BitOwi/core/widgets/input_title_label.dart';
+import 'package:BitOwi/core/widgets/primary_button.dart';
 import 'package:BitOwi/core/widgets/soft_circular_loader.dart';
 import 'package:BitOwi/features/profile/presentation/controllers/settings_controller.dart';
 import 'package:flutter/material.dart';
@@ -52,31 +53,43 @@ class ChangeNickname extends StatelessWidget {
     );
   }
 
-  SizedBox buildUpdateButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 56,
-      child: Obx(() {
-        final isLoading = settingsController.userNicknameLoading.value;
+  // SizedBox buildUpdateButton() {
+  //   return SizedBox(
+  //     width: double.infinity,
+  //     height: 56,
+  //     child: Obx(() {
+  //       final isLoading = settingsController.userNicknameLoading.value;
 
-        return ElevatedButton(
-          onPressed: isLoading ? null : settingsController.onSave,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF1D5DE5),
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          child: isLoading
-              ? const SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: SoftCircularLoader(color: Colors.white),
-                )
-              : AppText.p2SemiBold("Update", color: Colors.white),
-        );
-      }),
-    );
+  //       return ElevatedButton(
+  //         onPressed: isLoading ? null : settingsController.onSave,
+  //         style: ElevatedButton.styleFrom(
+  //           backgroundColor: const Color(0xFF1D5DE5),
+  //           elevation: 0,
+  //           shape: RoundedRectangleBorder(
+  //             borderRadius: BorderRadius.circular(12),
+  //           ),
+  //         ),
+  //         child: isLoading
+  //             ? const SizedBox(
+  //                 width: 22,
+  //                 height: 22,
+  //                 child: SoftCircularLoader(color: Colors.white),
+  //               )
+  //             : AppText.p2SemiBold("Update", color: Colors.white),
+  //       );
+  //     }),
+  //   );
+  // }
+  Widget buildUpdateButton() {
+    return Obx(() {
+      final isLoading = settingsController.userNicknameLoading.value;
+
+      return PrimaryButton(
+        text: "Update",
+        enabled: !isLoading,
+        onPressed: settingsController.onSave,
+        child: isLoading ? const SoftCircularLoader(color: Colors.white) : null,
+      );
+    });
   }
 }

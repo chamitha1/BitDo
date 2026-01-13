@@ -1,6 +1,7 @@
 import 'package:BitOwi/core/theme/app_input_decorations.dart';
 import 'package:BitOwi/core/widgets/common_appbar.dart';
 import 'package:BitOwi/core/widgets/common_image.dart';
+import 'package:BitOwi/core/widgets/primary_button.dart';
 import 'package:BitOwi/core/widgets/soft_circular_loader.dart';
 import 'package:BitOwi/features/merchant/presentation/controllers/user_kyc_personal_information_controller.dart';
 import 'package:BitOwi/features/merchant/presentation/widgets/expiry_calendar.dart';
@@ -266,35 +267,44 @@ class UserKycInformationPage extends StatelessWidget {
                       },
                     ),
                   ),
+                  // Padding(
+                  //   padding: const EdgeInsets.all(20),
+                  //   child: SizedBox(
+                  //     width: double.infinity,
+                  //     height: 56,
+                  //     child: ElevatedButton(
+                  //       onPressed: tempSelectedIndex == null
+                  //           ? null
+                  //           : () => Navigator.pop(context, tempSelectedIndex),
+                  //       style: ElevatedButton.styleFrom(
+                  //         backgroundColor: tempSelectedIndex == null
+                  //             ? const Color(0xFFB9C6E2)
+                  //             : const Color(0xFF1D5DE5),
+                  //         elevation: 0,
+                  //         disabledBackgroundColor: const Color(0xFFB9C6E2),
+                  //         shape: RoundedRectangleBorder(
+                  //           borderRadius: BorderRadius.circular(12),
+                  //         ),
+                  //       ),
+                  //       child: const Text(
+                  //         "Continue",
+                  //         style: TextStyle(
+                  //           fontFamily: 'Inter',
+                  //           fontWeight: FontWeight.w600,
+                  //           fontSize: 16,
+                  //           color: Colors.white,
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                   Padding(
                     padding: const EdgeInsets.all(20),
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton(
-                        onPressed: tempSelectedIndex == null
-                            ? null
-                            : () => Navigator.pop(context, tempSelectedIndex),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: tempSelectedIndex == null
-                              ? const Color(0xFFB9C6E2)
-                              : const Color(0xFF1D5DE5),
-                          elevation: 0,
-                          disabledBackgroundColor: const Color(0xFFB9C6E2),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text(
-                          "Continue",
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
+                    child: PrimaryButton(
+                      text: "Continue",
+                      enabled: tempSelectedIndex != null,
+                      onPressed: () =>
+                          Navigator.pop(context, tempSelectedIndex),
                     ),
                   ),
                   const SizedBox(height: 40),
@@ -495,40 +505,53 @@ class UserKycInformationPage extends StatelessWidget {
                   ),
 
                   // ---------- CONTINUE ----------
+                  // Padding(
+                  //   padding: const EdgeInsets.all(20),
+                  //   child: SizedBox(
+                  //     width: double.infinity,
+                  //     height: 56,
+                  //     child: ElevatedButton(
+                  //       onPressed: tempSelectedIndex == null
+                  //           ? null
+                  //           : () {
+                  //               Navigator.pop(
+                  //                 context,
+                  //                 tempSelectedIndex, // ✅ return index
+                  //               );
+                  //             },
+                  //       style: ElevatedButton.styleFrom(
+                  //         backgroundColor: tempSelectedIndex == null
+                  //             ? const Color(0xFFB9C6E2)
+                  //             : const Color(0xFF1D5DE5),
+                  //         elevation: 0,
+                  //         disabledBackgroundColor: const Color(0xFFB9C6E2),
+                  //         shape: RoundedRectangleBorder(
+                  //           borderRadius: BorderRadius.circular(12),
+                  //         ),
+                  //       ),
+                  //       child: const Text(
+                  //         "Continue",
+                  //         style: TextStyle(
+                  //           fontFamily: 'Inter',
+                  //           fontWeight: FontWeight.w600,
+                  //           fontSize: 16,
+                  //           color: Colors.white,
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                   Padding(
                     padding: const EdgeInsets.all(20),
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton(
-                        onPressed: tempSelectedIndex == null
-                            ? null
-                            : () {
-                                Navigator.pop(
-                                  context,
-                                  tempSelectedIndex, // ✅ return index
-                                );
-                              },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: tempSelectedIndex == null
-                              ? const Color(0xFFB9C6E2)
-                              : const Color(0xFF1D5DE5),
-                          elevation: 0,
-                          disabledBackgroundColor: const Color(0xFFB9C6E2),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text(
-                          "Continue",
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
+                    child: PrimaryButton(
+                      text: "Continue",
+                      enabled: tempSelectedIndex != null,
+                      onPressed: () {
+                        Navigator.pop(
+                          context,
+                          tempSelectedIndex, // ✅ return index
+                        );
+                      },
                     ),
                   ),
                   const SizedBox(height: 40),
@@ -782,43 +805,60 @@ class UserKycInformationPage extends StatelessWidget {
     });
   }
 
+  // Widget buildSubmitButton(BuildContext context) {
+  //   return Obx(() {
+  //     // 🔁 reactive wrapper
+  //     final isReady = controller.isFormReady; // 🔁 from controller
+  //     final isRejected =
+  //         controller.latestIdentifyOrderStatus.value == '2'; // 🔁
+
+  //     return SizedBox(
+  //       width: double.infinity,
+  //       height: 56,
+  //       child: ElevatedButton(
+  //         onPressed: isReady
+  //             ? () async {
+  //                 if (!_formKey.currentState!.validate()) return;
+
+  //                 await controller.submit(); // 🔁 delegate to controller
+  //               }
+  //             : null, //DISABLED
+  //         style: ElevatedButton.styleFrom(
+  //           backgroundColor: isReady
+  //               ? const Color(0xFF1D5DE5)
+  //               : const Color(0xFFB9C6E2),
+  //           elevation: 0,
+  //           shape: RoundedRectangleBorder(
+  //             borderRadius: BorderRadius.circular(12),
+  //           ),
+  //         ),
+  //         child: Text(
+  //           isRejected ? "Resubmit" : "Submit", // 🔁 reactive label
+  //           style: TextStyle(
+  //             fontFamily: 'Inter',
+  //             fontWeight: FontWeight.w600,
+  //             fontSize: 16,
+  //             color: Colors.white,
+  //           ),
+  //         ),
+  //       ),
+  //     );
+  //   });
+  // }
   Widget buildSubmitButton(BuildContext context) {
     return Obx(() {
-      // 🔁 reactive wrapper
-      final isReady = controller.isFormReady; // 🔁 from controller
+      final isReady = controller.isFormReady; // 🔁 reactive
       final isRejected =
           controller.latestIdentifyOrderStatus.value == '2'; // 🔁
 
-      return SizedBox(
-        width: double.infinity,
-        height: 56,
-        child: ElevatedButton(
-          onPressed: isReady
-              ? () async {
-                  if (!_formKey.currentState!.validate()) return;
+      return PrimaryButton(
+        text: isRejected ? "Resubmit" : "Submit", // 🔁 reactive label
+        enabled: isReady,
+        onPressed: () async {
+          if (!_formKey.currentState!.validate()) return;
 
-                  await controller.submit(); // 🔁 delegate to controller
-                }
-              : null, //DISABLED
-          style: ElevatedButton.styleFrom(
-            backgroundColor: isReady
-                ? const Color(0xFF1D5DE5)
-                : const Color(0xFFB9C6E2),
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          child: Text(
-            isRejected ? "Resubmit" : "Submit", // 🔁 reactive label
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
-              color: Colors.white,
-            ),
-          ),
-        ),
+          await controller.submit(); // 🔁 delegate to controller
+        },
       );
     });
   }

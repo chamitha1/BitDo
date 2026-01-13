@@ -4,12 +4,16 @@ import 'package:BitOwi/features/merchant/presentation/controllers/user_kyc_perso
 import 'package:BitOwi/features/merchant/presentation/pages/become_merchant_page.dart';
 import 'package:BitOwi/features/merchant/presentation/pages/personal_information_page.dart';
 import 'package:BitOwi/features/merchant/presentation/pages/user_kyc_information_page.dart';
-import 'package:BitOwi/features/profile/presentation/controllers/settings_controller.dart';
 import 'package:BitOwi/features/profile/presentation/pages/about_us.dart';
+import 'package:BitOwi/features/profile/presentation/pages/add_bank_card_page.dart';
+import 'package:BitOwi/features/profile/presentation/pages/add_mobile_money_page.dart';
 import 'package:BitOwi/features/profile/presentation/pages/change_nickname.dart';
 import 'package:BitOwi/features/profile/presentation/pages/help_center.dart';
 import 'package:BitOwi/features/profile/presentation/pages/local_currency.dart';
 import 'package:BitOwi/features/profile/presentation/pages/me_page.dart';
+import 'package:BitOwi/features/profile/presentation/pages/my_ads_page.dart';
+import 'package:BitOwi/features/profile/presentation/pages/payment_methods_page.dart';
+import 'package:BitOwi/features/profile/presentation/pages/post_ads_page.dart';
 import 'package:BitOwi/features/profile/presentation/pages/settings.dart';
 import 'package:get/get.dart';
 import 'package:BitOwi/features/auth/presentation/pages/login_screen.dart';
@@ -41,12 +45,19 @@ class Routes {
   static const String kycPersonalInformation = '/kycPersonalInformation';
   static const String userKycPersonalInformation =
       '/userKycPersonalInformation';
+  //
   static const String helpCenter = '/helpCenter';
   static const String aboutUs = '/aboutUs';
   static const String settings = '/settings';
   static const String mePage = '/mePage';
   static const String changeNickname = '/changeNickname';
   static const String localCurrency = '/localCurrency';
+  //
+  static const String paymentMethodsPage = '/paymentMethods';
+  static const String addBankCardPage = '/addBankCardPage';
+  static const String addMobileMoneyPage = '/addMobileMoneyPage';
+  static const String postAdsPage = '/postAdsPage';
+  static const String myAdsPage = '/myAdsPage';
 }
 
 class AppPages {
@@ -119,5 +130,12 @@ class AppPages {
     GetPage(name: Routes.mePage, page: () => MePage()),
     GetPage(name: Routes.changeNickname, page: () => ChangeNickname()),
     GetPage(name: Routes.localCurrency, page: () => LocalCurrency()),
+    //
+    GetPage(name: Routes.paymentMethodsPage, page: () => PaymentMethodsPage()),
+    GetPage(name: Routes.addBankCardPage, page: () => AddBankCardPage()),
+    GetPage(name: Routes.addMobileMoneyPage, page: () => AddMobileMoneyPage()),
+    GetPage(name: Routes.postAdsPage, page: () =>PostAdsPage()),
+    GetPage(name: Routes.myAdsPage, page: () => MyAdsPage()),
+
   ];
 }

@@ -21,48 +21,24 @@ class AppText extends StatelessWidget {
 
   // ---- Named constructors (Figma friendly) ----
 
-  factory AppText.p1SemiBold(
-    String text, {
-    Color? color,
-  }) {
-    return AppText(
-      text,
-      style: AppTextStyles.p1SemiBold,
-      color: color,
-    );
+  factory AppText.p1SemiBold(String text, {Color? color}) {
+    return AppText(text, style: AppTextStyles.p1SemiBold, color: color);
   }
 
-  factory AppText.p2SemiBold(
-    String text, {
-    Color? color,
-  }) {
-    return AppText(
-      text,
-      style: AppTextStyles.p2SemiBold,
-      color: color,
-    );
+  factory AppText.p2SemiBold(String text, {Color? color}) {
+    return AppText(text, style: AppTextStyles.p2SemiBold, color: color);
   }
 
-  factory AppText.p2Medium(
-    String text, {
-    Color? color,
-  }) {
-    return AppText(
-      text,
-      style: AppTextStyles.p2Medium,
-      color: color,
-    );
+  factory AppText.p2Medium(String text, {Color? color}) {
+    return AppText(text, style: AppTextStyles.p2Medium, color: color);
   }
 
-  factory AppText.p3Regular(
-    String text, {
-    Color? color,
-  }) {
-    return AppText(
-      text,
-      style: AppTextStyles.p3Regular,
-      color: color,
-    );
+  factory AppText.p3Regular(String text, {Color? color}) {
+    return AppText(text, style: AppTextStyles.p3Regular, color: color);
+  }
+
+  factory AppText.p3Medium(String text, {Color? color}) {
+    return AppText(text, style: AppTextStyles.p3Medium, color: color);
   }
 
   @override

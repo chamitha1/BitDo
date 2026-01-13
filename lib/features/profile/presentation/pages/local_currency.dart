@@ -1,5 +1,6 @@
 import 'package:BitOwi/core/widgets/app_text.dart';
 import 'package:BitOwi/core/widgets/common_appbar.dart';
+import 'package:BitOwi/core/widgets/primary_button.dart';
 import 'package:BitOwi/core/widgets/soft_circular_loader.dart';
 import 'package:BitOwi/features/profile/presentation/controllers/settings_controller.dart';
 import 'package:flutter/material.dart';
@@ -92,36 +93,52 @@ class LocalCurrency extends StatelessWidget {
     );
   }
 
-  SizedBox buildUpdateButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 56,
-      child: Obx(() {
-        final isLoading = settingsController.currencyUpdating.value;
-        final isChanged =
-            settingsController.selectedIndex.value !=
-            settingsController.savedIndex.value;
+  // SizedBox buildUpdateButton() {
+  //   return SizedBox(
+  //     width: double.infinity,
+  //     height: 56,
+  //     child: Obx(() {
+  //       final isLoading = settingsController.currencyUpdating.value;
+  //       final isChanged =
+  //           settingsController.selectedIndex.value !=
+  //           settingsController.savedIndex.value;
 
-        return ElevatedButton(
-          onPressed: (!isChanged || isLoading)
-              ? null
-              : settingsController.onChoseUpdate,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF1D5DE5),
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          child: isLoading
-              ? const SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: SoftCircularLoader(color: Colors.white),
-                )
-              : AppText.p2SemiBold("Update", color: Colors.white),
-        );
-      }),
-    );
+  //       return ElevatedButton(
+  //         onPressed: (!isChanged || isLoading)
+  //             ? null
+  //             : settingsController.onChoseUpdate,
+  //         style: ElevatedButton.styleFrom(
+  //           backgroundColor: const Color(0xFF1D5DE5),
+  //           elevation: 0,
+  //           shape: RoundedRectangleBorder(
+  //             borderRadius: BorderRadius.circular(12),
+  //           ),
+  //         ),
+  //         child: isLoading
+  //             ? const SizedBox(
+  //                 width: 22,
+  //                 height: 22,
+  //                 child: SoftCircularLoader(color: Colors.white),
+  //               )
+  //             : AppText.p2SemiBold("Update", color: Colors.white),
+  //       );
+  //     }),
+  //   );
+  // }
+
+  Widget buildUpdateButton() {
+    return Obx(() {
+      final isLoading = settingsController.currencyUpdating.value;
+      final isChanged =
+          settingsController.selectedIndex.value !=
+          settingsController.savedIndex.value;
+
+      return PrimaryButton(
+        text: "Update",
+        enabled: isChanged && !isLoading,
+        onPressed: settingsController.onChoseUpdate,
+        child: isLoading ? const SoftCircularLoader(color: Colors.white) : null,
+      );
+    });
   }
 }

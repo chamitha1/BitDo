@@ -33,4 +33,11 @@ class AppTextStyles {
     fontWeight: FontWeight.w400,
     color: Color(0xFF6A7282),
   );
+
+  static const TextStyle p3Medium = TextStyle(
+    fontFamily: _fontFamily,
+    fontSize: 14,
+    fontWeight: FontWeight.w500,
+    color: Color(0xFF6A7282),
+  );
 }

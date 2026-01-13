@@ -1,4 +1,5 @@
 import 'package:BitOwi/config/routes.dart';
+import 'package:BitOwi/core/widgets/app_text.dart';
 import 'package:BitOwi/core/widgets/common_image.dart';
 import 'package:BitOwi/features/address_book/presentation/pages/address_book_page.dart';
 import 'package:BitOwi/features/auth/presentation/controllers/user_controller.dart';
@@ -31,7 +32,10 @@ class ProfileScreen extends StatelessWidget {
               const SizedBox(height: 20),
               _buildProfileCard(userController),
               const SizedBox(height: 24),
-              _buildQuickActionsRow(),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                child: _buildQuickActionsRow(),
+              ),
               const SizedBox(height: 24),
               _buildMenuCards(context),
               const SizedBox(height: 40),
@@ -57,7 +61,6 @@ class ProfileScreen extends StatelessWidget {
         ),
         Row(
           children: [
-          
             const SizedBox(width: 12),
             Obx(
               () => _buildCircleIconButton(
@@ -307,16 +310,37 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildQuickActionsRow() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildQuickActionItem(
+          iconPath: 'assets/icons/profile_page/ads.svg',
+          label: "My\nAds",
+          bgColor: const Color(0xFFE9F6FF),
+          borderColor: const Color(0xFFD4EDFF),
+          onTap: () => Get.toNamed(Routes.myAdsPage),
+        ),
+        _buildQuickActionItem(
           iconPath: 'assets/icons/profile_page/partners.svg',
-          label: "My Partners",
+          label: "My\nPartners",
           bgColor: const Color(0xFFFFFBF6),
           borderColor: const Color(0xFFFFEFDC),
           onTap: () => Get.to(() => const PartnersPage()),
         ),
+        _buildQuickActionItem(
+          iconPath: 'assets/icons/profile_page/payment.svg',
+          label: "Payment\nMethods",
+          bgColor: const Color(0xFFEAF9F0),
+          borderColor: const Color(0xFFD5F4E2),
+          onTap: () => Get.toNamed(Routes.paymentMethodsPage),
+        ),
+        // _buildQuickActionItem(
+        //   iconPath: 'assets/icons/profile_page/headphone.svg',
+        //   label: "Customer\nCare",
+        //   bgColor: const Color(0xFFF4E9FE),
+        //   borderColor: const Color(0xFFD8ABFC),
+        //   onTap: () {},
+        // ),
       ],
     );
   }
@@ -397,7 +421,7 @@ class ProfileScreen extends StatelessWidget {
               subtitle: "Manage your saved addresses",
               onTap: () => Get.to(() => AddressBookPage()),
             ),
-           
+
             const Divider(height: 1, color: Color(0xFFF0F4FF)),
           ],
         ),

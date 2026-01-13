@@ -2,6 +2,7 @@ import 'package:BitOwi/core/theme/app_input_decorations.dart';
 import 'package:BitOwi/core/widgets/common_appbar.dart';
 import 'package:BitOwi/core/widgets/common_image.dart';
 import 'package:BitOwi/core/widgets/custom_snackbar.dart';
+import 'package:BitOwi/core/widgets/primary_button.dart';
 import 'package:BitOwi/core/widgets/soft_circular_loader.dart';
 import 'package:BitOwi/features/merchant/presentation/controllers/kyc_personal_information_controller.dart';
 import 'package:BitOwi/features/merchant/presentation/widgets/expiry_calendar.dart';
@@ -282,35 +283,44 @@ class KycPersonalInformationPage extends StatelessWidget {
                       },
                     ),
                   ),
+                  // Padding(
+                  //   padding: const EdgeInsets.all(20),
+                  //   child: SizedBox(
+                  //     width: double.infinity,
+                  //     height: 56,
+                  //     child: ElevatedButton(
+                  //       onPressed: tempSelectedIndex == null
+                  //           ? null
+                  //           : () => Navigator.pop(context, tempSelectedIndex),
+                  //       style: ElevatedButton.styleFrom(
+                  //         backgroundColor: tempSelectedIndex == null
+                  //             ? const Color(0xFFB9C6E2)
+                  //             : const Color(0xFF1D5DE5),
+                  //         elevation: 0,
+                  //         disabledBackgroundColor: const Color(0xFFB9C6E2),
+                  //         shape: RoundedRectangleBorder(
+                  //           borderRadius: BorderRadius.circular(12),
+                  //         ),
+                  //       ),
+                  //       child: const Text(
+                  //         "Continue",
+                  //         style: TextStyle(
+                  //           fontFamily: 'Inter',
+                  //           fontWeight: FontWeight.w600,
+                  //           fontSize: 16,
+                  //           color: Colors.white,
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                   Padding(
                     padding: const EdgeInsets.all(20),
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton(
-                        onPressed: tempSelectedIndex == null
-                            ? null
-                            : () => Navigator.pop(context, tempSelectedIndex),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: tempSelectedIndex == null
-                              ? const Color(0xFFB9C6E2)
-                              : const Color(0xFF1D5DE5),
-                          elevation: 0,
-                          disabledBackgroundColor: const Color(0xFFB9C6E2),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text(
-                          "Continue",
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
+                    child: PrimaryButton(
+                      text: "Continue",
+                      enabled: tempSelectedIndex != null,
+                      onPressed: () =>
+                          Navigator.pop(context, tempSelectedIndex),
                     ),
                   ),
                   const SizedBox(height: 40),
@@ -510,37 +520,47 @@ class KycPersonalInformationPage extends StatelessWidget {
                   ),
 
                   // ---------- CONTINUE ----------
+                  // Padding(
+                  //   padding: const EdgeInsets.all(20),
+                  //   child: SizedBox(
+                  //     width: double.infinity,
+                  //     height: 56,
+                  //     child: ElevatedButton(
+                  //       onPressed: tempSelectedIndex == null
+                  //           ? null
+                  //           : () {
+                  //               Navigator.pop(context, tempSelectedIndex);
+                  //             },
+                  //       style: ElevatedButton.styleFrom(
+                  //         backgroundColor: tempSelectedIndex == null
+                  //             ? const Color(0xFFB9C6E2)
+                  //             : const Color(0xFF1D5DE5),
+                  //         elevation: 0,
+                  //         disabledBackgroundColor: const Color(0xFFB9C6E2),
+                  //         shape: RoundedRectangleBorder(
+                  //           borderRadius: BorderRadius.circular(12),
+                  //         ),
+                  //       ),
+                  //       child: const Text(
+                  //         "Continue",
+                  //         style: TextStyle(
+                  //           fontFamily: 'Inter',
+                  //           fontWeight: FontWeight.w600,
+                  //           fontSize: 16,
+                  //           color: Colors.white,
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                   Padding(
                     padding: const EdgeInsets.all(20),
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton(
-                        onPressed: tempSelectedIndex == null
-                            ? null
-                            : () {
-                                Navigator.pop(context, tempSelectedIndex);
-                              },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: tempSelectedIndex == null
-                              ? const Color(0xFFB9C6E2)
-                              : const Color(0xFF1D5DE5),
-                          elevation: 0,
-                          disabledBackgroundColor: const Color(0xFFB9C6E2),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text(
-                          "Continue",
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
+                    child: PrimaryButton(
+                      text: "Continue",
+                      enabled: tempSelectedIndex != null,
+                      onPressed: () {
+                        Navigator.pop(context, tempSelectedIndex);
+                      },
                     ),
                   ),
                   const SizedBox(height: 40),
@@ -790,62 +810,98 @@ class KycPersonalInformationPage extends StatelessWidget {
     );
   }
 
-  SizedBox buildSubmitButton(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: 56,
+  // SizedBox buildSubmitButton(BuildContext context) {
+  //   return SizedBox(
+  //     width: double.infinity,
+  //     height: 56,
 
-      child: Obx(() {
-        final canSubmit = controller.isFormReady;
-        return ElevatedButton(
-          onPressed:
-              canSubmit //
-              ? () async {
-                  if (!_formKey.currentState!.validate()) return;
+  //     child: Obx(() {
+  //       final canSubmit = controller.isFormReady;
+  //       return ElevatedButton(
+  //         onPressed:
+  //             canSubmit //
+  //             ? () async {
+  //                 if (!_formKey.currentState!.validate()) return;
 
-                  final success = await controller.submitKyc();
+  //                 final success = await controller.submitKyc();
 
-                  if (success) {
-                    CustomSnackbar.showError(
-                      title: "Success",
-                      message: "KYC Information Submitted!",
-                    );
-                    // //TODO:   getLatestIdentifyOrderList getLatestIdentifyOrderList getLatestIdentifyOrderList getLatestIdentifyOrderList
-                    //       await getLatestIdentifyOrderList();
-                    //       setState(() {
-                    //         _isLoading = false;
-                    //         widget.merchantStatus =
-                    //             latestSubmittedInfo?.status ?? '0';
-                    //       }
-                    // Get.back(result: true); // return result
-                  } else {
-                    CustomSnackbar.showError(
-                      title: "Error",
-                      message: "Submission failed",
-                    );
-                  }
-                }
-              : null, //DISABLED
-          style: ElevatedButton.styleFrom(
-            backgroundColor: canSubmit
-                ? const Color(0xFF1D5DE5)
-                : const Color(0xFFB9C6E2),
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          child: const Text(
-            "Submit",
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
-              color: Colors.white,
-            ),
-          ),
-        );
-      }),
-    );
+  //                 if (success) {
+  //                   CustomSnackbar.showError(
+  //                     title: "Success",
+  //                     message: "KYC Information Submitted!",
+  //                   );
+  //                   // //TODO:   getLatestIdentifyOrderList getLatestIdentifyOrderList getLatestIdentifyOrderList getLatestIdentifyOrderList
+  //                   //       await getLatestIdentifyOrderList();
+  //                   //       setState(() {
+  //                   //         _isLoading = false;
+  //                   //         widget.merchantStatus =
+  //                   //             latestSubmittedInfo?.status ?? '0';
+  //                   //       }
+  //                   // Get.back(result: true); // return result
+  //                 } else {
+  //                   CustomSnackbar.showError(
+  //                     title: "Error",
+  //                     message: "Submission failed",
+  //                   );
+  //                 }
+  //               }
+  //             : null, //DISABLED
+  //         style: ElevatedButton.styleFrom(
+  //           backgroundColor: canSubmit
+  //               ? const Color(0xFF1D5DE5)
+  //               : const Color(0xFFB9C6E2),
+  //           elevation: 0,
+  //           shape: RoundedRectangleBorder(
+  //             borderRadius: BorderRadius.circular(12),
+  //           ),
+  //         ),
+  //         child: const Text(
+  //           "Submit",
+  //           style: TextStyle(
+  //             fontFamily: 'Inter',
+  //             fontWeight: FontWeight.w600,
+  //             fontSize: 16,
+  //             color: Colors.white,
+  //           ),
+  //         ),
+  //       );
+  //     }),
+  //   );
+  // }
+
+  Widget buildSubmitButton(BuildContext context) {
+    return Obx(() {
+      final canSubmit = controller.isFormReady;
+
+      return PrimaryButton(
+        text: "Submit",
+        enabled: canSubmit,
+        onPressed: () async {
+          if (!_formKey.currentState!.validate()) return;
+
+          final success = await controller.submitKyc();
+
+          if (success) {
+            CustomSnackbar.showSuccess(
+              title: "Success",
+              message: "KYC Information Submitted!",
+            );
+            // //TODO:   getLatestIdentifyOrderList getLatestIdentifyOrderList getLatestIdentifyOrderList getLatestIdentifyOrderList
+            //       await getLatestIdentifyOrderList();
+            //       setState(() {
+            //         _isLoading = false;
+            //         widget.merchantStatus =
+            //             latestSubmittedInfo?.status ?? '0';
+            //       }
+            // Get.back(result: true);
+          } else {
+            CustomSnackbar.showError(
+              title: "Error",
+              message: "Submission failed",
+            );
+          }
+        },
+      );
+    });
   }
 }
