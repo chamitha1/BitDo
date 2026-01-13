@@ -330,61 +330,113 @@ class _P2PPageState extends State<P2PPage> {
     );
   }
 
+  Widget _buildCurrencyDropdown() {
+    final bool hasCurrencies = _currencyList.isNotEmpty;
+
+    return Container(
+      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFDAE0EE)),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<Dict>(
+          value: hasCurrencies ? _selectedCurrency : null,
+          isDense: true,
+          icon: const Icon(
+            Icons.keyboard_arrow_down_rounded,
+            size: 22,
+            color: Color(0xFF151E2F),
+          ),
+          style: const TextStyle(
+            fontFamily: 'Inter',
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
+            color: Color(0xFF151E2F),
+          ),
+          items: _currencyList.map((Dict currency) {
+            return DropdownMenuItem<Dict>(
+              value: currency,
+              child: Text(
+                currency.key,
+                style: const TextStyle(
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  color: Color(0xFF151E2F),
+                ),
+              ),
+            );
+          }).toList(),
+          onChanged: hasCurrencies
+              ? (Dict? newValue) {
+                  if (newValue == null) return;
+                  setState(() => _selectedCurrency = newValue);
+                  _fetchAds(isRefresh: true);
+                }
+              : null,
+        ),
+      ),
+    );
+  }
+
   Widget _buildFilterRow() {
     final bool hasCurrencies = _currencyList.isNotEmpty;
 
     return Row(
       children: [
         // Currency Dropdown
-        Container(
-          height: 48,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<Dict>(
-              value: hasCurrencies ? _selectedCurrency : null,
-              icon: SvgPicture.asset(
-                'assets/icons/p2p/down-arrow.svg',
-                width: 10,
-                height: 6,
-                colorFilter: const ColorFilter.mode(
-                  Color(0xFF151E2F),
-                  BlendMode.srcIn,
-                ),
-              ),
-              items: _currencyList.map((Dict currency) {
-                return DropdownMenuItem<Dict>(
-                  value: currency,
-                  child: Text(
-                    currency.key,
-                    style: const TextStyle(
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w500,
-                      fontSize: 14,
-                      color: Color(0xFF151E2F),
-                    ),
-                  ),
-                );
-              }).toList(),
-              onChanged: hasCurrencies
-                  ? (Dict? newValue) {
-                      if (newValue == null) return;
-                      setState(() {
-                        _selectedCurrency = newValue;
-                        // optional: if user changes currency, clear search
-                        // _searchController.clear();
-                      });
-                      _fetchAds(isRefresh: true);
-                    }
-                  : null,
-            ),
-          ),
-        ),
-
-        const SizedBox(width: 8),
+        // Container(
+        //   height: 48,
+        //   padding: const EdgeInsets.symmetric(horizontal: 12),
+        //   decoration: BoxDecoration(
+        //     color: Colors.white,
+        //     borderRadius: BorderRadius.circular(8),
+        //   ),
+        //   child: DropdownButtonHideUnderline(
+        //     child: DropdownButton<Dict>(
+        //       value: hasCurrencies ? _selectedCurrency : null,
+        //       icon: SvgPicture.asset(
+        //         'assets/icons/p2p/down-arrow.svg',
+        //         width: 10,
+        //         height: 6,
+        //         colorFilter: const ColorFilter.mode(
+        //           Color(0xFF151E2F),
+        //           BlendMode.srcIn,
+        //         ),
+        //       ),
+        //       items: _currencyList.map((Dict currency) {
+        //         return DropdownMenuItem<Dict>(
+        //           value: currency,
+        //           child: Text(
+        //             currency.key,
+        //             style: const TextStyle(
+        //               fontFamily: 'Inter',
+        //               fontWeight: FontWeight.w500,
+        //               fontSize: 14,
+        //               color: Color(0xFF151E2F),
+        //             ),
+        //           ),
+        //         );
+        //       }).toList(),
+        //       onChanged: hasCurrencies
+        //           ? (Dict? newValue) {
+        //               if (newValue == null) return;
+        //               setState(() {
+        //                 _selectedCurrency = newValue;
+        //                 // optional: if user changes currency, clear search
+        //                 // _searchController.clear();
+        //               });
+        //               _fetchAds(isRefresh: true);
+        //             }
+        //           : null,
+        //     ),
+        //   ),
+        // ),
+        _buildCurrencyDropdown(),
+        const SizedBox(width: 12),
 
         // Search Bar
         Expanded(
