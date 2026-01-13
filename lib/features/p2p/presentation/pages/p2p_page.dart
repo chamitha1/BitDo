@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:easy_refresh/easy_refresh.dart';
+
+import 'package:BitOwi/api/common_api.dart';
+import 'package:BitOwi/api/p2p_api.dart';
+import 'package:BitOwi/models/dict.dart';
+import 'package:BitOwi/models/ads_page_res.dart';
+
 import '../widgets/p2p_order_card.dart';
 import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/p2p_empty_state.dart';
-
-import 'package:BitOwi/api/common_api.dart';
-import 'package:BitOwi/models/dict.dart';
-import 'package:BitOwi/api/p2p_api.dart';
-import 'package:BitOwi/models/ads_page_res.dart';
-import 'package:easy_refresh/easy_refresh.dart';
 
 class P2PPage extends StatefulWidget {
   const P2PPage({super.key});
@@ -19,29 +20,38 @@ class P2PPage extends StatefulWidget {
 
 class _P2PPageState extends State<P2PPage> {
   bool isBuySelected = true;
+
+  // Filters
   List<Dict> _currencyList = [];
   Dict? _selectedCurrency;
   String? _minPrice;
-  late TextEditingController _searchController;
+
+  late final TextEditingController _searchController;
 
   // Ads List State
   List<AdItem> _adsList = [];
   int _pageNum = 1;
   bool _isEnd = false;
+
   final EasyRefreshController _refreshController = EasyRefreshController(
     controlFinishRefresh: true,
     controlFinishLoad: true,
   );
 
+  Dict? _defaultCurrency(List<Dict> list) {
+    if (list.isEmpty) return null;
+    return list.firstWhere(
+      (e) => e.key == 'NGN',
+      orElse: () => list.first,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
     _searchController = TextEditingController();
+
     _fetchCurrencies();
-    // Verify init fetch
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _fetchAds(isRefresh: true);
-    });
   }
 
   @override
@@ -54,19 +64,20 @@ class _P2PPageState extends State<P2PPage> {
   Future<void> _fetchCurrencies() async {
     try {
       final list = await CommonApi.getDictList(parentKey: 'ads_trade_currency');
-      if (list.isNotEmpty) {
-        setState(() {
-          _currencyList = list;
-          _selectedCurrency = list.firstWhere(
-            (e) => e.key == 'NGN',
-            orElse: () => list.first,
-          );
-        });
-        // Fetch ads after currency is set
-        _fetchAds(isRefresh: true);
-      }
+
+      if (!mounted) return;
+
+      setState(() {
+        _currencyList = list;
+        _selectedCurrency = _defaultCurrency(list);
+      });
+
+      await _fetchAds(isRefresh: true);
     } catch (e) {
       debugPrint("Error fetching currencies: $e");
+
+      // If currencies fail, still try loading ads (backend may allow default)
+      await _fetchAds(isRefresh: true);
     }
   }
 
@@ -92,11 +103,19 @@ class _P2PPageState extends State<P2PPage> {
       if (nickName.isNotEmpty) {
         params["nickName"] = nickName;
       } else {
-        params["tradeCurrency"] = _selectedCurrency?.key ?? "";
-        params["minPrice"] = _minPrice;
+        final currencyKey = _selectedCurrency?.key;
+        if (currencyKey != null && currencyKey.isNotEmpty) {
+          params["tradeCurrency"] = currencyKey;
+        }
+
+        if (_minPrice != null && _minPrice!.trim().isNotEmpty) {
+          params["minPrice"] = _minPrice!.trim();
+        }
       }
 
       final res = await P2PApi.getAdsPageList(params);
+
+      if (!mounted) return;
 
       setState(() {
         if (isRefresh) {
@@ -104,15 +123,18 @@ class _P2PPageState extends State<P2PPage> {
         } else {
           _adsList.addAll(res.list);
         }
+
+        // End check
         if (res.list.isEmpty ||
             (res.total != null && _adsList.length >= res.total!)) {
           _isEnd = true;
         }
+
         _pageNum++;
       });
 
       if (isRefresh) {
-        _refreshController.finishRefresh();
+        _refreshController.finishRefresh(IndicatorResult.success);
         _refreshController.resetFooter();
       } else {
         _refreshController.finishLoad(
@@ -121,12 +143,23 @@ class _P2PPageState extends State<P2PPage> {
       }
     } catch (e) {
       debugPrint("Error fetching ads: $e");
+
       if (isRefresh) {
         _refreshController.finishRefresh(IndicatorResult.fail);
       } else {
         _refreshController.finishLoad(IndicatorResult.fail);
       }
     }
+  }
+
+  Widget _emptyScrollable() {
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      children: const [
+        SizedBox(height: 60),
+        P2PEmptyState(),
+      ],
+    );
   }
 
   @override
@@ -150,35 +183,26 @@ class _P2PPageState extends State<P2PPage> {
               ),
             ),
             Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  bool isEmpty = false;
-
-                  return EasyRefresh(
-                    controller: _refreshController,
-                    onRefresh: () async {
-                      await _fetchAds(isRefresh: true);
-                    },
-                    onLoad: () async {
-                      await _fetchAds();
-                    },
-                    child: ListView.separated(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 16,
+              child: EasyRefresh(
+                controller: _refreshController,
+                onRefresh: () async => _fetchAds(isRefresh: true),
+                onLoad: () async => _fetchAds(),
+                child: _adsList.isEmpty
+                    ? _emptyScrollable()
+                    : ListView.separated(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 16,
+                        ),
+                        itemCount: _adsList.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 16),
+                        itemBuilder: (_, index) {
+                          return P2POrderCard(
+                            isBuy: isBuySelected,
+                            adItem: _adsList[index],
+                          );
+                        },
                       ),
-                      itemCount: _adsList.length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(height: 16),
-                      itemBuilder: (context, index) {
-                        return P2POrderCard(
-                          isBuy: isBuySelected,
-                          adItem: _adsList[index],
-                        );
-                      },
-                    ),
-                  );
-                },
               ),
             ),
           ],
@@ -201,7 +225,9 @@ class _P2PPageState extends State<P2PPage> {
           ),
         ),
         GestureDetector(
-          onTap: () {},
+          onTap: () {
+            // TODO: Navigate to Post Ad
+          },
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
@@ -243,8 +269,10 @@ class _P2PPageState extends State<P2PPage> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              setState(() => isBuySelected = true);
-              _fetchAds(isRefresh: true);
+              if (!isBuySelected) {
+                setState(() => isBuySelected = true);
+                _fetchAds(isRefresh: true);
+              }
             },
             child: Container(
               height: 44,
@@ -271,8 +299,10 @@ class _P2PPageState extends State<P2PPage> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              setState(() => isBuySelected = false);
-              _fetchAds(isRefresh: true);
+              if (isBuySelected) {
+                setState(() => isBuySelected = false);
+                _fetchAds(isRefresh: true);
+              }
             },
             child: Container(
               height: 44,
@@ -289,9 +319,8 @@ class _P2PPageState extends State<P2PPage> {
                   fontFamily: 'Inter',
                   fontWeight: FontWeight.w700,
                   fontSize: 16,
-                  color: !isBuySelected
-                      ? Colors.white
-                      : const Color(0xFF717F9A),
+                  color:
+                      !isBuySelected ? Colors.white : const Color(0xFF717F9A),
                 ),
               ),
             ),
@@ -302,6 +331,8 @@ class _P2PPageState extends State<P2PPage> {
   }
 
   Widget _buildFilterRow() {
+    final bool hasCurrencies = _currencyList.isNotEmpty;
+
     return Row(
       children: [
         // Currency Dropdown
@@ -314,7 +345,7 @@ class _P2PPageState extends State<P2PPage> {
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<Dict>(
-              value: _selectedCurrency,
+              value: hasCurrencies ? _selectedCurrency : null,
               icon: SvgPicture.asset(
                 'assets/icons/p2p/down-arrow.svg',
                 width: 10,
@@ -338,18 +369,23 @@ class _P2PPageState extends State<P2PPage> {
                   ),
                 );
               }).toList(),
-              onChanged: (Dict? newValue) {
-                if (newValue != null) {
-                  setState(() {
-                    _selectedCurrency = newValue;
-                  });
-                  _fetchAds(isRefresh: true);
-                }
-              },
+              onChanged: hasCurrencies
+                  ? (Dict? newValue) {
+                      if (newValue == null) return;
+                      setState(() {
+                        _selectedCurrency = newValue;
+                        // optional: if user changes currency, clear search
+                        // _searchController.clear();
+                      });
+                      _fetchAds(isRefresh: true);
+                    }
+                  : null,
             ),
           ),
         ),
+
         const SizedBox(width: 8),
+
         // Search Bar
         Expanded(
           child: Container(
@@ -363,9 +399,7 @@ class _P2PPageState extends State<P2PPage> {
             child: Row(
               children: [
                 GestureDetector(
-                  onTap: () {
-                    _fetchAds(isRefresh: true);
-                  },
+                  onTap: () => _fetchAds(isRefresh: true),
                   child: SvgPicture.asset(
                     'assets/icons/p2p/search.svg',
                     width: 20,
@@ -381,9 +415,7 @@ class _P2PPageState extends State<P2PPage> {
                   child: TextField(
                     controller: _searchController,
                     textInputAction: TextInputAction.search,
-                    onSubmitted: (_) {
-                      _fetchAds(isRefresh: true);
-                    },
+                    onSubmitted: (_) => _fetchAds(isRefresh: true),
                     decoration: const InputDecoration(
                       hintText: "Search Here",
                       hintStyle: TextStyle(
@@ -402,7 +434,9 @@ class _P2PPageState extends State<P2PPage> {
             ),
           ),
         ),
+
         const SizedBox(width: 8),
+
         // Filter Button
         GestureDetector(
           onTap: () async {
@@ -410,37 +444,41 @@ class _P2PPageState extends State<P2PPage> {
               context: context,
               backgroundColor: Colors.transparent,
               isScrollControlled: true,
-              builder: (context) => FilterBottomSheet(
+              builder: (_) => FilterBottomSheet(
                 initialAmount: _minPrice,
                 initialCurrency: _selectedCurrency?.key,
               ),
             );
 
-            if (result != null) {
-              if (result['type'] == 'reset') {
-                setState(() {
-                  _minPrice = null;
-                  _selectedCurrency = null;
-                });
-                _fetchAds(isRefresh: true);
-              } else if (result['type'] == 'filter') {
-                final amount = result['amount'];
-                final currencyKey = result['currency'];
+            if (!mounted || result == null) return;
 
-                setState(() {
-                  _minPrice = amount;
-                  if (currencyKey != null) {
-                    try {
-                      _selectedCurrency = _currencyList.firstWhere(
-                        (e) => e.key == currencyKey,
-                        orElse: () =>
-                            Dict(key: currencyKey, value: currencyKey),
-                      );
-                    } catch (_) {}
-                  }
-                });
-                _fetchAds(isRefresh: true);
-              }
+            if (result['type'] == 'reset') {
+              setState(() {
+                _minPrice = null;
+                _selectedCurrency = _defaultCurrency(_currencyList);
+              });
+              _fetchAds(isRefresh: true);
+              return;
+            }
+
+            if (result['type'] == 'filter') {
+              final amount = (result['amount'] ?? '').toString();
+              final currencyKey = (result['currency'] ?? '').toString();
+
+              setState(() {
+                _minPrice = amount.trim().isEmpty ? null : amount.trim();
+
+                if (currencyKey.trim().isNotEmpty) {
+                  final match = _currencyList.where((e) => e.key == currencyKey);
+                  _selectedCurrency = match.isNotEmpty
+                      ? match.first
+                      : _defaultCurrency(_currencyList);
+                } else {
+                  _selectedCurrency = _defaultCurrency(_currencyList);
+                }
+              });
+
+              _fetchAds(isRefresh: true);
             }
           },
           child: Container(
