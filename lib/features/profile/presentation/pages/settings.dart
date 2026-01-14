@@ -32,7 +32,7 @@ class Settings extends StatelessWidget {
                 const _Divider(),
                 ProfileMenuItem(
                   iconPath: 'assets/icons/profile_page/dollar_circle.svg',
-                  title: "Local Currency",
+                  title: "Preferred Currency",
                   subtitle: "Set your preferred currency",
                   onTap: () {
                     settingsController.getCurrency();

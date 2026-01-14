@@ -136,7 +136,7 @@ class SettingsController extends GetxController {
     userController.userName.value = nickname;
   }
 
-  /// ----------------------- Local Currency -----------------------
+  /// ----------------------- Preferred Currency -----------------------
 
   final RxBool currencyLoading = false.obs;
 

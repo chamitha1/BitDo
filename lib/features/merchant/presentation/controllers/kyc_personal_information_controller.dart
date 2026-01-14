@@ -45,13 +45,14 @@ class KycPersonalInformationController extends GetxController {
   IdentifyOrderListRes? latestSubmittedInfo;
 
   final isEdit = false.obs;
-  final merchantStatus = '-1'.obs;
+  final merchantStatus = '-1'.obs; // ✅ reactive
   String topTip = '';
 
   // bool _initialized = false;
 
+  /// 🚀 INIT (called once from page)
   // void init({required bool isEdit, required String merchantStatus}) {
-  //   if (_initialized) return;
+  //   if (_initialized) return; // ✅ prevent re-init
   //   _initialized = true;
   //   this.isEdit = isEdit;
   //   this.merchantStatus.value = merchantStatus; // 🔁 FIX
@@ -61,12 +62,13 @@ class KycPersonalInformationController extends GetxController {
   void onReady() {
     super.onReady();
 
+    // 🔥 This runs ONCE per navigation to the screen
     final args = Get.arguments as Map<String, dynamic>;
 
     isEdit.value = args['isEdit'] ?? false; // 🔁
     merchantStatus.value = args['merchantStatus'] ?? '-1';
 
-    debugPrint("merchantStatus: ${merchantStatus.value}");
+    debugPrint("🚀🔥 merchantStatus: ${merchantStatus.value}");
 
     _nameWorker = ever(name, (v) => nameController.text = v);
     _idWorker = ever(idNumber, (v) => idController.text = v);
@@ -83,6 +85,7 @@ class KycPersonalInformationController extends GetxController {
     super.onClose();
   }
 
+  /// 🔎 FORM READY CHECK
   bool get isFormReady =>
       countryIndex.value >= 0 &&
       name.value.isNotEmpty &&
@@ -91,6 +94,7 @@ class KycPersonalInformationController extends GetxController {
       faceUrl.value != null &&
       faceUrl.value!.isNotEmpty;
 
+  /// 🔁 INIT DATA
   Future<void> _loadInitData() async {
     try {
       isLoading.value = true;
@@ -101,6 +105,7 @@ class KycPersonalInformationController extends GetxController {
         CommonApi.getConfig(type: 'identify_config'),
       ]);
 
+      // ✅ Explicit casts (VERY IMPORTANT)
       final List<Dict> dicts = results[0] as List<Dict>;
       final List<CountryListRes> countries = results[1] as List<CountryListRes>;
       final configRes = results[2] as dynamic; // config response model
@@ -134,7 +139,7 @@ class KycPersonalInformationController extends GetxController {
   }
 
   Future<void> pickKYCImage(ValueChanged<String> onPicked) async {
-    if (isIdImageUploading.value) return; 
+    if (isIdImageUploading.value) return; // ⛔️ GUARD
 
     isIdImageUploading.value = true;
 
@@ -159,6 +164,7 @@ class KycPersonalInformationController extends GetxController {
         return;
       }
 
+      // ---------- UPLOAD ----------
       final url = await AwsUploadUtil().upload(file: pickedFile);
       onPicked(url);
     } on UploadTooLargeException {
@@ -182,6 +188,7 @@ class KycPersonalInformationController extends GetxController {
     });
   }
 
+  /// 📝 SUBMIT KYC
   Future<bool> submitKyc() async {
     try {
       isLoading.value = true;
@@ -208,11 +215,12 @@ class KycPersonalInformationController extends GetxController {
           res['errorCode'] == 'Success' || res['errorMsg'] == 'SUCCESS';
 
       if (success) {
+        // 🔁 FETCH LATEST STATUS
         final list = await UserApi.getIdentifyOrderList();
 
         if (list.isNotEmpty) {
           latestSubmittedInfo = list.first;
-          merchantStatus.value = latestSubmittedInfo!.status; 
+          merchantStatus.value = latestSubmittedInfo!.status; // ✅ CRITICAL
         }
       }
 

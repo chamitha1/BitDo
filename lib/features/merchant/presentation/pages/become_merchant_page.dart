@@ -1,4 +1,5 @@
 import 'package:BitOwi/config/routes.dart';
+import 'package:BitOwi/core/widgets/app_text.dart';
 import 'package:BitOwi/core/widgets/common_appbar.dart';
 import 'package:BitOwi/core/widgets/soft_circular_loader.dart';
 import 'package:BitOwi/features/merchant/presentation/controllers/become_merchant_controller.dart';
@@ -160,7 +161,7 @@ class BecomeMerchantPage extends StatelessWidget {
                     },
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 54),
 
                   // ❌ DECERTIFY
                   if (controller.merchantStatus == '1')
@@ -188,12 +189,24 @@ class BecomeMerchantPage extends StatelessWidget {
                           },
                         );
                       },
-                      child: const Text(
-                        "Decertify as Merchant",
-                        style: TextStyle(
-                          color: Color(0xFFE54848),
-                          fontWeight: FontWeight.w600,
-                        ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6.0,
+                            ),
+                            child: SvgPicture.asset(
+                              'assets/icons/merchant_details/profile_delete.svg',
+                              width: 24,
+                              height: 24,
+                            ),
+                          ),
+                          AppText.p2Medium(
+                            "Request to Decertification",
+                            color: Color(0xFFE74C3C),
+                          ),
+                        ],
                       ),
                     ),
 

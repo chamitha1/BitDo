@@ -15,7 +15,10 @@ class LocalCurrency extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7FB),
-      appBar: CommonAppBar(title: "Local Currency", onBack: () => Get.back()),
+      appBar: CommonAppBar(
+        title: "Preferred Currency",
+        onBack: () => Get.back(),
+      ),
       body: SafeArea(
         top: false,
         child: Container(

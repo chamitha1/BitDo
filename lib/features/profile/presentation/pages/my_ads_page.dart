@@ -1,7 +1,10 @@
 import 'package:BitOwi/api/c2c_api.dart';
 import 'package:BitOwi/core/widgets/common_appbar.dart';
+import 'package:BitOwi/core/widgets/confirm_dialog.dart';
+import 'package:BitOwi/core/widgets/custom_snackbar.dart';
 import 'package:BitOwi/core/widgets/soft_circular_loader.dart';
 import 'package:BitOwi/models/ads_my_page_res.dart';
+import 'package:BitOwi/models/ads_page_res.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -18,7 +21,7 @@ class _MyAdsPageState extends State<MyAdsPage> {
 
   late EasyRefreshController _controller;
 
-List<AdsMyPageRes> list = [];
+  List<AdsMyPageRes> list = [];
   int pageNum = 1;
   bool isEnd = false;
   bool isLoading = false;
@@ -45,7 +48,6 @@ List<AdsMyPageRes> list = [];
       if (!mounted) {
         return;
       }
-      setState(() {});
     } catch (e) {
       print("getMyAdsPageList onRefresh error: $e");
     }
@@ -59,17 +61,18 @@ List<AdsMyPageRes> list = [];
     if (!mounted) {
       return;
     }
-    setState(() {});
   }
 
   /// Get list from API based on selected tab
   Future<void> getList([bool isRefresh = false]) async {
     if (isLoading) return;
     try {
-      isLoading = true;
-      if (isRefresh) {
-        pageNum = 1;
-      }
+      setState(() {
+        isLoading = true;
+        if (isRefresh) {
+          pageNum = 1;
+        }
+      });
       // Map tab index to status: 0=Draft, 1=Posted, 2=Archived
       final res = await C2CApi.getMyAdsPageList({
         "pageNum": pageNum,
@@ -80,17 +83,21 @@ List<AdsMyPageRes> list = [];
             ? ['1']
             : ['2'],
       });
-      isEnd = res.isEnd;
-      if (isRefresh) {
-        list = res.list;
-      } else {
-        list.addAll(res.list);
-      }
-      pageNum++;
+      setState(() {
+        isEnd = res.isEnd;
+        if (isRefresh) {
+          list = res.list;
+        } else {
+          list.addAll(res.list);
+        }
+        pageNum++;
+      });
     } catch (e) {
       print("getMyAdsPageList getList error: $e");
     } finally {
-      isLoading = false;
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -153,7 +160,7 @@ List<AdsMyPageRes> list = [];
                       padding: const EdgeInsets.all(20),
                       itemCount: list.length,
                       itemBuilder: (context, index) {
-                        return _buildAdCard(list[index]);
+                        return _buildAdCard(ad: list[index]);
                       },
                     ),
             ),
@@ -200,7 +207,7 @@ List<AdsMyPageRes> list = [];
     );
   }
 
-  Widget _buildAdCard(AdsMyPageRes ad) {
+  Widget _buildAdCard({required AdsMyPageRes ad}) {
     // Calculate completion rate from userStatistics
     final stats = ad.userStatistics;
     final completionRate = stats.orderCount > 0
@@ -444,8 +451,7 @@ List<AdsMyPageRes> list = [];
                 const SizedBox(width: 8),
                 ElevatedButton.icon(
                   onPressed: () {
-                    // TODO: Post ad (change status from 0 to 1)
-                    print("Post ad: ${ad.id}");
+                    onPostTap(ad);
                   },
                   icon: const Icon(Icons.send, size: 16),
                   label: const Text("Post"),
@@ -485,8 +491,7 @@ List<AdsMyPageRes> list = [];
                 const SizedBox(width: 8),
                 ElevatedButton.icon(
                   onPressed: () {
-                    // TODO: Turn off ad (change status from 1 to 2)
-                    print("Turn off ad: ${ad.id}");
+                    offDownTap(ad);
                   },
                   icon: const Icon(Icons.power_settings_new, size: 16),
                   label: const Text("Off"),
@@ -536,22 +541,112 @@ List<AdsMyPageRes> list = [];
   //   );
   // }
 
-  // Publish ad (Draft → Posted)
-  // onPublishTap() aync {
-  //   await C2CApi.upDownAds(info.id, "1");  // Change status to '1'
-  //   setState(() {
-  //       list.removeAt(index);  // Remove from current list
-  //     }); // Remove from draft list
-  // }
+  // Post ad (Draft → Posted)
+  void onPostTap(AdsMyPageRes ad) {
+    //todo:
+    // if (!PlatformUtils().isMobile) {
+    //   DownloadModal.showModal(context);
+    //   return;
+    // }
+    print("Post ad: ${ad.id}");
 
-  // // Archive ad (Posted → Archived)
-  // onDownTap() {
-  //   await C2CApi.upDownAds(info.id, "0");  // Change status to '0'
-  //   afterDown!();  // Remove from posted list
-  // }
+    showCommonConfirmDialog(
+      context,
+      title: "Confirm to post ad?",
+      message: "Are you sure you want to post this ad?",
+      primaryText: "Post",
+      secondaryText: "Cancel",
+      onPrimary: () async {
+        if (isLoading) return;
 
-  // // Edit ad
-  // onEditTap() {
-  //   Get.toNamed(Routes.publishAd, parameters: {'id': info.id});
-  // }
+        setState(() {
+          isLoading = true;
+        });
+
+        try {
+          await C2CApi.upDownAds(ad.id, "1"); // 1 = on shelf
+
+          setState(() {
+            list.removeWhere((e) => e.id == ad.id);
+          });
+
+          CustomSnackbar.showSuccess(
+            title: "Success",
+            message: "Ad posted successfully",
+          );
+        } catch (e) {
+          debugPrint("Post ad error: $e");
+
+          CustomSnackbar.showError(
+            title: "Error",
+            message: "Something went wrong",
+          );
+        } finally {
+          if (mounted) {
+            setState(() {
+              isLoading = false;
+            });
+          }
+        }
+      },
+      onSecondary: () {
+        debugPrint("User cancelled post ad");
+      },
+    );
+  }
+
+  // Archive ad (Posted → Archived)
+  void offDownTap(AdsMyPageRes ad) {
+    //todo:
+    // if (!PlatformUtils().isMobile) {
+    //   DownloadModal.showModal(context);
+    //   return;
+    // }
+    print("Turn off ad: ${ad.id}");
+
+    showCommonConfirmDialog(
+      context,
+      title: "Confirm to off ads?",
+      message: "Are you sure you want to turn off this ad?",
+      primaryText: "Confirm",
+      secondaryText: "Cancel",
+      onPrimary: () async {
+        if (isLoading) return;
+        setState(() {
+          isLoading = true;
+        });
+
+        try {
+          await C2CApi.upDownAds(ad.id, "0");
+          setState(() {
+            list.removeWhere((e) => e.id == ad.id);
+          });
+          CustomSnackbar.showSuccess(
+            title: "Success",
+            message: "Ad turned off successfully",
+          );
+        } catch (e) {
+          debugPrint("Off ad error: $e");
+          CustomSnackbar.showError(
+            title: "Error",
+            message: "Something went wrong",
+          );
+        } finally {
+          if (mounted) {
+            setState(() {
+              isLoading = false;
+            });
+          }
+        }
+      },
+      onSecondary: () {
+        debugPrint("User cancelled off ad");
+      },
+    );
+  }
+
+  // Edit ad
+  void onEditTap() {
+    // Get.toNamed(Routes.publishAd, parameters: {'id': info.id});
+  }
 }

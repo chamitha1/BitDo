@@ -82,6 +82,7 @@ class UserKycInformationController extends GetxController {
     super.onClose();
   }
 
+  /// ───────────────── API ─────────────────
   Future<void> getLatestIdentifyOrderList() async {
     final list = await UserApi.getIdentifyOrderList();
     latestSubmittedInfo = list.isNotEmpty ? list.first : null;
@@ -98,7 +99,9 @@ class UserKycInformationController extends GetxController {
         CommonApi.getConfig(type: 'identify_config'),
       ]);
 
-      await getLatestIdentifyOrderList(); 
+      await getLatestIdentifyOrderList(); // 🔁 AFTER
+
+      // ✅ Explicit casts (VERY IMPORTANT)
       final List<Dict> dicts = results[0] as List<Dict>;
       final List<CountryListRes> countries = results[1] as List<CountryListRes>;
       final configRes = results[2] as dynamic; // config response model

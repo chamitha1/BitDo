@@ -2,6 +2,7 @@ import 'package:BitOwi/config/api_client.dart';
 import 'package:BitOwi/models/account.dart';
 import 'package:BitOwi/models/account_asset_res.dart';
 import 'package:BitOwi/models/account_detail_res.dart';
+import 'package:BitOwi/models/bankcard_list_res.dart';
 import 'package:BitOwi/models/chain_symbol_list_res.dart';
 import 'package:BitOwi/models/withdraw_page_res.dart';
 import 'package:BitOwi/models/withdraw_rule_detail_res.dart';
@@ -370,22 +371,20 @@ class AccountApi {
   // }
   // }
 
-  //📝TODO
-  // static Future<List<BankcardListRes>> getBankCardList() async {
-  //   // try {
-  //   //   final res = await HttpUtil.post('/core/v1/bankcard/listByUserId');
-  //   //   List<BankcardListRes> list = (res as List<dynamic>)
-  //   //       .map(
-  //   //         (item) =>
-  //   //             BankcardListRes.fromJson(CommonUtils.removeNullKeys(item)),
-  //   //       )
-  //   //       .toList();
-  //   //   return list;
-  //   // } catch (e) {
-  //   //   e.printError();
-  //   //   rethrow;
-  //   // }
-  // }
+  // 📝TODO
+  /// Check bank card list
+  static Future<List<BankcardListRes>> getBankCardList() async {
+    try {
+      final res = await ApiClient.dio.post('/core/v1/bankcard/listByUserId');
+      List<BankcardListRes> list = (res.data['data'] as List<dynamic>)
+          .map((item) => BankcardListRes.fromJson(item))
+          .toList();
+      return list;
+    } catch (e) {
+      print("getBankCardList error: $e");
+      rethrow;
+    }
+  }
 
   //📝TODO
   // static Future<BankcardListRes> getBankCardDetail(String id) async {

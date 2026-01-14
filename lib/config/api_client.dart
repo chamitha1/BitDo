@@ -32,10 +32,7 @@ class ApiClient {
                 // 'Authorization': authHeader,
                 // 'content-Type': 'application/json',
                 // 'Accept-Language': Get.deviceLocale?.toString() ?? 'en_US',
-                'Accept-Language': Get.deviceLocale?.toString() == 'en_GB'
-                    ? const Locale('en', 'US')
-                    : Get.deviceLocale,
-                // 'Accept-Language': 'en_US',
+                'Accept-Language': 'en_US',
               });
 
               print("------------API Request------------");

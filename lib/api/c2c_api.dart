@@ -2,6 +2,7 @@ import 'package:BitOwi/config/api_client.dart';
 import 'package:BitOwi/models/ads_home_res.dart';
 import 'package:BitOwi/models/ads_my_page_res.dart';
 import 'package:BitOwi/models/page_info.dart';
+import 'package:flutter/material.dart';
 
 class C2CApi {
   static Future<AdsHomeRes> getOtherUserAdsHome(String master) async {
@@ -37,6 +38,20 @@ class C2CApi {
       return PageInfo<AdsMyPageRes>.fromJson(resData, AdsMyPageRes.fromJson);
     } catch (e) {
       print("getMyAdsPageList error: $e");
+      rethrow;
+    }
+  }
+
+  /// Add and remove ads
+  /// type 0: off the shelf 1: on the shelf
+  static Future<void> upDownAds(String id, String type) async {
+    try {
+      await ApiClient.dio.post(
+        '/core/v1/ads/updown_ads',
+        data: {"id": id, "type": type},
+      );
+    } catch (e) {
+      print("upDownAds error: $e");
       rethrow;
     }
   }

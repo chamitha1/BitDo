@@ -37,13 +37,10 @@ class AddBankCardPage extends StatelessWidget {
   Widget buildUpdateButton() {
     return Obx(() {
       final isLoading = settingsController.currencyUpdating.value;
-      final isChanged =
-          settingsController.selectedIndex.value !=
-          settingsController.savedIndex.value;
 
       return PrimaryButton(
         text: "Save",
-        enabled: isChanged && !isLoading,
+        enabled: !isLoading,
         onPressed: settingsController.onChoseUpdate,
         child: isLoading ? const SoftCircularLoader(color: Colors.white) : null,
       );
