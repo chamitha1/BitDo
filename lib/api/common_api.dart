@@ -117,11 +117,16 @@ class CommonApi {
     required int pageNum,
     required int pageSize,
     required String type,
+    String? isRead,
   }) async {
     try {
+      final data = {'pageNum': pageNum, 'pageSize': pageSize, 'type': type};
+      if (isRead != null) {
+        data['isRead'] = isRead;
+      }
       final response = await ApiClient.dio.post(
         '/core/v1/mySms/public/my_sms_page_by_type',
-        data: {'pageNum': pageNum, 'pageSize': pageSize, 'type': type},
+        data: data,
       );
       print(response);
       return response.data as Map<String, dynamic>;
@@ -134,9 +139,10 @@ class CommonApi {
   /// Get notification detail
   static Future<Sms> getNoticeDetail(String id) async {
     try {
-      final res = await ApiClient.dio.post('/core/v1/mySms/public/detail', data: {
-        "id": id,
-      });
+      final res = await ApiClient.dio.post(
+        '/core/v1/mySms/public/detail',
+        data: {"id": id},
+      );
       return Sms.fromJson(res.data['data']);
     } catch (e) {
       print("getNoticeDetail error: $e");
@@ -147,7 +153,9 @@ class CommonApi {
   /// Check if there are unread notifications
   static Future<bool> getNoticeUnReadFlag() async {
     try {
-      final res = await ApiClient.dio.post('/core/v1/cuser/public/user_home_unread');
+      final res = await ApiClient.dio.post(
+        '/core/v1/cuser/public/user_home_unread',
+      );
       final data = res.data['data'];
       return data["smsNotReadFlag"] == '1';
     } catch (e) {

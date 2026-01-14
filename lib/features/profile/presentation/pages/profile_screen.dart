@@ -67,7 +67,11 @@ class ProfileScreen extends StatelessWidget {
                 icon: SvgPicture.asset(
                   'assets/icons/profile_page/notification.svg',
                 ),
-                onTap: () => Get.to(() => const NotificationsPage()),
+                onTap: () {
+                  Get.to(() => const NotificationsPage())?.then((_) {
+                    userController.fetchNotificationCount();
+                  });
+                },
                 badgeCount: userController.notificationCount.value > 0
                     ? userController.notificationCount.value
                     : null,

@@ -1,7 +1,7 @@
 import 'package:BitOwi/core/storage/storage_service.dart';
 import 'package:BitOwi/api/c2c_api.dart';
 import 'package:BitOwi/api/user_api.dart';
-import 'package:BitOwi/api/common_api.dart'; 
+import 'package:BitOwi/api/common_api.dart';
 import 'package:get/get.dart';
 import 'package:BitOwi/models/ads_home_res.dart';
 import 'package:BitOwi/models/user_model.dart';
@@ -100,20 +100,35 @@ class UserController extends GetxController {
   Future<void> fetchNotificationCount() async {
     try {
       print("Fetching notification count...");
-      final res = await CommonApi.getSmsPageByType(
-        pageNum: 1,
-        pageSize: 10,
-        type: "2", //notifications
-      );
-      print("Notification API Response: $res");
+      final results = await Future.wait([
+        CommonApi.getSmsPageByType(
+          pageNum: 1,
+          pageSize: 100, // Fetch 100 items to count locally
+          type: "1", // Announcements
+        ),
+        CommonApi.getSmsPageByType(
+          pageNum: 1,
+          pageSize: 100, 
+          type: "2", // Notifications
+        ),
+      ]);
 
-      if (res['code'] == 200 || res['code'] == '200') {
-        final data = res['data'];
-        if (data != null && data['total'] != null) {
-          notificationCount.value = int.tryParse(data['total'].toString()) ?? 0;
-          print("Notification count updated: ${notificationCount.value}");
+      int unreadCount = 0;
+
+      for (var res in results) {
+        if (res['code'] == 200 || res['code'] == '200') {
+          final data = res['data'];
+          if (data != null && data['list'] != null) {
+            final List list = data['list'];
+            // Count items where isRead is '0'
+            final count = list.where((item) => item['isRead'].toString() == '0').length;
+            unreadCount += count;
+          }
         }
       }
+
+      notificationCount.value = unreadCount;
+      print("Notification count updated: ${notificationCount.value}");
     } catch (e) {
       print("Error fetching notification count: $e");
     }
