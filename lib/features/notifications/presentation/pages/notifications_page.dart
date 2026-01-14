@@ -1,5 +1,7 @@
 import 'package:BitOwi/api/common_api.dart';
 import 'package:BitOwi/models/sms_model.dart';
+import 'package:BitOwi/features/notifications/presentation/pages/notification_detail_page.dart';
+import 'package:BitOwi/features/notifications/presentation/widgets/confirm_read_dialog.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -54,7 +56,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
       print("Load error: $e");
     }
     _controller.finishLoad(
-        isEnd ? IndicatorResult.noMore : IndicatorResult.success);
+      isEnd ? IndicatorResult.noMore : IndicatorResult.success,
+    );
   }
 
   Future<void> getList([bool isRefresh = false]) async {
@@ -72,8 +75,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
       );
 
       final List<dynamic> dataList = res['data']['list'] ?? [];
-      final List<Sms> fetchedList =
-          dataList.map((e) => Sms.fromJson(e)).toList();
+      final List<Sms> fetchedList = dataList
+          .map((e) => Sms.fromJson(e))
+          .toList();
 
       final int total = res['data']['total'] ?? 0;
       final int pages = res['data']['pages'] ?? 1;
@@ -89,15 +93,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
         if (fetchedList.isEmpty || list.length >= total) {
           isEnd = true;
         } else {
-             isEnd = false;
+          isEnd = false;
         }
         pageNum++;
       });
     } catch (e) {
       print("Get list error: $e");
-       setState(() {
-          if (isRefresh) isEnd = true;
-       });
+      setState(() {
+        if (isRefresh) isEnd = true;
+      });
     }
   }
 
@@ -137,7 +141,19 @@ class _NotificationsPageState extends State<NotificationsPage> {
         actions: [
           IconButton(
             onPressed: () {
-              // clear notification btn
+              showDialog(
+                context: context,
+                builder: (context) => ConfirmReadDialog(
+                  onConfirm: () async {
+                    try {
+                      await CommonApi.readAllNotice();
+                      onRefresh();
+                    } catch (e) {
+                      print("Read all error: $e");
+                    }
+                  },
+                ),
+              );
             },
             icon: const Icon(Icons.cleaning_services, color: Color(0xFF151E2F)),
           ),
@@ -192,10 +208,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
               fontWeight: FontWeight.w600,
               color: isSelected
                   ? const Color(0xFF151E2F)
-                  : const Color(0xFF83869D), 
+                  : const Color(0xFF83869D),
             ),
           ),
-         
         ],
       ),
     );
@@ -232,18 +247,26 @@ class _NotificationsPageState extends State<NotificationsPage> {
   }
 
   Widget _buildNotificationItem(Sms item) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          item.isRead = '1';
+        });
+        Get.to(() => NotificationDetailPage(id: item.id));
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: Text(
@@ -260,10 +283,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
               ),
               if (item.isRead == '0')
                 Container(
+                  margin: const EdgeInsets.only(left: 8, top: 4),
                   width: 8,
                   height: 8,
                   decoration: const BoxDecoration(
-                    color: Color(0xFFFF4D4F),
+                    color: Color(0xffE74C3C),
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -272,7 +296,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           const SizedBox(height: 8),
           Text(
             item.content,
-             maxLines: 2,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               fontSize: 14,
@@ -291,6 +315,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           ),
         ],
       ),
+    ),
     );
   }
 }

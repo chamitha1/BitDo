@@ -11,6 +11,7 @@ const smsBizTypeValues = [
 enum SmsBizType {
   register, // C_REG_EMAIL
   forgetPwd, // FORGET_LOGINPWD
+  resetLoginPwd, //Change login pwd
   bindTradePwd, // BIND_TRADEPWD
   modifyEmail, // MODIFY_EMAIL
   openGoogle, // OPEN_GOOGLE
@@ -35,6 +36,8 @@ extension SmsBizTypeExtension on SmsBizType {
         return 'CLOSE_GOOGLE';
       case SmsBizType.withdraw:
         return 'WITHDRAW';
+      case SmsBizType.resetLoginPwd:
+        return 'RESET_LOGIN_PWD';
     }
   }
 }

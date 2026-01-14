@@ -474,6 +474,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                       readOnly: true,
                       decoration: _inputDecoration(
                         hint: _userEmail,
+                        fillColor: const Color(0xFFECEFF5),
                         suffixWidget: Padding(
                           padding: const EdgeInsets.only(
                             right: 6,
@@ -841,6 +842,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
     bool isPassword = false,
     bool isVisible = false,
     VoidCallback? onToggleVisibility,
+    Color? fillColor,
   }) {
     return InputDecoration(
       hintText: hint,
@@ -888,7 +890,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
             )
           : suffixWidget,
       filled: true,
-      fillColor: Colors.white,
+      fillColor: fillColor ?? Color(0xFFDAE0EE),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: Color(0xFFDAE0EE), width: 1.0),
@@ -899,10 +901,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(
-          color: Color.fromARGB(255, 112, 152, 221),
-          width: 1.0,
-        ),
+        borderSide: const BorderSide(color: Color(0xFFDAE0EE), width: 1.0),
       ),
     );
   }

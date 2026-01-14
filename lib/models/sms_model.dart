@@ -21,7 +21,7 @@ class Sms {
       type: json['type']?.toString() ?? '',
       title: json['title']?.toString() ?? '',
       content: json['content']?.toString() ?? '',
-      isRead: json['status']?.toString() ?? '0', 
+      isRead: json['isRead']?.toString() ?? '1', 
       createDatetime: json['createDatetime']?.toString() ?? '',
     );
   }

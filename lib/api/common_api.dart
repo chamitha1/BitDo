@@ -3,6 +3,7 @@ import 'package:BitOwi/models/article_type.dart';
 import 'package:BitOwi/models/config.dart';
 import 'package:BitOwi/models/country_list_res.dart';
 import 'package:BitOwi/models/dict.dart';
+import 'package:BitOwi/models/sms_model.dart';
 
 class CommonApi {
   /// Fetch dictionary list
@@ -120,15 +121,47 @@ class CommonApi {
     try {
       final response = await ApiClient.dio.post(
         '/core/v1/mySms/public/my_sms_page_by_type',
-        data: {
-          'pageNum': pageNum,
-          'pageSize': pageSize,
-          'type': type,
-        },
+        data: {'pageNum': pageNum, 'pageSize': pageSize, 'type': type},
       );
+      print(response);
       return response.data as Map<String, dynamic>;
     } catch (e) {
       print("Get SMS Page By Type error: $e");
+      rethrow;
+    }
+  }
+
+  /// Get notification detail
+  static Future<Sms> getNoticeDetail(String id) async {
+    try {
+      final res = await ApiClient.dio.post('/core/v1/mySms/public/detail', data: {
+        "id": id,
+      });
+      return Sms.fromJson(res.data['data']);
+    } catch (e) {
+      print("getNoticeDetail error: $e");
+      rethrow;
+    }
+  }
+
+  /// Check if there are unread notifications
+  static Future<bool> getNoticeUnReadFlag() async {
+    try {
+      final res = await ApiClient.dio.post('/core/v1/cuser/public/user_home_unread');
+      final data = res.data['data'];
+      return data["smsNotReadFlag"] == '1';
+    } catch (e) {
+      print("getNoticeUnReadFlag error: $e");
+      rethrow;
+    }
+  }
+
+  /// Mark all notifications as read
+  static Future<void> readAllNotice() async {
+    try {
+      await ApiClient.dio.post('/core/v1/mySms/read_all');
+    } catch (e) {
+      print("readAllNotice error: $e");
       rethrow;
     }
   }

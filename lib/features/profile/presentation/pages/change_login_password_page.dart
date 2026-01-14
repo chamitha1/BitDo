@@ -174,7 +174,7 @@ class _ChangeLoginPasswordPageState extends State<ChangeLoginPasswordPage> {
           onResend: () async {
             return await _userApi.sendOtp(
               email: _email,
-              bizType: SmsBizType.forgetPwd,
+              bizType: SmsBizType.resetLoginPwd,
             );
           },
           onVerified: () {
