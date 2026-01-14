@@ -514,6 +514,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                             ),
                             decoration: _inputDecoration(
                               hint: "Enter Authenticator Code",
+                              fillColor: Colors.white,
                             ),
                             onChanged: (_) => setState(
                               () {},

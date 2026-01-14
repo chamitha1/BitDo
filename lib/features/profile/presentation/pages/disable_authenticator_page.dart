@@ -265,34 +265,17 @@ class _DisableAuthenticatorPageState extends State<DisableAuthenticatorPage> {
                             ),
                           ),
                           suffixIcon: Padding(
-                            padding: const EdgeInsets.all(10),
-                            child: SizedBox(
-                              height: 32,
-                              child: OutlinedButton(
-                                onPressed: _countdown > 0 ? null : _sendOtp,
-                                style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                  ),
-                                  side: const BorderSide(
-                                    color: Color(0xFF1D5DE5),
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                child: Text(
-                                  _countdown > 0
-                                      ? "${_countdown}s"
-                                      : "Get a code",
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontFamily: 'Inter',
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xFF1D5DE5),
-                                  ),
-                                ),
-                              ),
+                            padding: const EdgeInsets.only(
+                              right: 6,
+                              top: 6,
+                              bottom: 6,
+                            ),
+                            child: _verifyButton(
+                              text: _countdown > 0
+                                  ? "${_countdown}s"
+                                  : "Get a code",
+                              onPressed: _sendOtp,
+                              isEnabled: _countdown == 0,
                             ),
                           ),
                         ),
@@ -339,6 +322,77 @@ class _DisableAuthenticatorPageState extends State<DisableAuthenticatorPage> {
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+
+  Widget _verifyButton({
+    required String text,
+    required VoidCallback onPressed,
+    required bool isEnabled,
+    bool isVerified = false,
+  }) {
+    return SizedBox(
+      height: 32,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: isVerified
+              ? const Color(0xffEAF9F0)
+              : (isEnabled ? const Color(0xFF1D5DE5) : const Color(0XFFB9C6E2)),
+          border: isVerified
+              ? Border.all(color: const Color(0xFFABEAC6), width: 1.0)
+              : null,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            disabledBackgroundColor: Colors.transparent,
+            disabledForegroundColor: Colors.white,
+            padding: EdgeInsets.symmetric(horizontal: isVerified ? 10 : 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          onPressed: (isEnabled && !isVerified) ? onPressed : null,
+          child: isVerified
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SvgPicture.asset(
+                      "assets/icons/forgot_password/check_circle.svg",
+                      width: 20,
+                      height: 20,
+                      colorFilter: const ColorFilter.mode(
+                        Color(0xFF40A372),
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      text,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Inter',
+                        color: Color(0xFF40A372),
+                      ),
+                    ),
+                  ],
+                )
+              : Text(
+                  text,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: 'Inter',
+                    color: Colors.white,
+                  ),
+                ),
         ),
       ),
     );
