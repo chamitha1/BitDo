@@ -94,9 +94,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               // Index 1: P2P
-              const P2PPage(),
+              // const P2PPage(),
               // Index 2: Order (Placeholder)
-              const P2PPage(),
+              // const P2PPage(),
               // Index 3: Profile
               const ProfileScreen(),
             ],
