@@ -2,7 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:BitOwi/core/widgets/common_image.dart';
 
-enum OrderStatus { pending, pendingPayment, completed, cancelled, arbitration }
+enum OrderStatus {
+  pending,
+  pendingPayment,
+  pendingReleased,
+  completed,
+  cancelled,
+  arbitration,
+  cryptoReleased,
+}
 
 class OrderCard extends StatelessWidget {
   final String orderNo;
@@ -34,23 +42,25 @@ class OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x12717F9A),
-            offset: Offset(0, 3),
-            blurRadius: 9,
-            spreadRadius: 0,
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x12717F9A),
+              offset: Offset(0, 3),
+              blurRadius: 9,
+              spreadRadius: 0,
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
           // Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -157,7 +167,8 @@ class OrderCard extends StatelessWidget {
               ],
             ),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -181,6 +192,12 @@ class OrderCard extends StatelessWidget {
         iconName = "clock-three.svg";
         text = "Pending Buyer Payment";
         break;
+      case OrderStatus.pendingReleased:
+        bgColor = const Color(0xFFFFFBF6);
+        textColor = const Color(0xFFFF9B29);
+        iconName = "lock.svg";
+        text = "Pending Released";
+        break;
       case OrderStatus.completed:
         bgColor = const Color(0xFFEAF9F0);
         textColor = const Color(0xFF40A372);
@@ -198,6 +215,12 @@ class OrderCard extends StatelessWidget {
         textColor = const Color(0xFFFF9B29);
         iconName = "scale.svg";
         text = "Arbitration";
+        break;
+      case OrderStatus.cryptoReleased:
+        bgColor = const Color(0xFFEAF9F0);
+        textColor = const Color(0xFF40A372);
+        iconName = "note-2.svg";
+        text = "Crypto Released";
         break;
     }
 

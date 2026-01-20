@@ -2,6 +2,7 @@ import 'package:BitOwi/features/orders/presentation/widgets/order_card.dart';
 import 'package:BitOwi/features/orders/presentation/controllers/orders_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:BitOwi/features/orders/presentation/pages/order_details_page.dart';
 
 class OrdersPage extends GetView<OrdersController> {
   const OrdersPage({super.key});
@@ -56,7 +57,7 @@ class OrdersPage extends GetView<OrdersController> {
 
                   if (controller.currentTabIndex.value == 0) {
                     orders = [
-                      const OrderCard(
+                      OrderCard(
                         orderNo: "19714381",
                         status: OrderStatus.pending,
                         title: "Sell ETH",
@@ -67,8 +68,11 @@ class OrdersPage extends GetView<OrdersController> {
                         userAvatar: "assets/icons/orders/Avatar.png",
                         isCertified: true,
                         hasUnreadMessages: true,
+                        onTap: () => Get.to(() => OrderDetailsPage(
+                              status: OrderStatus.pendingPayment,
+                            )),
                       ),
-                      const OrderCard(
+                      OrderCard(
                         orderNo: "19714382",
                         status: OrderStatus.pendingPayment,
                         title: "Sell ETH",
@@ -79,8 +83,11 @@ class OrdersPage extends GetView<OrdersController> {
                         userAvatar: "assets/icons/orders/Avatar1.png",
                         isCertified: false,
                         hasUnreadMessages: false,
+                        onTap: () => Get.to(() => OrderDetailsPage(
+                              status: OrderStatus.pendingPayment,
+                            )),
                       ),
-                      const OrderCard(
+                      OrderCard(
                         orderNo: "19714385",
                         status: OrderStatus.arbitration,
                         title: "Sell ETH",
@@ -91,12 +98,15 @@ class OrdersPage extends GetView<OrdersController> {
                         userAvatar: "assets/icons/orders/Avatar1.png",
                         isCertified: true,
                         hasUnreadMessages: true,
+                        onTap: () => Get.to(() => OrderDetailsPage(
+                              status: OrderStatus.arbitration,
+                            )),
                       ),
                     ];
                   } else if (controller.currentTabIndex.value == 1) {
                     // Completed
                     orders = [
-                      const OrderCard(
+                      OrderCard(
                         orderNo: "19714383",
                         status: OrderStatus.completed,
                         title: "Sell ETH",
@@ -107,12 +117,15 @@ class OrdersPage extends GetView<OrdersController> {
                         userAvatar: "assets/icons/orders/Avatar.png",
                         isCertified: true,
                         hasUnreadMessages: false,
+                        onTap: () => Get.to(() => OrderDetailsPage(
+                              status: OrderStatus.completed,
+                            )),
                       ),
                     ];
                   } else {
                     // Cancelled
                     orders = [
-                      const OrderCard(
+                      OrderCard(
                         orderNo: "19714384",
                         status: OrderStatus.cancelled,
                         title: "Sell ETH",
@@ -123,6 +136,9 @@ class OrdersPage extends GetView<OrdersController> {
                         userAvatar: "assets/icons/orders/Avatar1.png",
                         isCertified: false,
                         hasUnreadMessages: false,
+                        onTap: () => Get.to(() => OrderDetailsPage(
+                              status: OrderStatus.cancelled,
+                            )),
                       ),
                     ];
                   }
