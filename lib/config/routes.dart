@@ -28,6 +28,7 @@ import 'package:BitOwi/features/wallet/presentation/pages/transaction_detail_pag
 import 'package:BitOwi/features/wallet/presentation/pages/wallet_detail_page.dart';
 import 'package:BitOwi/features/wallet/presentation/pages/deposit_screen.dart';
 import 'package:BitOwi/features/wallet/presentation/pages/withdraw_screen.dart';
+import 'package:BitOwi/features/orders/presentation/pages/order_details_page.dart';
 
 class Routes {
   static const String splash = '/splash';
@@ -58,6 +59,7 @@ class Routes {
   static const String addMobileMoneyPage = '/addMobileMoneyPage';
   static const String postAdsPage = '/postAdsPage';
   static const String myAdsPage = '/myAdsPage';
+  static const String orderDetailPage = '/orderDetail';
 }
 
 class AppPages {
@@ -136,6 +138,10 @@ class AppPages {
     GetPage(name: Routes.addMobileMoneyPage, page: () => AddMobileMoneyPage()),
     GetPage(name: Routes.postAdsPage, page: () =>PostAdsPage()),
     GetPage(name: Routes.myAdsPage, page: () => MyAdsPage()),
+    GetPage(
+      name: Routes.orderDetailPage,
+      page: () => const OrderDetailsPage(),
+    ),
 
   ];
 }

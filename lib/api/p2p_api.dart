@@ -1,6 +1,8 @@
 import 'package:BitOwi/config/api_client.dart';
 import 'package:BitOwi/models/ads_page_res.dart';
 import 'package:BitOwi/models/trade_order_page_res.dart';
+import 'package:BitOwi/models/ads_detail_res.dart';
+import 'package:flutter/foundation.dart';
 
 class P2PApi {
   /// params: {pageNum, pageSize, tradeCoin, tradeType, tradeCurrency, minPrice}
@@ -34,6 +36,68 @@ class P2PApi {
       return TradeOrderPageRes.fromJson(responseData);
     } catch (e) {
       print("getTradeOrderPageList Error: $e");
+      rethrow;
+    }
+  }
+
+  /// Get Ad Detail with optional calculation
+  /// params: {id, tradeAmount (optional), count (optional)}
+  static Future<AdsDetailRes> getAdsInfo(
+    String id, {
+    String? tradeAmount,
+    String? count,
+  }) async {
+    try {
+      final res = await ApiClient.dio.post('/core/v1/ads/detail_front', data: {
+        "id": id,
+        "tradeAmount": tradeAmount,
+        "count": count,
+      });
+
+      debugPrint(
+          "getAdsInfo Request: id=$id, tradeAmount=$tradeAmount, count=$count");
+      debugPrint("getAdsInfo Response: ${res.data}");
+
+      final responseData = res.data['data'];
+      return AdsDetailRes.fromJson(responseData);
+    } catch (e) {
+      debugPrint("getAdsInfo Error: $e");
+      rethrow;
+    }
+  }
+
+  /// Create Buy Order
+  /// params: {adsId, tradeAmount, count}
+  static Future<String> buyOrder(Map<String, dynamic> data) async {
+    try {
+      debugPrint("buyOrder Request: $data");
+
+      final res =
+          await ApiClient.dio.post('/core/v1/trade_order/buy', data: data);
+
+      debugPrint("buyOrder Response: ${res.data}");
+
+      return res.data['data']['id'].toString();
+    } catch (e) {
+      debugPrint("buyOrder Error: $e");
+      rethrow;
+    }
+  }
+
+  /// Create Sell Order
+  /// params: {adsId, bankcardId, tradeAmount, count}
+  static Future<String> sellOrder(Map<String, dynamic> data) async {
+    try {
+      debugPrint("sellOrder Request: $data");
+
+      final res =
+          await ApiClient.dio.post('/core/v1/trade_order/sell', data: data);
+
+      debugPrint("sellOrder Response: ${res.data}");
+
+      return res.data['data']['id'].toString();
+    } catch (e) {
+      debugPrint("sellOrder Error: $e");
       rethrow;
     }
   }

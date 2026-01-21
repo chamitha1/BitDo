@@ -1,31 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:BitOwi/models/ads_page_res.dart';
+import 'package:BitOwi/models/ads_detail_res.dart';
+import 'package:BitOwi/models/bankcard_list_res.dart';
+import 'package:BitOwi/api/p2p_api.dart';
+import 'package:BitOwi/api/account_api.dart';
+import 'package:BitOwi/utils/debounce_utils.dart';
+import 'package:BitOwi/features/p2p/presentation/widgets/order_confirmation_dialog.dart';
+import 'package:BitOwi/config/routes.dart';
+import 'package:get/get.dart';
 
 class P2PSellScreen extends StatefulWidget {
-  const P2PSellScreen({super.key});
+  final AdItem adItem;
+
+  const P2PSellScreen({super.key, required this.adItem});
 
   @override
   State<P2PSellScreen> createState() => _P2PSellScreenState();
 }
 
 class _P2PSellScreenState extends State<P2PSellScreen> {
-  bool isSellQuantityMode = true;
+  int tabIndex = 0;
   final TextEditingController _amountController = TextEditingController();
   bool _isMaxChecked = false;
 
-  final String _maxLimitStr = "113788237.00";
-  final String _assetName = "BTC";
-  final String _fiatName = "NGN";
-  final double _pricePerUnit = 3566878988.00; 
+  late String adId;
+  AdsDetailRes? adsDetail;
+  String amount = '';
+  late Function debounceGetDetail;
+  BankcardListRes? selectedBankcard;
+  String availableBalance = '';
 
   @override
   void initState() {
     super.initState();
+    adId = widget.adItem.id!;
+    debounceGetDetail = DebounceUtils.debounce(getDetail, 300);
     _amountController.addListener(() {
-      setState(
-        () {},
-      ); 
+      amount = _amountController.text;
+      if (amount.isNotEmpty) {
+        debounceGetDetail();
+      }
     });
+    getInitData();
   }
 
   @override
@@ -34,17 +51,103 @@ class _P2PSellScreenState extends State<P2PSellScreen> {
     super.dispose();
   }
 
+  Future<void> getInitData() async {
+    try {
+      await getDetail();
+      
+      if (adsDetail != null) {
+        // Fetch available balance
+        final accountRes = await AccountApi.getDetailAccount(adsDetail!.tradeCoin!);
+        if (mounted) {
+          setState(() {
+            availableBalance = accountRes.availableAmount ?? '0';
+          });
+        }
+
+        // Fetch bank cards
+        final bankCards = await AccountApi.getBankCardList();
+        if (bankCards.isNotEmpty && mounted) {
+          setState(() {
+            selectedBankcard = bankCards.first;
+          });
+        }
+      }
+    } catch (e) {
+      // Error handled by API client
+    }
+  }
+
+  Future<void> getDetail() async {
+    try {
+      final res = await P2PApi.getAdsInfo(
+        adId,
+        tradeAmount: tabIndex == 1 ? amount : null,
+        count: tabIndex == 0 ? amount : null,
+      );
+      if (mounted) {
+        setState(() {
+          adsDetail = res;
+        });
+      }
+    } catch (e) {
+      // Error handled by API client
+    }
+  }
+
   void _onMaxChanged(bool? value) {
     setState(() {
       _isMaxChecked = value ?? false;
-      if (_isMaxChecked) {
-        _amountController.text = isSellQuantityMode
-            ? "9.990007843"
-            : _maxLimitStr;
+      if (_isMaxChecked && adsDetail != null) {
+        if (tabIndex == 0) {
+          _amountController.text = adsDetail!.countMax ?? '';
+        } else {
+          _amountController.text = adsDetail!.tradeAmountMax ?? '';
+        }
+        getDetail();
       } else {
         _amountController.clear();
       }
     });
+  }
+
+  String _getCurrencySymbol(String? currency) {
+    if (currency == 'NGN') return '₦';
+    if (currency == 'USD') return '\$';
+    return '';
+  }
+
+  Future<void> _onSellTap() async {
+    if (adsDetail == null || amount.isEmpty || selectedBankcard == null) {
+      return;
+    }
+
+    await OrderConfirmationDialog.show(
+      context: context,
+      type: "Selling",
+      price: "${_getCurrencySymbol(adsDetail!.tradeCurrency)} ${adsDetail!.truePrice}",
+      amount: tabIndex == 0
+          ? "${_getCurrencySymbol(adsDetail!.tradeCurrency)} ${adsDetail!.tradeAmount}"
+          : "${_getCurrencySymbol(adsDetail!.tradeCurrency)} $amount",
+      qty: tabIndex == 0
+          ? "$amount ${adsDetail!.tradeCoin}"
+          : "${adsDetail!.count} ${adsDetail!.tradeCoin}",
+      onConfirm: () async {
+        try {
+          final orderId = await P2PApi.sellOrder({
+            "adsId": adId,
+            "bankcardId": selectedBankcard!.id,
+            "tradeAmount": tabIndex == 1 ? amount : "",
+            "count": tabIndex == 0 ? amount : "",
+          });
+
+          if (mounted) {
+            Get.offNamed(Routes.orderDetailPage, arguments: orderId);
+          }
+        } catch (e) {
+          // Error handled by API interceptor
+        }
+      },
+    );
   }
 
   @override
@@ -99,6 +202,10 @@ class _P2PSellScreenState extends State<P2PSellScreen> {
   }
 
   Widget _buildTopInfoCard() {
+    if (adsDetail == null) {
+      return const SizedBox.shrink();
+    }
+    
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -123,7 +230,7 @@ class _P2PSellScreenState extends State<P2PSellScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                _assetName,
+                adsDetail!.tradeCoin ?? 'USDT',
                 style: const TextStyle(
                   fontFamily: 'Inter',
                   fontSize: 12,
@@ -132,9 +239,9 @@ class _P2PSellScreenState extends State<P2PSellScreen> {
                 ),
               ),
               const SizedBox(height: 4),
-              const Text(
-                "₦ 3,566,878,988.00",
-                style: TextStyle(
+              Text(
+                "${_getCurrencySymbol(adsDetail!.tradeCurrency)} ${adsDetail!.truePrice}",
+                style: const TextStyle(
                   fontFamily: 'Inter',
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -163,16 +270,30 @@ class _P2PSellScreenState extends State<P2PSellScreen> {
               Expanded(
                 child: _buildToggleButton(
                   "Sell Quantity",
-                  isSellQuantityMode,
-                  () => setState(() => isSellQuantityMode = true),
+                  tabIndex == 0,
+                  () {
+                    setState(() {
+                      tabIndex = 0;
+                      _amountController.clear();
+                      amount = '';
+                    });
+                    getDetail();
+                  },
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: _buildToggleButton(
                   "Sell Amount",
-                  !isSellQuantityMode,
-                  () => setState(() => isSellQuantityMode = false),
+                  tabIndex == 1,
+                  () {
+                    setState(() {
+                      tabIndex = 1;
+                      _amountController.clear();
+                      amount = '';
+                    });
+                    getDetail();
+                  },
                 ),
               ),
             ],
@@ -192,7 +313,7 @@ class _P2PSellScreenState extends State<P2PSellScreen> {
                 ),
               ),
               Text(
-                "0.00544$_assetName", 
+                "${adsDetail?.leftCount ?? '0'} ${adsDetail?.tradeCoin ?? ''}", 
                 style: const TextStyle(
                   fontFamily: 'Inter',
                   fontSize: 16,
@@ -204,7 +325,7 @@ class _P2PSellScreenState extends State<P2PSellScreen> {
           ),
           const SizedBox(height: 16),
 
-          _buildLabel(isSellQuantityMode ? "Sell Quantity" : "Sell Amount"),
+          _buildLabel(tabIndex == 0 ? "Sell Quantity" : "Sell Amount"),
           const SizedBox(height: 8),
           TextField(
             controller: _amountController,
@@ -223,9 +344,9 @@ class _P2PSellScreenState extends State<P2PSellScreen> {
                 horizontal: 16,
                 vertical: 14,
               ),
-              suffixText: isSellQuantityMode
-                  ? "BTC"
-                  : "NGN",
+              suffixText: tabIndex == 0
+                  ? (adsDetail?.tradeCoin ?? 'BTC')
+                  : (adsDetail?.tradeCurrency ?? 'NGN'),
               suffixStyle: const TextStyle(
                 fontFamily: 'Inter',
                 fontSize: 16,
@@ -276,18 +397,18 @@ class _P2PSellScreenState extends State<P2PSellScreen> {
             ],
           ),
           const SizedBox(height: 4),
-          const Text(
-            "Limit : 113788237.00 - 2883888",
-            style: TextStyle(
+          Text(
+            "Limit : ${_getCurrencySymbol(adsDetail?.tradeCurrency)}${adsDetail?.minTrade ?? '0'} - ${_getCurrencySymbol(adsDetail?.tradeCurrency)}${adsDetail?.maxTrade ?? '0'}",
+            style: const TextStyle(
               fontFamily: 'Inter',
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: Color(0xFF717F9A), 
+              color: Color(0xFF717F9A),
             ),
           ),
           const SizedBox(height: 4),
           Text(
-            "Available Balance : 9.990.0007843 BTC",
+            "Available Balance : $availableBalance ${adsDetail?.tradeCoin ?? 'BTC'}",
             style: const TextStyle(
               fontFamily: 'Inter',
               fontSize: 12,
@@ -304,11 +425,8 @@ class _P2PSellScreenState extends State<P2PSellScreen> {
   }
 
   Widget _buildCalculationRow() {
-    double inputVal = double.tryParse(_amountController.text) ?? 0.0;
-
-    if (isSellQuantityMode) {
-      String receivable = (inputVal * _pricePerUnit).toStringAsFixed(2);
-
+    if (tabIndex == 0) {
+      // By Quantity - show Receivable amount
       return Container(
         padding: const EdgeInsets.only(top: 16),
         decoration: const BoxDecoration(
@@ -323,11 +441,11 @@ class _P2PSellScreenState extends State<P2PSellScreen> {
                 fontFamily: 'Inter',
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Colors.black, 
+                color: Colors.black,
               ),
             ),
             Text(
-              "₦ $receivable",
+              "${_getCurrencySymbol(adsDetail?.tradeCurrency)} ${adsDetail?.tradeAmount ?? '0.00'}",
               style: const TextStyle(
                 fontFamily: 'Inter',
                 fontSize: 18,
@@ -339,8 +457,7 @@ class _P2PSellScreenState extends State<P2PSellScreen> {
         ),
       );
     } else {
-      String sellCrypto = (inputVal / _pricePerUnit).toStringAsFixed(8);
-
+      // By Amount - show Sell quantity
       return Container(
         padding: const EdgeInsets.only(top: 16),
         decoration: const BoxDecoration(
@@ -359,7 +476,7 @@ class _P2PSellScreenState extends State<P2PSellScreen> {
               ),
             ),
             Text(
-              "$sellCrypto BTC",
+              "${adsDetail?.count ?? '0.00'} ${adsDetail?.tradeCoin ?? 'BTC'}",
               style: const TextStyle(
                 fontFamily: 'Inter',
                 fontSize: 18,
@@ -604,7 +721,8 @@ class _P2PSellScreenState extends State<P2PSellScreen> {
     // Validate Input
     bool isValid =
         _amountController.text.isNotEmpty &&
-        (double.tryParse(_amountController.text) ?? 0) > 0;
+        (double.tryParse(_amountController.text) ?? 0) > 0 &&
+        selectedBankcard != null;
 
     return Row(
       children: [
@@ -639,11 +757,7 @@ class _P2PSellScreenState extends State<P2PSellScreen> {
           child: SizedBox(
             height: 48,
             child: ElevatedButton(
-              onPressed: isValid
-                  ? () {
-                      // Sell Action
-                    }
-                  : null,
+              onPressed: isValid ? _onSellTap : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: isValid
                     ? const Color(0xFF1D5DE5)

@@ -286,14 +286,14 @@ class P2POrderCard extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const P2PBuyScreen(),
+                          builder: (context) => P2PBuyScreen(adItem: adItem!),
                         ),
                       );
                     } else {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const P2PSellScreen(),
+                          builder: (context) => P2PSellScreen(adItem: adItem!),
                         ),
                       );
                     }
