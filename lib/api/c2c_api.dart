@@ -3,18 +3,24 @@ import 'package:BitOwi/models/ads_detail_res.dart';
 import 'package:BitOwi/models/ads_home_res.dart';
 import 'package:BitOwi/models/ads_my_page_res.dart';
 import 'package:BitOwi/models/page_info.dart';
-import 'package:flutter/material.dart';
 
 class C2CApi {
-  //  /// Add new ad
-  // static Future<void> createAds(Map<String, dynamic> data) async {
-  //   try {
-  //     await ApiClient.dio.post('/core/v1/ads/create', data);
-  //   } catch (e) {
-  //     e.printError();
-  //     rethrow;
-  //   }
-  // }
+  /// Add new ad
+  static Future<Map<String, dynamic>> createAds(
+    Map<String, dynamic> data,
+  ) async {
+    try {
+      final response = await ApiClient.dio.post(
+        '/core/v1/ads/create',
+        data: data,
+      );
+      // assuming backend returns JSON
+      return response.data as Map<String, dynamic>;
+    } catch (e) {
+      print("createAds error: $e");
+      rethrow;
+    }
+  }
 
   /// get price
   static Future<String> getPrice(Map<String, dynamic> data) async {
@@ -51,15 +57,19 @@ class C2CApi {
     }
   }
 
-  // /// Edit ad
-  // static Future<void> editAds(Map<String, dynamic> data) async {
-  //   try {
-  //     await ApiClient.dio.post('/core/v1/ads/edit_ads', data);
-  //   } catch (e) {
-  //     e.printError();
-  //     rethrow;
-  //   }
-  // }
+  /// Edit ad
+  static Future<Map<String, dynamic>> editAds(Map<String, dynamic> data) async {
+    try {
+      final response = await ApiClient.dio.post(
+        '/core/v1/ads/edit_ads',
+        data: data,
+      );
+      return response.data as Map<String, dynamic>;
+    } catch (e) {
+      print("editAds error: $e");
+      rethrow;
+    }
+  }
 
   static Future<AdsHomeRes> getOtherUserAdsHome(String master) async {
     try {

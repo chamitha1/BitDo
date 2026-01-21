@@ -1,6 +1,20 @@
 import 'dart:async';
 
 class CommonUtils {
+  /// Hide bank card number
+  static String maskBankno(String text, {int remainLength = 4}) {
+    if (text.isEmpty) return '';
+
+    final cleaned = text.replaceAll(' ', '');
+    if (cleaned.length <= remainLength) return cleaned;
+
+    final starLength = cleaned.length - remainLength;
+    final stars = '*' * starLength;
+    final visible = cleaned.substring(cleaned.length - remainLength);
+
+    return '${stars.replaceAllMapped(RegExp('.{4}'), (m) => '${m.group(0)} ').trim()} $visible';
+  }
+
   /// Get currency symbol
   static String getUnit(String currency) {
     if (currency == 'CNY') {
