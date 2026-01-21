@@ -1,9 +1,12 @@
 import 'package:BitOwi/api/account_api.dart';
 import 'package:BitOwi/api/c2c_api.dart';
 import 'package:BitOwi/api/common_api.dart';
+import 'package:BitOwi/config/routes.dart';
 import 'package:BitOwi/core/theme/app_input_decorations.dart';
 import 'package:BitOwi/core/widgets/app_text.dart';
 import 'package:BitOwi/core/widgets/common_appbar.dart';
+import 'package:BitOwi/core/widgets/common_bottom_sheets.dart';
+import 'package:BitOwi/core/widgets/common_image.dart';
 import 'package:BitOwi/core/widgets/custom_snackbar.dart';
 import 'package:BitOwi/core/widgets/primary_button.dart';
 import 'package:BitOwi/core/widgets/soft_circular_loader.dart';
@@ -12,6 +15,7 @@ import 'package:BitOwi/models/coin_list_res.dart';
 import 'package:BitOwi/models/dict.dart';
 import 'package:BitOwi/utils/common_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:lazy_load_indexed_stack/lazy_load_indexed_stack.dart';
 
@@ -37,9 +41,7 @@ class _PostAdsPageState extends State<PostAdsPage> {
 
   final TextEditingController premiumController = TextEditingController();
   final TextEditingController highestPriceController = TextEditingController();
-  final TextEditingController priceController = TextEditingController(
-    text: '473,288,835,774.967',
-  );
+  final TextEditingController priceController = TextEditingController(text: '');
 
   List<CoinListRes> coinList = [];
   int coinIndex = 0;
@@ -48,7 +50,7 @@ class _PostAdsPageState extends State<PostAdsPage> {
   int currencyIndex = 0;
 
   List<BankcardListRes> bankCardList = [];
-  int bankCardIndex = -1;
+  int bankCardSelectedIndex = -1; // -1 means nothing selected
 
   void onPremiumRateChange(String value) {
     if (!value.isNum) {
@@ -92,9 +94,6 @@ class _PostAdsPageState extends State<PostAdsPage> {
 
   final TextEditingController minLimitController = TextEditingController();
   final TextEditingController maxLimitController = TextEditingController();
-
- String? selectedPaymentMethod; // 'bank_card' | 'airtel'
-int? selectedBankCardIndex;
 
   // ! ------ step 3 ------
 
@@ -182,7 +181,7 @@ int? selectedBankCardIndex;
       //   }
       //   minLimitController.text = adsInfo.minTrade;
       //   maxLimitController.text = adsInfo.maxTrade;
-      //   bankCardIndex = bankCardList.indexWhere(
+      //   bankCardSelectedIndex = bankCardList.indexWhere(
       //     (element) => element.id == adsInfo.bankcardId,
       //   );
       //   remarkController.text = adsInfo.leaveMessage;
@@ -308,7 +307,7 @@ int? selectedBankCardIndex;
       //     message: 'Maximum must be greater than minimum',
       //   );
       // }
-      else if (bankCardIndex < 0) {
+      else if (bankCardSelectedIndex < 0) {
         CustomSnackbar.showSimpleValidation(
           message: 'Please choose a payment method',
         );
@@ -332,9 +331,10 @@ int? selectedBankCardIndex;
       //     message: 'Please Add time slot',
       //   );
       // }
-      else {
-        // _submitAd();
-        // TODO: submit
+      else if (openHour.isEmpty) {
+        CustomSnackbar.showSimpleValidation(message: 'Please Add time slot');
+      } else {
+        _submitAd();
       }
     }
   }
@@ -364,7 +364,7 @@ int? selectedBankCardIndex;
           max.isEmpty ||
           double.tryParse(max) == null ||
           double.parse(max) < double.parse(min) ||
-          selectedPaymentMethod == null;
+          bankCardSelectedIndex < 0;
     }
 
     /// STEP 3
@@ -382,6 +382,110 @@ int? selectedBankCardIndex;
   void onPrevStepTap() {
     hideKeyboard();
     setState(() => currentStep--);
+  }
+
+  Future<void> _submitAd([bool saveDraft = false]) async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      String publishType = '';
+      if (id.isNotEmpty) {
+        //todo
+        // publishType = status == '1' ? '3' : '2';
+      } else {
+        publishType = saveDraft ? "0" : "1";
+      }
+      final params = {
+        "publishType": publishType,
+
+        // BUY / SELL
+        "tradeType": typeIndex, // 0 = buy, 1 = sell
+        // COIN & CURRENCY
+        "tradeCoin": coinList[coinIndex].symbol,
+        "tradeCurrency": currencyList[currencyIndex].key,
+
+        // FLAGS
+        "onlyTrust": 0,
+
+        // PRICE
+        "premiumRate": premiumController.text.isEmpty
+            ? 0
+            : num.parse(premiumController.text) / 100,
+
+        "protectPrice": highestPriceController.text,
+
+        // AMOUNTS
+        "totalCount": totalQuantityController.text,
+        "minTrade": minLimitController.text,
+        "maxTrade": maxLimitController.text,
+
+        // PAYMENT METHOD
+        "bankcardId": bankCardList[bankCardSelectedIndex].id,
+
+        // COMMENT
+        "leaveMessage": commentController.text,
+
+        // OPEN HOUR
+        "displayTime": openHour == 'any'
+            ? []
+            : [
+                // TODO: fill when you implement custom time slots
+                // {
+                //   "week": x,
+                //   "startTime": y,
+                //   "endTime": z,
+                // }
+              ],
+      };
+      debugPrint("🚀👘 _submitAd params : ${params}");
+
+      if (id.isEmpty) {
+        final resCreate = await C2CApi.createAds(params);
+        // BACKEND-LEVEL ERROR (even though HTTP = 200)
+        if (resCreate['code'] != '200') {
+          CustomSnackbar.showError(
+            title: "Error",
+            message: resCreate['errorMsg'] ?? 'Operation failed',
+          );
+          return;
+        } else {
+          // SUCCESS
+          CustomSnackbar.showSuccess(
+            title: "Success",
+            message: "Ad created successfully",
+          );
+        }
+
+        // EventBusUtil.fireAdsEdit();
+      } else {
+        final resEdit = await C2CApi.editAds({...params, "id": id});
+
+        // BACKEND-LEVEL ERROR (even though HTTP = 200)
+        if (resEdit['code'] != '200') {
+          CustomSnackbar.showError(
+            title: "Error",
+            message: resEdit['errorMsg'] ?? 'Operation failed',
+          );
+          return;
+        } else {
+          // SUCCESS
+          CustomSnackbar.showSuccess(
+            title: "Success",
+            message: "Ad updated successfully",
+          );
+        }
+        // EventBusUtil.fireAdsEdit();
+      }
+      Get.back(closeOverlays: true);
+    } catch (e) {
+      print("_submitAd error: $e");
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -617,10 +721,7 @@ int? selectedBankCardIndex;
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
         children: [
-          Text(
-            text,
-            style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
-          ),
+          AppText.p3Regular(text, color: Color(0xFF2E3D5B)),
           if (onInfo != null) ...[
             const SizedBox(width: 4),
             GestureDetector(
@@ -904,82 +1005,137 @@ int? selectedBankCardIndex;
 
         /// PAYMENT METHOD
         _buildLabel("Payment Method"),
-
-        _paymentTile(
-          id: 'card',
-          title: 'Bank Card (**** **** 7654)',
-          icon: Icons.credit_card,
-        ),
-
+        const SizedBox(height: 4),
+        ..._paymentMethodList(),
         const SizedBox(height: 12),
-
-        _paymentTile(
-          id: 'airtel',
-          title: 'Airtel Money',
-          icon: Icons.account_balance_wallet,
-        ),
-
-        const SizedBox(height: 16),
-
-        GestureDetector(
-          onTap: () {
-            // add payment method
-          },
-          child: Row(
-            children: const [
-              Icon(Icons.add_circle_outline, color: Color(0xFF1D5DE5)),
-              SizedBox(width: 8),
-              Text(
-                "Add Payment Method",
-                style: TextStyle(
-                  color: Color(0xFF1D5DE5),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
+        _addPaymentMethod(),
+        const SizedBox(height: 12),
       ],
     );
   }
 
-  Widget _paymentTile({
-    required String id,
-    required String title,
-    required IconData icon,
-  }) {
-    final selected = selectedPaymentMethod == id;
+  List<Widget> _paymentMethodList() {
+    return List.generate(bankCardList.length, (index) {
+      final card = bankCardList[index];
+      final selected = bankCardSelectedIndex == index;
 
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedPaymentMethod = id;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: selected ? const Color(0xFFEFF6FF) : Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: selected ? const Color(0xFF1D5DE5) : const Color(0xFFE5E7EB),
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: selected ? const Color(0xFF1D5DE5) : Colors.grey),
-            const SizedBox(width: 12),
-            Expanded(child: Text(title)),
-            Icon(
-              selected ? Icons.radio_button_checked : Icons.radio_button_off,
+      return GestureDetector(
+        onTap: () {
+          setState(() {
+            bankCardSelectedIndex = index;
+          });
+        },
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: selected ? const Color(0xFFE8EFFF) : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
               color: selected
                   ? const Color(0xFF1D5DE5)
-                  : const Color(0xFF9CA3AF),
+                  : const Color(0xFFECEFF5),
+              width: selected ? 2 : 1,
             ),
-          ],
+          ),
+          child: Row(
+            children: [
+              /// Left icon
+              _paymentIcon(card),
+              const SizedBox(width: 12),
+
+              /// Title
+              Expanded(
+                child: Text(
+                  _cardTitle(card),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+
+              /// Radio
+              Icon(
+                selected ? Icons.radio_button_checked : Icons.radio_button_off,
+                color: selected
+                    ? const Color(0xFF1D5DE5)
+                    : const Color(0xFFCBD5E1),
+                size: 22,
+              ),
+            ],
+          ),
         ),
+      );
+    });
+  }
+
+  Widget _paymentIcon(BankcardListRes card) {
+    return card.pic == null
+        ? SvgPicture.asset(
+            'assets/icons/profile_page/bankcard.svg',
+            width: 32,
+            height: 32,
+          )
+        : ClipOval(child: CommonImage(card.pic ?? '', width: 32, height: 32));
+  }
+
+  String _cardTitle(BankcardListRes card) {
+    final masked = CommonUtils.maskBankno(
+      card.bankcardNumber ?? card.bindMobile ?? '',
+    );
+
+    return '${card.bankName} ($masked)';
+  }
+
+  Widget _addPaymentMethod() {
+    return GestureDetector(
+      onTap: () async {
+        // Get.toNamed(Routes.paymentMethodsPage);
+        final result = await CommonBottomSheets.showPaymentMethodBottomSheet();
+        if (result == 0) {
+          // Bank Card flow
+          final refreshed = await Get.toNamed(Routes.addBankCardPage);
+          if (refreshed == true) {
+            CustomSnackbar.showSuccess(
+              title: "Success",
+              message: "Bank card added successfully",
+            );
+            await refrershGetBankCardList();
+          }
+        } else if (result == 1) {
+          // Mobile Money flow
+          final refreshed = await Get.toNamed(Routes.addMobileMoneyPage);
+          if (refreshed == true) {
+            CustomSnackbar.showSuccess(
+              title: "Success",
+              message: "Mobile money updated successfully",
+            );
+            await refrershGetBankCardList();
+          }
+        }
+      },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.add_circle_outline_rounded, color: Color(0xFF1D5DE5)),
+          SizedBox(width: 8),
+          AppText.p2Medium('Add Payment Method', color: Color(0xFF1D5DE5)),
+        ],
       ),
     );
+  }
+
+  Future<void> refrershGetBankCardList() async {
+    try {
+      final resList = await AccountApi.getBankCardList();
+      if (!mounted) return;
+      setState(() {
+        bankCardList = resList;
+      });
+    } catch (e) {
+      print("getBankCardList getList refresh error: $e");
+    }
   }
 
   //! ----------------- step 3 content -----------------
@@ -998,6 +1154,7 @@ int? selectedBankCardIndex;
                 "Selling USDT with quick confirmation\n"
                 "Secure escrow • No delays • Verified merchant",
           ),
+          onChanged: (_) => setState(() {}),
         ),
 
         const SizedBox(height: 20),
