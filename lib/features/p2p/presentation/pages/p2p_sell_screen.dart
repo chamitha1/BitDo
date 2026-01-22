@@ -136,162 +136,7 @@ class _P2PSellScreenState extends State<P2PSellScreen> {
     return rate.toStringAsFixed(1);
   }
 
-  Future<void> _showPaymentMethodBottomSheet() async {
-    if (bankcardList.isEmpty) {
-      // Show message if no payment methods
-      Get.snackbar(
-        'No Payment Methods',
-        'Please add a payment method first',
-        snackPosition: SnackPosition.TOP,
-      );
-      return;
-    }
 
-    await showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) {
-        return Container(
-          padding: const EdgeInsets.only(top: 12),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Drag handle
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFB9C6E2),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              // Header
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 20,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "Select Payment Method",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: const Icon(
-                        Icons.close,
-                        color: Color(0xFF94A3B8),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Payment methods list
-              Flexible(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  itemCount: bankcardList.length,
-                  itemBuilder: (context, index) {
-                    final card = bankcardList[index];
-                    final isSelected = selectedBankcard?.id == card.id;
-                    
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          selectedBankcard = card;
-                        });
-                        Navigator.pop(context);
-                      },
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: isSelected
-                                ? const Color(0xFF1D5DE5)
-                                : const Color(0xFFECEFF5),
-                            width: 1.2,
-                          ),
-                          color: Colors.white,
-                        ),
-                        child: Row(
-                          children: [
-                            // Bank icon or image
-                            Container(
-                              width: 44,
-                              height: 44,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFFFBF6),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(
-                                Icons.account_balance,
-                                color: Color(0xFFFFAD4F),
-                                size: 24,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            // Bank details
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    card.bankName ?? 'Bank Card',
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: Color(0xFF151E2F),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    card.bankcardNumber != null
-                                        ? '****${card.bankcardNumber!.substring(card.bankcardNumber!.length - 4)}'
-                                        : card.bindMobile ?? '',
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Color(0xFF717F9A),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            // Selection indicator
-                            Icon(
-                              isSelected
-                                  ? Icons.radio_button_checked
-                                  : Icons.radio_button_off_outlined,
-                              color: isSelected
-                                  ? const Color(0xFF1D5DE5)
-                                  : const Color(0xFFDAE0EE),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 40),
-            ],
-          ),
-        );
-      },
-    );
-  }
 
   Future<void> _onSellTap() async {
     if (adsDetail == null || amount.isEmpty || selectedBankcard == null) {
@@ -670,7 +515,17 @@ class _P2PSellScreenState extends State<P2PSellScreen> {
 
   Widget _buildPaymentMethodDropdown() {
     return GestureDetector(
-      onTap: _showPaymentMethodBottomSheet,
+      onTap: () async {
+        final result = await Get.toNamed(
+          Routes.paymentMethodsPage,
+          arguments: {'isSelectionMode': true},
+        );
+        if (result != null && result is BankcardListRes) {
+          setState(() {
+            selectedBankcard = result;
+          });
+        }
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(

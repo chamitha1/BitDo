@@ -27,6 +27,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
   late EasyRefreshController _controller;
   // late StreamSubscription<BankcardEditEvent> beStream;
   // bool canChose = false;
+  bool isSelectionMode = false;
   bool isEnd = false;
   bool isLoading = false;
 
@@ -34,16 +35,16 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
   void initState() {
     super.initState();
     _controller = EasyRefreshController(controlFinishRefresh: true);
-    // beStream = EventBusUtil.listenBankcardEdit((event) {
+    final args = Get.arguments;
+    if (args != null && args is Map && args['isSelectionMode'] == true) {
+      isSelectionMode = true;
+    }
     getBankCardList();
-    // });
-    // canChose = Get.parameters['chose'] == '1';
   }
 
   @override
   void dispose() {
     _controller.dispose();
-    // beStream.cancel();
     super.dispose();
   }
 
@@ -77,7 +78,10 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7FB),
-      appBar: CommonAppBar(title: "Payment Methods", onBack: () => Get.back()),
+      appBar: CommonAppBar(
+        title: isSelectionMode ? "Select Payment Method" : "Payment Methods",
+        onBack: () => Get.back(),
+      ),
       body: SafeArea(
         top: false,
         child: Container(
@@ -90,8 +94,6 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
                 child: EasyRefresh(
                   controller: _controller,
                   onRefresh: getBankCardList,
-                  // refreshOnStart: true,
-                  // onLoad: onLoad,
                   child: isLoading
                       ? const SoftCircularLoader()
                       : isEmpty
@@ -118,129 +120,135 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
   }
 
   Widget buildPaymentMethodCard(BankcardListRes item, int index) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 18),
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Left accent bar
-          Container(
-            width: 7,
-            height: 30,
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFAD4F),
-              borderRadius: BorderRadius.only(
-                topRight: Radius.circular(7),
-                bottomRight: Radius.circular(7),
-              ),
+    return GestureDetector(
+      onTap: () {
+        if (isSelectionMode) {
+          Get.back(result: item);
+        }
+      },
+      child: Container(
+        margin: EdgeInsets.only(bottom: 18),
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
             ),
-          ),
-          const SizedBox(width: 14),
-          // Bank logo
-          if (item.pic != null) ...[
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: item.pic == null
-                  ? Image.asset(
-                      'assets/icons/profile_page/bankcard.png',
-                      width: 56,
-                      height: 56,
-                      fit: BoxFit.fill,
-                    )
-                  : CommonImage(
-                      item.pic ?? '',
-                      fit: BoxFit.cover,
-                      width: 56,
-                      height: 56,
-                    ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Left accent bar
+            Container(
+              width: 7,
+              height: 30,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFAD4F),
+                borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(7),
+                  bottomRight: Radius.circular(7),
+                ),
+              ),
             ),
             const SizedBox(width: 14),
-          ],
-          // Bank details
-          // Details
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    // name
-                    Flexible(
-                      child: Text(
-                        item.bankName ?? '--',
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF151E2F),
+            // Bank logo
+            if (item.pic != null) ...[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: item.pic == null
+                    ? Image.asset(
+                        'assets/icons/profile_page/bankcard.png',
+                        width: 56,
+                        height: 56,
+                        fit: BoxFit.fill,
+                      )
+                    : CommonImage(
+                        item.pic ?? '',
+                        fit: BoxFit.cover,
+                        width: 56,
+                        height: 56,
+                      ),
+              ),
+              const SizedBox(width: 14),
+            ],
+            // Bank details
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      // name
+                      Flexible(
+                        child: Text(
+                          item.bankName ?? '--',
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF151E2F),
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    // currency
-                    if (item.currency != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
+                      const SizedBox(width: 8),
+                      // currency
+                      if (item.currency != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEAF9F0),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: AppText.p4Medium(
+                            item.currency ?? '',
+                            color: Color(0xFF40A372),
+                          ),
                         ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFEAF9F0),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: AppText.p4Medium(
-                          item.currency ?? '',
-                          color: Color(0xFF40A372),
-                        ),
-                      ),
-                    const SizedBox(width: 8),
-                  ],
-                ),
-                const SizedBox(height: 6),
+                      const SizedBox(width: 8),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
 
-                // card/mobile number
-                AppText.p3Medium(
-                  item.bankcardNumber ?? item.bindMobile ?? '',
-                  color: Color(0xFF717F9A),
+                  // card/mobile number
+                  AppText.p3Medium(
+                    item.bankcardNumber ?? item.bindMobile ?? '',
+                    color: Color(0xFF717F9A),
+                  ),
+                ],
+              ),
+            ),
+            // Actions
+            Row(
+              children: [
+                _actionIcon(
+                  asset: 'assets/icons/profile_page/trash_bin.svg',
+                  bgColor: const Color(0xFFFFF1F1),
+                  iconColor: const Color(0xFFFF5A5A),
+                  onTap: () async {
+                    onDeletePaymentMethod(item);
+                  },
                 ),
+                const SizedBox(width: 8),
+                _actionIcon(
+                  asset: 'assets/icons/profile_page/edit_pencil.svg',
+                  bgColor: const Color(0xFFF1F4FA),
+                  iconColor: const Color(0xFF64748B),
+                  onTap: () async {
+                    await onEditPaymentMethod(item);
+                  },
+                ),
+                SizedBox(width: 16.0),
               ],
             ),
-          ),
-          // Actions
-          Row(
-            children: [
-              _actionIcon(
-                asset: 'assets/icons/profile_page/trash_bin.svg',
-                bgColor: const Color(0xFFFFF1F1),
-                iconColor: const Color(0xFFFF5A5A),
-                onTap: () async {
-                  onDeletePaymentMethod(item);
-                },
-              ),
-              const SizedBox(width: 8),
-              _actionIcon(
-                asset: 'assets/icons/profile_page/edit_pencil.svg',
-                bgColor: const Color(0xFFF1F4FA),
-                iconColor: const Color(0xFF64748B),
-                onTap: () async {
-                  await onEditPaymentMethod(item);
-                },
-              ),
-              SizedBox(width: 16.0),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

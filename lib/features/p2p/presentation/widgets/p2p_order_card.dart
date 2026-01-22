@@ -1,5 +1,6 @@
 import 'package:BitOwi/features/p2p/presentation/pages/p2p_buy_screen.dart';
 import 'package:BitOwi/features/p2p/presentation/pages/p2p_sell_screen.dart';
+import 'package:BitOwi/features/p2p/presentation/widgets/trade_type_badge.dart';
 import 'package:BitOwi/models/ads_page_res.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -199,28 +200,35 @@ class P2POrderCard extends StatelessWidget {
           const SizedBox(height: 16),
           // Price
           Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                "${_getCurrencySymbol(adItem?.tradeCurrency)} ${double.tryParse(adItem?.truePrice ?? '0')?.toStringAsFixed(2)}",
-                style: const TextStyle(
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 20,
-                  color: Color(0xFF151E2F),
-                ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    "${_getCurrencySymbol(adItem?.tradeCurrency)} ${double.tryParse(adItem?.truePrice ?? '0')?.toStringAsFixed(2)}",
+                    style: const TextStyle(
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w700,
+                      fontSize: 20,
+                      color: Color(0xFF151E2F),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Per ${adItem?.tradeCoin ?? 'USDT'}",
+                    style: const TextStyle(
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w400,
+                      fontSize: 12,
+                      color: Color(0xFF717F9A),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              Text(
-                "Per ${adItem?.tradeCoin ?? 'USDT'}",
-                style: const TextStyle(
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w400,
-                  fontSize: 12,
-                  color: Color(0xFF717F9A),
-                ),
-              ),
+              if (adItem != null)
+                TradeTypeBadge(isBuy: adItem!.tradeType == '0'),
             ],
           ),
           const SizedBox(height: 16),
