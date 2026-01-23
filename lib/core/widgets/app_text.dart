@@ -56,8 +56,9 @@ class AppText extends StatelessWidget {
     return AppText(text, style: AppTextStyles.p3Regular, color: color);
   }
 
-  factory AppText.p3Medium(String text, {Color? color}) {
-    return AppText(text, style: AppTextStyles.p3Medium, color: color);
+  factory AppText.p3Medium(String text, {Color? color, TextOverflow? overflow}) {
+    return AppText(text,
+        style: AppTextStyles.p3Medium, color: color, overflow: overflow);
   }
 
   // Paragraph / P4

@@ -448,111 +448,106 @@ class _MyAdsPageState extends State<MyAdsPage> {
             ],
           ),
           const SizedBox(height: 12),
-          //* Total and Limit
+          // Info Rows (Total & Limit)
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AppText.p3Regular("Total", color: Color(0xFF929EB8)),
-                    const SizedBox(height: 2),
-                    AppText.p3Medium("${ad.leftCount} ${ad.tradeCoin}"),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AppText.p3Regular("Limit", color: Color(0xFF929EB8)),
-                    const SizedBox(height: 2),
-                    AppText.p3Medium(
-                      "${CommonUtils.getUnit(ad.tradeCurrency)}${ad.minTrade}–${CommonUtils.getUnit(ad.tradeCurrency)}${ad.maxTrade}",
+                    // Total Row
+                    Row(
+                      children: [
+                        AppText.p3Regular(
+                          "Total: ",
+                          color: const Color(0xFF929EB8),
+                        ),
+                        AppText.p3Medium("${ad.leftCount} ${ad.tradeCoin}"),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    // Limit Row
+                    Row(
+                      children: [
+                        AppText.p3Regular(
+                          "Limit: ",
+                          color: const Color(0xFF929EB8),
+                        ),
+                        Expanded(
+                          child: AppText.p3Medium(
+                            "${CommonUtils.getUnit(ad.tradeCurrency)}${ad.minTrade}–${CommonUtils.getUnit(ad.tradeCurrency)}${ad.maxTrade}",
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 12),
 
-          //* Payment Type
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: hasBank
-                  ? const Color(0xFFFDF4F5)
-                  : const Color(0xFFFFFBF6),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: AppText.p4Medium(
-              payTypeDisplay,
-              color: hasBank
-                  ? const Color(0xFFE74C3C)
-                  : const Color(0xFFFF9B29),
-            ),
-          ),
-          const SizedBox(height: 4),
-          if (selectedTab != 2) Divider(color: Color(0xFFECEFF5), height: 20),
-          //* Action Buttons
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
               if (selectedTab == 0) ...[
-                // Draft: Edit and Post buttons
-                OutlinedButton.icon(
-                  onPressed: () {
-                    onEditTap(ad);
-                  },
-                  icon: SvgPicture.asset(
-                    'assets/icons/profile_page/edit.svg',
-                    width: 16,
-                    height: 16,
-                  ),
-                  label: AppText.p3Medium('Edit', color: Color(0xFF1D5DE5)),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF1D5DE5),
-                    side: const BorderSide(color: Color(0xFF1D5DE5)),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
                 const SizedBox(width: 8),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    onPostTap(ad);
-                  },
-                  icon: SvgPicture.asset(
-                    'assets/icons/profile_page/post.svg',
-                    width: 16,
-                    height: 16,
-                  ),
-                  label: AppText.p3Medium('Post', color: Colors.white),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1D5DE5),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    // Post Button
+                    ElevatedButton.icon(
+                      onPressed: () => onPostTap(ad),
+                      icon: SvgPicture.asset(
+                        'assets/icons/profile_page/post.svg',
+                        width: 16,
+                        height: 16,
+                      ),
+                      label: AppText.p3Medium('Post', color: Colors.white),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1D5DE5),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        minimumSize: const Size(90, 36),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                    const SizedBox(height: 8),
+                    // Edit Button
+                    OutlinedButton.icon(
+                      onPressed: () => onEditTap(ad),
+                      icon: SvgPicture.asset(
+                        'assets/icons/profile_page/edit.svg',
+                        width: 16,
+                        height: 16,
+                      ),
+                      label: AppText.p3Medium(
+                        'Edit',
+                        color: const Color(0xFF1D5DE5),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF1D5DE5),
+                        side: const BorderSide(color: Color(0xFF1D5DE5)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        minimumSize: const Size(90, 36),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ] else if (selectedTab == 1) ...[
-                // Posted: Off buttons
+                const SizedBox(width: 8),
+                // Off Button
                 ElevatedButton.icon(
-                  onPressed: () {
-                    offDownTap(ad);
-                  },
+                  onPressed: () => offDownTap(ad),
                   icon: SvgPicture.asset(
                     'assets/icons/profile_page/toggle_off_circle.svg',
                     width: 16,
@@ -569,10 +564,35 @@ class _MyAdsPageState extends State<MyAdsPage> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
+                    minimumSize: const Size(90, 36),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                 ),
               ],
-              // Archived tab (selectedTab == 2): No buttons shown
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Divider
+          const Divider(color: Color(0xFFECEFF5), height: 1),
+          const SizedBox(height: 16),
+
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: hasBank
+                      ? const Color(0xFFFDF4F5)
+                      : const Color(0xFFFFFBF6),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: AppText.p4Medium(
+                  payTypeDisplay,
+                  color: hasBank
+                      ? const Color(0xFFE74C3C)
+                      : const Color(0xFFFF9B29),
+                ),
+              ),
             ],
           ),
         ],
