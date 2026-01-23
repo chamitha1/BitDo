@@ -614,109 +614,127 @@ class _MyAdsPageState extends State<MyAdsPage> {
   }
 
   // Post ad (Draft → Posted)
-  void onPostTap(AdsMyPageRes ad) {
-    //todo:
-    // if (!PlatformUtils().isMobile) {
-    //   DownloadModal.showModal(context);
-    //   return;
-    // }
-    print("Post ad: ${ad.id}");
+  void onPostTap(AdsMyPageRes ad) async {
+    if (kIsWeb) {
+      await showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        builder: (_) => const DownloadAppBottomSheet(),
+      );
+    } else {
+      //todo:
+      // if (!PlatformUtils().isMobile) {
+      //   DownloadModal.showModal(context);
+      //   return;
+      // }
+      print("Post ad: ${ad.id}");
 
-    showCommonConfirmDialog(
-      context,
-      title: "Post This Ad?",
-      message:
-          "Once posted, this ad will be visible to other users and open for trading.",
-      primaryText: "Confirm",
-      secondaryText: "Cancel",
-      onPrimary: () async {
-        if (isLoading) return;
-
-        setState(() {
-          isLoading = true;
-        });
-
-        try {
-          await C2CApi.upDownAds(ad.id, "1"); // 1 = on shelf
+      showCommonConfirmDialog(
+        context,
+        title: "Post This Ad?",
+        message:
+            "Once posted, this ad will be visible to other users and open for trading.",
+        primaryText: "Confirm",
+        secondaryText: "Cancel",
+        onPrimary: () async {
+          if (isLoading) return;
 
           setState(() {
-            list.removeWhere((e) => e.id == ad.id);
+            isLoading = true;
           });
 
-          CustomSnackbar.showSuccess(
-            title: "Success",
-            message: "Ad posted successfully",
-          );
-        } catch (e) {
-          debugPrint("Post ad error: $e");
+          try {
+            await C2CApi.upDownAds(ad.id, "1"); // 1 = on shelf
 
-          CustomSnackbar.showError(
-            title: "Error",
-            message: "Something went wrong",
-          );
-        } finally {
-          if (mounted) {
             setState(() {
-              isLoading = false;
+              list.removeWhere((e) => e.id == ad.id);
             });
+
+            CustomSnackbar.showSuccess(
+              title: "Success",
+              message: "Ad posted successfully",
+            );
+          } catch (e) {
+            debugPrint("Post ad error: $e");
+
+            CustomSnackbar.showError(
+              title: "Error",
+              message: "Something went wrong",
+            );
+          } finally {
+            if (mounted) {
+              setState(() {
+                isLoading = false;
+              });
+            }
           }
-        }
-      },
-      onSecondary: () {
-        debugPrint("User cancelled post ad");
-      },
-    );
+        },
+        onSecondary: () {
+          debugPrint("User cancelled post ad");
+        },
+      );
+    }
   }
 
   // Archive ad (Posted → Archived)
-  void offDownTap(AdsMyPageRes ad) {
-    //todo:
-    // if (!PlatformUtils().isMobile) {
-    //   DownloadModal.showModal(context);
-    //   return;
-    // }
-    print("Turn off ad: ${ad.id}");
+  void offDownTap(AdsMyPageRes ad) async {
+    if (kIsWeb) {
+      await showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        builder: (_) => const DownloadAppBottomSheet(),
+      );
+    } else {
+      //todo:
+      // if (!PlatformUtils().isMobile) {
+      //   DownloadModal.showModal(context);
+      //   return;
+      // }
+      print("Turn off ad: ${ad.id}");
 
-    showCommonConfirmDialog(
-      context,
-      title: "Confirmation to Off",
-      message:
-          "This ad will be moved to Archived and will no longer be visible to other users. Once archived, this action cannot be undone",
-      primaryText: "Confirm",
-      secondaryText: "Cancel",
-      onPrimary: () async {
-        if (isLoading) return;
-        setState(() {
-          isLoading = true;
-        });
-
-        try {
-          await C2CApi.upDownAds(ad.id, "0");
+      showCommonConfirmDialog(
+        context,
+        title: "Confirmation to Off",
+        message:
+            "This ad will be moved to Archived and will no longer be visible to other users. Once archived, this action cannot be undone",
+        primaryText: "Confirm",
+        secondaryText: "Cancel",
+        onPrimary: () async {
+          if (isLoading) return;
           setState(() {
-            list.removeWhere((e) => e.id == ad.id);
+            isLoading = true;
           });
-          CustomSnackbar.showSuccess(
-            title: "Success",
-            message: "Ad turned off successfully",
-          );
-        } catch (e) {
-          debugPrint("Off ad error: $e");
-          CustomSnackbar.showError(
-            title: "Error",
-            message: "Something went wrong",
-          );
-        } finally {
-          if (mounted) {
+
+          try {
+            await C2CApi.upDownAds(ad.id, "0");
             setState(() {
-              isLoading = false;
+              list.removeWhere((e) => e.id == ad.id);
             });
+            CustomSnackbar.showSuccess(
+              title: "Success",
+              message: "Ad turned off successfully",
+            );
+          } catch (e) {
+            debugPrint("Off ad error: $e");
+            CustomSnackbar.showError(
+              title: "Error",
+              message: "Something went wrong",
+            );
+          } finally {
+            if (mounted) {
+              setState(() {
+                isLoading = false;
+              });
+            }
           }
-        }
-      },
-      onSecondary: () {
-        debugPrint("User cancelled off ad");
-      },
-    );
+        },
+        onSecondary: () {
+          debugPrint("User cancelled off ad");
+        },
+      );
+    }
   }
 
   void onEditTap(AdsMyPageRes ad) async {
