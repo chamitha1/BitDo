@@ -22,7 +22,10 @@ class P2POrderCard extends StatelessWidget {
     this.isBuy = true,
     this.adItem,
     this.onRefresh,
+    this.isMerchantProfile = false,
   });
+
+  final bool isMerchantProfile;
 
   @override
   Widget build(BuildContext context) {
@@ -322,7 +325,7 @@ class P2POrderCard extends StatelessWidget {
           Align(
             alignment: Alignment.centerRight,
             child: SizedBox(
-              width: 70,
+              width: isMerchantProfile ? 90 : 70,
               height: 36,
               child: Builder(
                 builder: (context) {
@@ -410,7 +413,7 @@ class P2POrderCard extends StatelessWidget {
 
                         const SizedBox(width: 4),
                         Text(
-                          isBuy ? "Buy" : "Sell",
+                          "${isBuy ? "Buy" : "Sell"}${isMerchantProfile ? " Ad" : ""}",
                           style: const TextStyle(
                             fontFamily: 'Inter',
                             fontWeight: FontWeight.w600,

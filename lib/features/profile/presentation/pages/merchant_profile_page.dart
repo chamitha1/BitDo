@@ -520,6 +520,7 @@ class _MerchantProfilePageState extends State<MerchantProfilePage> {
             adItem: ad,
             isBuy: isBuy,
             onRefresh: () => getAdsList(isRefresh: true),
+            isMerchantProfile: true,
           ),
         );
       }).toList(),
