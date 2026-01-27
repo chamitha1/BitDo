@@ -11,7 +11,6 @@ class SplashController extends GetxController {
   }
 
   Future<void> _checkStatus() async {
-
     await Future.delayed(const Duration(seconds: 2));
 
     // Check 1: Has Completed Onboarding?
@@ -31,11 +30,14 @@ class SplashController extends GetxController {
       if (isValid) {
         // Refresh user data globally before entering Home
         await UserController.to.loadUser();
+
+        await UserController.to.initIMForCurrentUser();
+
         Get.offAllNamed(Routes.home);
         return;
       } else {
         // Token expired, clear it safely (optional but good practice)
-        await StorageService.removeToken(); 
+        await StorageService.removeToken();
       }
     }
 

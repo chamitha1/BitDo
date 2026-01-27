@@ -8,9 +8,17 @@ class AppLogger {
     }
   }
 
-  static void e(Object message) {
+ // Error log
+  static void e(
+    Object error, {
+    StackTrace? stackTrace,
+  }) {
     if (!kReleaseMode) {
-      debugPrint('[ERROR] ${message.toString()}');
+      debugPrint('⛔ [ERROR] $error');
+
+      if (stackTrace != null) {
+        debugPrint('📌 StackTrace:\n$stackTrace');
+      }
     }
   }
 }

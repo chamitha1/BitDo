@@ -1,7 +1,9 @@
+import 'package:BitOwi/features/orders/chat/controllers/custom_sticker_package_controller.dart';
 import 'package:BitOwi/features/profile/presentation/controllers/settings_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -34,6 +36,15 @@ class BitOwi extends StatelessWidget {
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
 
+          builder: EasyLoading.init(
+            builder: (context, widget) {
+              return GestureDetector(
+                onTap: () => hideKeyboard(context),
+                child: widget,
+              );
+            },
+          ),
+
           translations: AppTranslations(),
           locale: Get.deviceLocale,
           fallbackLocale: AppTranslations.fallbackLocale,
@@ -48,6 +59,7 @@ class BitOwi extends StatelessWidget {
           initialBinding: BindingsBuilder(() {
             Get.put(UserController(), permanent: true);
             Get.put(SettingsController(), permanent: true);
+            Get.put(CustomStickerPackageController(), permanent: true);
           }),
           // home: null,
           initialRoute: Routes.splash,
@@ -55,5 +67,13 @@ class BitOwi extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+/// Click on another area of ​​the screen to hide the keyboard
+void hideKeyboard(BuildContext context) {
+  FocusScopeNode currentFocus = FocusScope.of(context);
+  if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
+    FocusManager.instance.primaryFocus?.unfocus();
   }
 }

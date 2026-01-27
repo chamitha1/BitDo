@@ -108,6 +108,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
         // Refresh user data in the global controller
         await UserController.to.loadUser();
+
+        await UserController.to.initIMForCurrentUser();
+
         Get.offAllNamed(Routes.home);
       } else {
         throw 'Login failed: ${data['errorMsg'] ?? 'Unknown'}';

@@ -96,9 +96,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               // Index 1: P2P
-              // const P2PPage(),
-              // // Index 2: Order
-              // const OrdersPage(),
+              const P2PPage(),
+              // Index 2: Order
+              const OrdersPage(),
               // Index 3: Profile
               const ProfileScreen(),
             ],
@@ -109,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
         currentIndex: _navIndex,
         onTap: (index) {
           setState(() => _navIndex = index);
-          if (index == 1) {
+          if (index == 3) {
             // Profile index
             Get.find<UserController>().fetchNotificationCount();
           }

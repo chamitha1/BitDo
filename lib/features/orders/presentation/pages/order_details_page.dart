@@ -1,4 +1,8 @@
+import 'package:BitOwi/core/widgets/app_text.dart';
+import 'package:BitOwi/features/p2p/presentation/widgets/download_app_bottom_sheet.dart';
+import 'package:BitOwi/features/profile/presentation/pages/chat.dart';
 import 'package:BitOwi/utils/app_logger.dart';
+import 'package:BitOwi/utils/im_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -11,6 +15,7 @@ import 'package:BitOwi/features/orders/presentation/widgets/notify_payment_dialo
 import 'package:BitOwi/features/orders/utils/order_helper.dart';
 import 'package:BitOwi/models/trade_order_detail_res.dart';
 import 'package:BitOwi/features/auth/presentation/controllers/user_controller.dart';
+import 'package:tencent_cloud_chat_uikit/ui/utils/platform.dart';
 
 class OrderDetailsPage extends StatefulWidget {
   final String orderId;
@@ -253,80 +258,107 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       ),
       actions: [
         // Chat
-        Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
-                color: Color(0xFFE8EFFF),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: SvgPicture.asset(
-                  'assets/icons/orders/messages.svg',
-                  width: 20,
-                  height: 20,
-                ),
-              ),
-            ),
-            Positioned(
-              right: -6,
-              top: -6,
-              child: Container(
-                padding: const EdgeInsets.all(2),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFE74C3C),
-                  shape: BoxShape.circle,
-                ),
-                constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
-                child: const Text(
-                  '12',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                    fontFamily: 'Inter',
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(width: 16),
+        // Stack(
+        //   clipBehavior: Clip.none,
+        //   children: [
+        //     Container(
+        //       width: 40,
+        //       height: 40,
+        //       decoration: const BoxDecoration(
+        //         color: Color(0xFFE8EFFF),
+        //         shape: BoxShape.circle,
+        //       ),
+        //       child: Center(
+        //         child: SvgPicture.asset(
+        //           'assets/icons/orders/messages.svg',
+        //           width: 20,
+        //           height: 20,
+        //         ),
+        //       ),
+        //     ),
+        //     Positioned(
+        //       right: -6,
+        //       top: -6,
+        //       child: Container(
+        //         padding: const EdgeInsets.all(2),
+        //         decoration: const BoxDecoration(
+        //           color: Color(0xFFE74C3C),
+        //           shape: BoxShape.circle,
+        //         ),
+        //         constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
+        //         child: const Text(
+        //           '12',
+        //           style: TextStyle(
+        //             color: Colors.white,
+        //             fontSize: 10,
+        //             fontWeight: FontWeight.w500,
+        //             fontFamily: 'Inter',
+        //           ),
+        //           textAlign: TextAlign.center,
+        //         ),
+        //       ),
+        //     ),
+        //   ],
+        // ),
+        // const SizedBox(width: 16),
         // Contact Button
-        Container(
-          height: 36,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF6F9FF),
-            border: Border.all(color: const Color(0xFF1D5DE5), width: 1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            children: [
-              SvgPicture.asset(
-                'assets/icons/orders/message-text.svg',
-                width: 16,
-                height: 16,
-                colorFilter: const ColorFilter.mode(
-                  Color(0xFF1D5DE5),
-                  BlendMode.srcIn,
+        InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: () async {
+            if (PlatformUtils().isMobile) {
+              // 🔹 Build group conversation ID
+              final String groupId = 'group_${widget.orderId}';
+
+              // 🔹 Fetch conversation from IM SDK
+              final res = await IMUtil.sdkInstance
+                  .getConversationManager()
+                  .getConversation(conversationID: groupId);
+
+              if (res.code == 0) {
+                final conversation = res.data;
+                if (conversation != null && context.mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          Chat(selectedConversation: conversation),
+                    ),
+                  );
+                }
+              }
+            } else {
+              // DownloadModal.showModal(context);
+              await showModalBottomSheet(
+                context: context,
+                backgroundColor: Colors.transparent,
+                isScrollControlled: true,
+                builder: (_) => const DownloadAppBottomSheet(),
+              );
+            }
+          },
+          child: Container(
+            height: 36,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF6F9FF),
+              border: Border.all(color: const Color(0xFF1D5DE5), width: 1.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                SvgPicture.asset(
+                  'assets/icons/chat/messages.svg',
+                  width: 16,
+                  height: 16,
+                  colorFilter: const ColorFilter.mode(
+                    Color(0xFF1D5DE5),
+                    BlendMode.srcIn,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 4),
-              const Text(
-                'Contact',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF1D5DE5),
-                  fontFamily: 'Inter',
-                ),
-              ),
-            ],
+                const SizedBox(width: 6),
+                AppText.p3Medium('Contact', color: Color(0xFF1D5DE5)),
+              ],
+            ),
           ),
         ),
         const SizedBox(width: 16),

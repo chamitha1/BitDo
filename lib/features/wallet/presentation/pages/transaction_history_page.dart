@@ -1,4 +1,5 @@
 import 'package:BitOwi/config/routes.dart';
+import 'package:BitOwi/features/auth/presentation/controllers/user_controller.dart';
 import 'package:BitOwi/features/wallet/presentation/controllers/transaction_history_controller.dart';
 
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
     TransactionHistoryController(),
   );
   final ScrollController _scrollController = ScrollController();
+  final userController = Get.find<UserController>();
 
   @override
   void initState() {
@@ -80,11 +82,16 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                     ),
                   ),
                   const Spacer(),
-                  // SvgPicture.asset(
-                  //   "assets/icons/home/headphones.svg",
-                  //   width: 28,
-                  //   height: 28,
-                  // ),
+                  GestureDetector(
+                    onTap: () async {
+                      await userController.customerServiceChatNavigate(context);
+                    },
+                    child: SvgPicture.asset(
+                      "assets/icons/home/headphones.svg",
+                      width: 24,
+                      height: 24,
+                    ),
+                  ),
                 ],
               ),
             ),

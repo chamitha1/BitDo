@@ -403,26 +403,14 @@ class _MyAdsPageState extends State<MyAdsPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text:
-                          "${CommonUtils.getUnit(ad.tradeCurrency)} ${ad.truePrice} ",
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF151E2F),
-                      ),
-                    ),
-                    const TextSpan(
-                      text: "Per USDT",
-                      style: TextStyle(fontSize: 12, color: Color(0xFF717F9A)),
-                    ),
-                  ],
+              Text(
+                "${CommonUtils.getUnit(ad.tradeCurrency)} ${ad.truePrice}",
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF151E2F),
                 ),
               ),
-
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(

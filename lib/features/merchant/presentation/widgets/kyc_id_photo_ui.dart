@@ -8,12 +8,11 @@ Widget buildIdUploadPlaceholder({
   required VoidCallback onPick,
 }) {
   return DottedBorder(
-    options: const RoundedRectDottedBorderOptions(
-      dashPattern: [2, 4],
-      strokeWidth: 1.5,
-      radius: Radius.circular(16),
-      color: Color(0xFFB9C6E2),
-    ),
+    dashPattern: const [2, 4],
+    strokeWidth: 1.5,
+    borderType: BorderType.RRect,
+    radius: const Radius.circular(16),
+    color: const Color(0xFFB9C6E2),
     child: Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(

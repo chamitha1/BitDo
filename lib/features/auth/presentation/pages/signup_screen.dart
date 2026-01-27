@@ -4,6 +4,7 @@ import 'package:BitOwi/constants/sms_constants.dart';
 import 'package:BitOwi/core/storage/storage_service.dart';
 import 'package:BitOwi/core/widgets/custom_snackbar.dart';
 import 'package:BitOwi/core/widgets/gradient_button.dart';
+import 'package:BitOwi/features/auth/presentation/controllers/user_controller.dart';
 import 'package:BitOwi/features/auth/presentation/pages/otp_bottom_sheet.dart';
 import 'package:BitOwi/features/rich_text_config.dart';
 import 'package:flutter/gestures.dart';
@@ -260,6 +261,12 @@ class _SignupScreenState extends State<SignupScreen> {
         final token = tokenData['token'] as String? ?? '';
 
         await StorageService.saveToken(token);
+
+        // Refresh user data in the global controller
+        await UserController.to.loadUser();
+
+        await UserController.to.initIMForCurrentUser();
+        
         await StorageService.saveUserName(_emailController!.text.trim());
 
         Get.offAllNamed(Routes.home);

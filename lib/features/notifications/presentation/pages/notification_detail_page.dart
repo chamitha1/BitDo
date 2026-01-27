@@ -3,8 +3,9 @@ import 'package:BitOwi/models/sms_model.dart';
 import 'package:BitOwi/utils/app_logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:get/get.dart';
-import 'package:flutter_html/flutter_html.dart';
+// import 'package:flutter_html/flutter_html.dart';
 
 class NotificationDetailPage extends StatefulWidget {
   final String id;
@@ -111,17 +112,26 @@ class _NotificationDetailPageState extends State<NotificationDetailPage> {
                 const SizedBox(height: 16),
                 const Divider(color: Color(0xFFEFF2F7)),
                 const SizedBox(height: 16),
-                Html(
-                  data: sms.content,
-                  style: {
-                    "body": Style(
-                      fontFamily: 'Inter',
-                      fontSize: FontSize(14),
-                      color: const Color(0xFF717F9A),
-                      margin: Margins.zero,
-                      padding: HtmlPaddings.zero,
-                    ),
-                  },
+                // Html(
+                //   data: sms.content,
+                //   style: {
+                //     "body": Style(
+                //       fontFamily: 'Inter',
+                //       fontSize: FontSize(14),
+                //       color: Colors.red,
+                //       margin: Margins.zero,
+                //       padding: HtmlPaddings.zero,
+                //     ),
+                //   },
+                // ),
+                // Required for tencent_cloud_chat_uikit compatibility / better than using flutter_html
+                HtmlWidget(
+                  sms.content,
+                  textStyle: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 14,
+                    color: Color(0xFF717F9A),
+                  ),
                 ),
               ],
             ),

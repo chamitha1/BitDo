@@ -1619,10 +1619,12 @@ class _PostAdsPageState extends State<PostAdsPage> {
               ),
               child: Theme(
                 data: Theme.of(context).copyWith(
-                  colorScheme: Theme.of(
-                    context,
-                  ).colorScheme.copyWith(primary: const Color(0xFF1D5DE5)),
+                  colorScheme: Theme.of(context).colorScheme.copyWith(
+                    primary: const Color(0xFF1D5DE5),
+                    surface: Colors.white,
+                  ),
                   timePickerTheme: const TimePickerThemeData(
+                    backgroundColor: Colors.white, // ✅ picker surface
                     // selected hour/minute box background
                     hourMinuteColor: Color(0xFFE8EFFF),
                     // selected hour/minute text
@@ -1634,6 +1636,7 @@ class _PostAdsPageState extends State<PostAdsPage> {
                     selectionColor: Color(0x331D5DE5), // optional, soft blue
                     selectionHandleColor: Color(0xFF1D5DE5),
                   ),
+                  dialogTheme: DialogThemeData(backgroundColor: Colors.white),
                 ),
                 child: child!,
               ),

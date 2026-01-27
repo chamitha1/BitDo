@@ -4,6 +4,7 @@ import 'package:BitOwi/core/widgets/common_image.dart';
 import 'package:BitOwi/features/address_book/presentation/pages/address_book_page.dart';
 import 'package:BitOwi/features/auth/presentation/controllers/user_controller.dart';
 import 'package:BitOwi/features/merchant/presentation/pages/user_kyc_information_page.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -31,11 +32,11 @@ class ProfileScreen extends StatelessWidget {
               SizedBox(height: 56, child: _buildTopBar(userController)),
               const SizedBox(height: 20),
               _buildProfileCard(userController),
-              // const SizedBox(height: 24),
-              // Padding(
-              //   padding: const EdgeInsets.symmetric(horizontal: 15.0),
-              //   child: _buildQuickActionsRow(),
-              // ),
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                child: _buildQuickActionsRow(context),
+              ),
               const SizedBox(height: 24),
               _buildMenuCards(context),
               const SizedBox(height: 40),
@@ -314,7 +315,8 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickActionsRow() {
+  Widget _buildQuickActionsRow(BuildContext context) {
+    final userController = Get.find<UserController>();
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -340,13 +342,16 @@ class ProfileScreen extends StatelessWidget {
           borderColor: const Color(0xFFD5F4E2),
           onTap: () => Get.toNamed(Routes.paymentMethodsPage),
         ),
-        // _buildQuickActionItem(
-        //   iconPath: 'assets/icons/profile_page/headphone.svg',
-        //   label: "Customer\nCare",
-        //   bgColor: const Color(0xFFF4E9FE),
-        //   borderColor: const Color(0xFFD8ABFC),
-        //   onTap: () {},
-        // ),
+        if (!kIsWeb)
+          _buildQuickActionItem(
+            iconPath: 'assets/icons/profile_page/headphone.svg',
+            label: "Customer\nCare",
+            bgColor: const Color(0xFFF4E9FE),
+            borderColor: const Color(0xFFD8ABFC),
+            onTap: () async {
+              await userController.customerServiceChatNavigate(context);
+            },
+          ),
       ],
     );
   }

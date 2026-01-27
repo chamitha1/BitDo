@@ -1,12 +1,18 @@
+import 'package:BitOwi/config/im_config.dart';
 import 'package:BitOwi/core/storage/storage_service.dart';
 import 'package:BitOwi/api/c2c_api.dart';
 import 'package:BitOwi/api/user_api.dart';
 import 'package:BitOwi/api/common_api.dart';
+import 'package:BitOwi/core/widgets/custom_snackbar.dart';
+import 'package:BitOwi/features/p2p/presentation/widgets/download_app_bottom_sheet.dart';
+import 'package:BitOwi/features/profile/presentation/pages/chat.dart';
 import 'package:BitOwi/utils/app_logger.dart';
+import 'package:BitOwi/utils/im_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:BitOwi/models/ads_home_res.dart';
 import 'package:BitOwi/models/user_model.dart';
+import 'package:tencent_cloud_chat_uikit/ui/utils/platform.dart';
 
 class UserController extends GetxController {
   static UserController get to => Get.find();
@@ -110,6 +116,21 @@ class UserController extends GetxController {
     userRealName.value = realName;
   }
 
+  Future<void> initIMForCurrentUser() async {
+    final currentUser = user.value;
+
+    if (currentUser == null) {
+      throw Exception("User load failed after login");
+    }
+    // Init + Login IM (MOBILE ONLY)
+    if (PlatformUtils().isMobile) {
+      debugPrint("💬 IMConfig.sdkappid: ${IMConfig.sdkappid}");
+
+      await IMUtil.initIMSDKAndAddIMListeners(currentUser.id!);
+      await IMUtil.loginIMUser(currentUser.id!);
+    }
+  }
+
   Future<void> fetchNotificationCount() async {
     try {
       AppLogger.d("Fetching notification count...");
@@ -157,8 +178,80 @@ class UserController extends GetxController {
     } finally {
       // Clear data regardless of API success
       await StorageService.removeToken();
+      await IMUtil.logoutIMUser();
       // Navigate to login
       Get.offAllNamed('/login');
+    }
+  }
+
+  ///chat get customerServiceUserID
+
+  String customerServiceUserID = ''; // Im customer service user id
+
+  Future<void> getServiceUserID() async {
+    try {
+      final res = await CommonApi.getConfig(type: 'system', key: 'im_url');
+      String value = res.data["im_url"] ?? '';
+      customerServiceUserID = value;
+    } catch (e) {
+      AppLogger.d("Error getServiceUserID: $e");
+    }
+  }
+
+  Future<void> customerServiceChatNavigate(BuildContext context) async {
+    if (customerServiceUserID.isEmpty) {
+      await getServiceUserID();
+    }
+
+    if (customerServiceUserID.isEmpty) {
+      debugPrint('❌ customerServiceUserID still empty');
+      CustomSnackbar.showError(
+        title: "Error",
+        message: "Customer Service Not Found",
+      );
+      return;
+    }
+
+    if (PlatformUtils().isMobile) {
+      debugPrint(
+        "💬🆔 userController.customerServiceUserID : $customerServiceUserID",
+      );
+      String conversationID = 'c2c_$customerServiceUserID';
+      debugPrint('💬🆔 Fetching conversation with ID: $conversationID');
+      final res = await IMUtil.sdkInstance
+          .getConversationManager()
+          .getConversation(conversationID: conversationID);
+      debugPrint(' 💬👄 Conversation response code: ${res.code}');
+      debugPrint(' 💬👄👄 Conversation data: ${res.data!.toJson().toString()}');
+      if (res.code == 0) {
+        final conversation = res.data;
+        if (conversation != null) {
+          debugPrint(
+            '💬👄👄👄 Navigating to chat with conversation: $conversation',
+          );
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Chat(
+                selectedConversation: conversation,
+                customerServiceUserID: customerServiceUserID,
+              ),
+            ),
+          );
+        } else {
+          debugPrint('Conversation is null');
+        }
+      } else {
+        debugPrint('Failed to fetch conversation');
+      }
+    } else {
+      // DownloadModal.showModal(context);
+      await showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        builder: (_) => const DownloadAppBottomSheet(),
+      );
     }
   }
 }

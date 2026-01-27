@@ -40,10 +40,13 @@
     dio: ^5.4.0
 
     intl: ^0.20.2
-    dotted_border: ^3.1.0
+    # dotted_border: ^3.1.0
+    dotted_border: ^2.1.0
     image_picker: ^1.2.1
     easy_refresh: ^3.4.0
-    flutter_widget_from_html: ^0.17.1
+    
+    # flutter_widget_from_html: ^0.17.1
+    flutter_widget_from_html: 0.15.3
 
     flutter_localizations:
       sdk: flutter
@@ -58,13 +61,25 @@
     permission_handler: ^11.3.0
     qr_code_scanner_plus: ^2.0.14
     table_calendar: ^3.2.0  
-    flutter_html: ^3.0.0
+    # flutter_html: ^3.0.0
     shimmer: ^3.0.0
     lazy_load_indexed_stack: ^1.2.1
+    # cached_network_image: ^3.4.1
+    cached_network_image: ^3.3.1
+    
+    # CHAT RTC
+    tencent_cloud_chat_uikit: ^5.0.1+4
+    tencent_cloud_chat_customer_service_plugin: ^0.1.10
+    tencent_chat_i18n_tool: ^2.3.8
+    tencent_cloud_chat_sdk: ^8.8.7373
+    wechat_camera_picker: ^4.3.2
+    flutter_easyloading: ^3.0.5
+    provider: ^6.0.5
 
-    cached_network_image: ^3.4.1
-    tencent_cloud_chat_sdk: ^8.8.7373+1
-    url_launcher: ^6.3.2
+
+  dependency_overrides:
+    # Required for tencent_cloud_chat_uikit compatibility
+    image_picker: 1.2.1
     
   dev_dependencies:
     flutter_test:
@@ -131,6 +146,7 @@
       - assets/icons/profile_page/about_us/
       - assets/icons/orders/
       - assets/icons/post_ads/
+      - assets/icons/chat/
 
 
     # An image asset can refer to one or more resolution-specific "variants", see
