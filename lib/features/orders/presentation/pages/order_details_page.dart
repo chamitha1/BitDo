@@ -12,6 +12,7 @@ import 'package:BitOwi/core/widgets/custom_snackbar.dart';
 import 'package:BitOwi/features/orders/presentation/widgets/order_card.dart';
 import 'package:BitOwi/features/orders/presentation/widgets/action_confirmation_bottom_sheet.dart';
 import 'package:BitOwi/features/orders/presentation/widgets/notify_payment_dialog.dart';
+import 'package:BitOwi/features/orders/presentation/widgets/rate_experience_bottom_sheet.dart';
 import 'package:BitOwi/features/orders/utils/order_helper.dart';
 import 'package:BitOwi/models/trade_order_detail_res.dart';
 import 'package:BitOwi/features/auth/presentation/controllers/user_controller.dart';
@@ -165,6 +166,16 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       _hideLoadingDialog();
       _showErrorSnackbar(e.toString());
     }
+  }
+
+  void _showRateExperienceBottomSheet() {
+    RateExperienceBottomSheet.show(
+      context,
+      orderId: widget.orderId,
+      onSuccess: () {
+        _fetchOrderDetail(); // Refresh to update review status if needed
+      },
+    );
   }
 
   // ==================== HELPER METHODS ====================
@@ -439,8 +450,8 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         subtitle = null;
         break;
       case OrderStatus.completed:
-        iconPath = 'assets/icons/orders/clock.svg';
-        bgColor = const Color(0xFFFFFBF6);
+        iconPath = 'assets/icons/orders/tick-circle.svg';
+        bgColor = const Color(0xffEAF9F0);
         title = 'Order Completed';
         subtitle = 'This Order has been Completed';
         break;
@@ -906,22 +917,25 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         );
 
       case OrderStatus.cryptoReleased:
-        return ElevatedButton(
-          onPressed: () {},
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF1D5DE5),
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+        return SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: _showRateExperienceBottomSheet,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF1D5DE5),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-          ),
-          child: const Text(
-            'Leave a Review',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-              fontFamily: 'Inter',
+            child: const Text(
+              'Leave a Review',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+                fontFamily: 'Inter',
+              ),
             ),
           ),
         );
