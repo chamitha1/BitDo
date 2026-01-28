@@ -367,7 +367,7 @@ class _RateExperienceBottomSheetState extends State<RateExperienceBottomSheet> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: bgColor,ii
+          color: bgColor,
           border: Border.all(color: borderColor),
           borderRadius: BorderRadius.circular(8),
         ),
