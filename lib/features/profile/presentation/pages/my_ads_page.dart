@@ -18,6 +18,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:flutter/foundation.dart';
 import 'package:BitOwi/features/p2p/presentation/widgets/download_app_bottom_sheet.dart';
+import 'package:tencent_cloud_chat_uikit/ui/utils/platform.dart';
 
 class MyAdsPage extends StatefulWidget {
   const MyAdsPage({super.key});
@@ -284,37 +285,45 @@ class _MyAdsPageState extends State<MyAdsPage> {
                         debugPrint(" Navigate to userCenter merchant ads");
                       },
 
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            height: 32,
-                            width: 32,
-                            child: ClipOval(
-                              child: ad.photo.isNotEmpty
-                                  ? CommonImage(
-                                      ad.photo,
-                                      fit: BoxFit.cover,
-                                      height: 32,
-                                      width: 32,
-                                    )
-                                  : Container(
-                                      color: const Color(0xFFE8EFFF),
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        _getInitials(ad.nickname),
-                                        style: const TextStyle(
-                                          color: Color(0xFF1D5DE5),
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
+                      child: GestureDetector(
+                        onTap: () {
+                          Get.toNamed(
+                            Routes.merchantProfilePage,
+                            arguments: ad.userId,
+                          );
+                        },
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              height: 32,
+                              width: 32,
+                              child: ClipOval(
+                                child: ad.photo.isNotEmpty
+                                    ? CommonImage(
+                                        ad.photo,
+                                        fit: BoxFit.cover,
+                                        height: 32,
+                                        width: 32,
+                                      )
+                                    : Container(
+                                        color: const Color(0xFFE8EFFF),
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          _getInitials(ad.nickname),
+                                          style: const TextStyle(
+                                            color: Color(0xFF1D5DE5),
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                          ),
                                         ),
                                       ),
-                                    ),
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 10),
-                          // Nickname
-                          AppText.p2SemiBold(ad.nickname),
-                        ],
+                            const SizedBox(width: 10),
+                            // Nickname
+                            AppText.p2SemiBold(ad.nickname),
+                          ],
+                        ),
                       ),
                     ),
                     Spacer(),
@@ -612,11 +621,15 @@ class _MyAdsPageState extends State<MyAdsPage> {
         builder: (_) => const DownloadAppBottomSheet(),
       );
     } else {
-      //todo:
-      // if (!PlatformUtils().isMobile) {
-      //   DownloadModal.showModal(context);
-      //   return;
-      // }
+      if (!PlatformUtils().isMobile) {
+        await showModalBottomSheet(
+          context: context,
+          backgroundColor: Colors.transparent,
+          isScrollControlled: true,
+          builder: (_) => const DownloadAppBottomSheet(),
+        );
+        return;
+      }
       AppLogger.d("Post ad: ${ad.id}");
 
       showCommonConfirmDialog(
@@ -676,11 +689,16 @@ class _MyAdsPageState extends State<MyAdsPage> {
         builder: (_) => const DownloadAppBottomSheet(),
       );
     } else {
-      //todo:
-      // if (!PlatformUtils().isMobile) {
-      //   DownloadModal.showModal(context);
-      //   return;
-      // }
+      if (!PlatformUtils().isMobile) {
+        await showModalBottomSheet(
+          context: context,
+          backgroundColor: Colors.transparent,
+          isScrollControlled: true,
+          builder: (_) => const DownloadAppBottomSheet(),
+        );
+        return;
+      }
+
       AppLogger.d("Turn off ad: ${ad.id}");
 
       showCommonConfirmDialog(
@@ -737,10 +755,15 @@ class _MyAdsPageState extends State<MyAdsPage> {
       return;
     }
     //todo:
-    // if (!PlatformUtils().isMobile) {
-    //   DownloadModal.showModal(context);
-    //   return;
-    // }
+    if (!PlatformUtils().isMobile) {
+      await showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        builder: (_) => const DownloadAppBottomSheet(),
+      );
+      return;
+    }
     AppLogger.d(" Navigate to edit ad page / Edit ad: ${ad.id}");
     final result = await Get.toNamed(
       Routes.postAdsPage,

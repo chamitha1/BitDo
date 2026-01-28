@@ -124,8 +124,6 @@ class UserController extends GetxController {
     }
     // Init + Login IM (MOBILE ONLY)
     if (PlatformUtils().isMobile) {
-      debugPrint("💬 IMConfig.sdkappid: ${IMConfig.sdkappid}");
-
       await IMUtil.initIMSDKAndAddIMListeners(currentUser.id!);
       await IMUtil.loginIMUser(currentUser.id!);
     }
@@ -213,22 +211,14 @@ class UserController extends GetxController {
     }
 
     if (PlatformUtils().isMobile) {
-      debugPrint(
-        "💬🆔 userController.customerServiceUserID : $customerServiceUserID",
-      );
       String conversationID = 'c2c_$customerServiceUserID';
-      debugPrint('💬🆔 Fetching conversation with ID: $conversationID');
       final res = await IMUtil.sdkInstance
           .getConversationManager()
           .getConversation(conversationID: conversationID);
-      debugPrint(' 💬👄 Conversation response code: ${res.code}');
-      debugPrint(' 💬👄👄 Conversation data: ${res.data!.toJson().toString()}');
+      debugPrint(' 💬 Conversation data Fetched ');
       if (res.code == 0) {
         final conversation = res.data;
         if (conversation != null) {
-          debugPrint(
-            '💬👄👄👄 Navigating to chat with conversation: $conversation',
-          );
           Navigator.push(
             context,
             MaterialPageRoute(

@@ -59,8 +59,8 @@ class Chat extends StatefulWidget {
 
 class _ChatState extends State<Chat> {
   final TIMUIKitChatController _chatController = TIMUIKitChatController();
-  // final themeController = Get.find<ThemeController>(); // 🟢
-  final stickerController = Get.find<CustomStickerPackageController>(); // 🟢
+  // final themeController = Get.find<ThemeController>();
+  final stickerController = Get.find<CustomStickerPackageController>();
 
   String? backRemark;
   final V2TIMManager sdkInstance = TIMUIKitCore.getSDKInstance();
@@ -163,9 +163,9 @@ class _ChatState extends State<Chat> {
 
   //   return Obx(() {
   //     final customStickerPackageList =
-  //         stickerController.customStickerPackageList; // 🟢
+  //         stickerController.customStickerPackageList;
   //     return StickerPanel(
-        
+
   //       height: height,
   //       width: width,
   //       sendTextMsg: sendTextMessage,
@@ -272,8 +272,7 @@ class _ChatState extends State<Chat> {
   @override
   Widget build(BuildContext context) {
     // final theme = Provider.of<ThemeProvider>(context).imTheme;
-    final TUITheme imTheme =
-        serviceLocator<TUIThemeViewModel>().theme; 
+    final TUITheme imTheme = serviceLocator<TUIThemeViewModel>().theme;
     // final customTheme = Provider.of<ThemeProvider>(context).customTheme;
     // final customThemeImage = Provider.of<ThemeProvider>(
     //   context,

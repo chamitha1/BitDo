@@ -10,6 +10,7 @@ import 'package:BitOwi/core/widgets/soft_circular_loader.dart';
 import 'package:BitOwi/features/auth/presentation/controllers/user_controller.dart';
 import 'package:BitOwi/models/bankcard_channel_list_res.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart' as dio;
 
@@ -177,26 +178,20 @@ class _AddMobileMoneyPageState extends State<AddMobileMoneyPage> {
     return DropdownButtonFormField<String>(
       value: _selectedProvider,
       style: AppTextStyles.p2Regular,
-      hint: const Text(
-        'Select Currency',
-        style: TextStyle(
-          fontFamily: 'Inter',
-          fontWeight: FontWeight.w400,
-          fontSize: 14,
-          color: Color(0xFF717F9A),
-        ),
-      ),
+      hint: AppText.p2Regular('Select Provider', color: Color(0xFF717F9A)),
       decoration: AppInputDecorations.textField(),
+      dropdownColor: Colors.white,
       items: providerList.map((BankcardChannelListRes item) {
         return DropdownMenuItem<String>(
           value: item.id,
-          child: Text(item.bankName),
+          child: AppText.p2Regular(item.bankName),
         );
       }).toList(),
       onChanged: (value) => setState(() => _selectedProvider = value),
       icon: const Icon(
         Icons.keyboard_arrow_down_rounded,
-        color: Color(0xFF717F9A),
+        color: Color(0xFF2E3D5B),
+        size: 20,
       ),
       validator: (value) => value == null ? "Please select a provider" : null,
     );
@@ -212,16 +207,28 @@ class _AddMobileMoneyPageState extends State<AddMobileMoneyPage> {
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          const Icon(Icons.lightbulb_outline, color: Color(0xFFFF8A00)),
+          SvgPicture.asset(
+            'assets/icons/profile_page/lightbulb-alt.svg',
+            width: 20,
+            height: 20,
+          ),
           const SizedBox(width: 10),
           Expanded(
-            child: AppText.p3Regular(
-              "During trade details of the added payment method will be shown "
-              "to the buyer to make due payment, whereas sellers will see "
-              "the buyer's real name. Please ensure that the information is "
-              "correct and matches your KYC information.",
-              color: const Color(0xFFC9710D),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppText.p1Medium(
+                  "Trading Alert",
+                  color: const Color(0xFFC9710D),
+                ),
+                const SizedBox(height: 10),
+                AppText.p3Regular(
+                  "During trade details of the added payment method will be shown to the buyer to make due payment, whereas sellers will see the buyer's real name. Please ensure that the information is correct, real, and matches your KYC information on Bitowi Mobile Money, Nigerian Naira (NGN) currency is set by default.",
+                  color: const Color(0xFFC9710D),
+                ),
+              ],
             ),
           ),
         ],

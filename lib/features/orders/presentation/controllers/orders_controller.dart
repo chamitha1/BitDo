@@ -1,7 +1,12 @@
 import 'package:BitOwi/utils/app_logger.dart';
+import 'package:BitOwi/utils/im_util.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:BitOwi/api/p2p_api.dart';
 import 'package:BitOwi/models/trade_order_page_res.dart';
+import 'package:tencent_cloud_chat_sdk/enum/V2TimAdvancedMsgListener.dart';
+import 'package:tencent_cloud_chat_sdk/enum/V2TimConversationListener.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_conversation.dart';
 
 class OrdersController extends GetxController {
   final RxInt currentTabIndex = 0.obs;
@@ -105,63 +110,58 @@ class OrdersController extends GetxController {
     await fetchOrders(isRefresh: true);
   }
 
+  // order chat
+  List<V2TimConversation?> conversationList = [];
 
+  Future<void> orderItemUnreadConvoLoad() async {
+    try {
+      final res = await IMUtil.sdkInstance
+          .getConversationManager()
+          .getConversationList(nextSeq: '0', count: 100);
+      conversationList = res.data?.conversationList ?? [];
+      setUnreadCount();
+    } catch (e) {}
 
-//  // order chat 
-//   int unReadCount = 0;
+    IMUtil.sdkInstance.getConversationManager().addConversationListener(
+      listener: V2TimConversationListener(
+        onConversationChanged: (_conversationList) {
+          conversationList = _conversationList;
+          setUnreadCount();
+        },
+      ),
+    );
+    IMUtil.sdkInstance.getMessageManager().addAdvancedMsgListener(
+      listener: V2TimAdvancedMsgListener(
+        onRecvNewMessage: (msg) async {
+          try {
+            final res = await IMUtil.sdkInstance
+                .getConversationManager()
+                .getConversationList(nextSeq: '0', count: 100);
+            conversationList = res.data?.conversationList ?? [];
+            setUnreadCount();
+          } catch (e) {}
+        },
+      ),
+    );
+  }
 
-//   List<V2TimConversation?> conversationList = [];
+  void setUnreadCount() {
+    if (ordersList.isEmpty || conversationList.isEmpty) return;
 
-//   Future<void> getIMData() async {
-//     try {
-//       final res = await IMUtil.sdkInstance
-//           .getConversationManager()
-//           .getConversationList(nextSeq: '0', count: 100);
-//       conversationList = res.data?.conversationList ?? [];
-//       setUnreadCount();
-//     } catch (e) {}
-
-//     IMUtil.sdkInstance.getConversationManager().addConversationListener(
-//       listener: V2TimConversationListener(
-//         onConversationChanged: (_conversationList) {
-//           conversationList = _conversationList;
-//           setUnreadCount();
-//         },
-//       ),
-//     );
-//     IMUtil.sdkInstance.getMessageManager().addAdvancedMsgListener(
-//       listener: V2TimAdvancedMsgListener(
-//         onRecvNewMessage: (msg) async {
-//           try {
-//             final res = await IMUtil.sdkInstance
-//                 .getConversationManager()
-//                 .getConversationList(nextSeq: '0', count: 100);
-//             conversationList = res.data?.conversationList ?? [];
-//             setUnreadCount();
-//           } catch (e) {}
-//         },
-//       ),
-//     );
-//   }
-
-//   void setUnreadCount() {
-//     if (ordersList.isEmpty || conversationList.isEmpty) return;
-
-//     // bool flag = false;
-//     for (int i = 0; i < ordersList.length; i++) {
-//       final orderId = ordersList[i].id;
-//       final index = conversationList.indexWhere(
-//         (element) => element?.groupID == orderId.toString(),
-//       );
-//       if (index > -1) {
-//         ordersList[i].unReadCount =
-//             conversationList[index]?.unreadCount ?? 0;
-//         debugPrint("unReadCount🚀 ${ordersList[i].unReadCount}");
-//         // flag = true;
-//       }
-//     }
-//     // if (flag && mounted) {
-//     //   setState(() {});
-//     // }
-//   }
+    // bool flag = false;
+    for (int i = 0; i < ordersList.length; i++) {
+      final orderId = ordersList[i].id;
+      final index = conversationList.indexWhere(
+        (element) => element?.groupID == orderId.toString(),
+      );
+      if (index > -1) {
+        ordersList[i].unReadCount = conversationList[index]?.unreadCount ?? 0;
+        debugPrint("unReadCount🚀 ${ordersList[i].unReadCount}");
+        // flag = true;
+      }
+    }
+    // if (flag && mounted) {
+    //   setState(() {});
+    // }
+  }
 }

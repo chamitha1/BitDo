@@ -48,46 +48,49 @@ class TradeOrderPageRes {
 class TradeOrderItem {
   @JsonKey(fromJson: _dynamicToInt)
   final int? buyUser;
-  
+
   final String? buyerNickname;
   final String? buyerPhoto;
-  
+
   @JsonKey(fromJson: _dynamicToInt)
   final int? sellUser;
-  
+
   final String? sellerNickname;
   final String? sellerPhoto;
   final List<dynamic>? statusList;
-  
+
   @JsonKey(fromJson: _dynamicToInt)
   final int? id;
-  
+
   final String? type;
   final String? tradeCurrency;
   final String? tradeCoin;
-  
+
   @JsonKey(fromJson: _dynamicToDouble)
   final double? tradeAmount;
-  
+
   @JsonKey(fromJson: _dynamicToDouble)
   final double? count;
-  
+
   @JsonKey(fromJson: _dynamicToInt)
   final int? number;
-  
+
   @JsonKey(fromJson: _dynamicToInt)
   final int? userId;
-  
+
   final String? realName;
-  
+
   @JsonKey(fromJson: _dynamicToInt)
   final int? status;
-  
+
   @JsonKey(fromJson: _dynamicToInt)
   final int? createDatetime;
-  
+
   @JsonKey(fromJson: _dynamicToInt)
   final int? adsId;
+
+  @JsonKey(fromJson: _dynamicToInt)
+  int? unReadCount;
 
   TradeOrderItem({
     this.buyUser,
@@ -109,6 +112,7 @@ class TradeOrderItem {
     this.status,
     this.createDatetime,
     this.adsId,
+    this.unReadCount,
   });
 
   factory TradeOrderItem.fromJson(Map<String, dynamic> json) =>

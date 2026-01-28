@@ -215,20 +215,12 @@ class _AddBankCardPageState extends State<AddBankCardPage> {
     return DropdownButtonFormField<String>(
       value: _selectedCoin,
       style: AppTextStyles.p2Regular,
-      hint: Text(
-        'Select Currency',
-        style: const TextStyle(
-          fontFamily: 'Inter',
-          fontWeight: FontWeight.w400,
-          fontSize: 14,
-          color: Color(0xFF717F9A),
-        ),
-      ),
+      hint: AppText.p2Regular('Select Currency', color: Color(0xFF717F9A)),
       decoration: AppInputDecorations.textField(),
       items: coinList.map((Dict coin) {
         return DropdownMenuItem<String>(
           value: coin.key,
-          child: Text(coin.value),
+          child: AppText.p2Regular(coin.value),
         );
       }).toList(),
       onChanged: (value) {
@@ -238,8 +230,8 @@ class _AddBankCardPageState extends State<AddBankCardPage> {
       },
       icon: const Icon(
         Icons.keyboard_arrow_down_rounded,
-        color: Color(0xFF717F9A),
-        size: 24,
+        color: Color(0xFF2E3D5B),
+        size: 20,
       ),
       validator: (value) =>
           (value == null || value.isEmpty) ? "Please select a currency" : null,
@@ -260,7 +252,6 @@ class _AddBankCardPageState extends State<AddBankCardPage> {
         "bankName": _bankAccountNoController.text.trim(),
         "currency": _selectedCoin,
       };
-
 
       late final dio.Response<dynamic> response;
       if (bankcardId.isNotEmpty) {

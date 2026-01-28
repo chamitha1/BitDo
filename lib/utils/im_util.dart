@@ -92,7 +92,7 @@ class IMUtil {
                 AppLogger.d(callbackValue.catchError.toString());
               }
             } else {
-              AppLogger.e(callbackValue, stackTrace:  callbackValue.stackTrace);
+              AppLogger.e(callbackValue, stackTrace: callbackValue.stackTrace);
             }
         }
       },
@@ -137,7 +137,7 @@ class IMUtil {
     }
   }
 
-  /// 设置自定义表情
+  /// Set custom emoticon
   static Future<void> setCustomSticker(BuildContext context) async {
     List<CustomStickerPackage> customStickerPackageList = [];
 
@@ -183,20 +183,18 @@ class IMUtil {
     );
     // Provider.of<CustomStickerPackageData>(context, listen: false)
     //     .customStickerPackageList = customStickerPackageList;
-    final stickerController =
-        Get.find<CustomStickerPackageController>(); // 🟢 NEW
+    final stickerController = Get.find<CustomStickerPackageController>();
 
-    stickerController.customStickerPackageList =
-        customStickerPackageList; // 🟢 NEW
+    stickerController.customStickerPackageList = customStickerPackageList;
   }
 
   static Future<void> loginIMUser(String userId) async {
     try {
       final sign = await IMApi.getSign();
-      AppLogger.d("💬🔑 IMApi.getSign(); sign : $sign");
+      AppLogger.d("💬 IMApi sign");
 
       final data = await _coreInstance.login(userID: userId, userSig: sign);
-      AppLogger.d("💬✅ data : ${data.desc}");
+      AppLogger.d("💬 login");
 
       if (data.code != 0) {
         final option1 = data.desc;

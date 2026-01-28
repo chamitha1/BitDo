@@ -1,4 +1,5 @@
 import 'package:BitOwi/features/home/presentation/controllers/balance_controller.dart';
+import 'package:BitOwi/features/orders/presentation/controllers/orders_controller.dart';
 import 'package:BitOwi/utils/app_logger.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
@@ -112,6 +113,10 @@ class _HomeScreenState extends State<HomeScreen> {
           if (index == 3) {
             // Profile index
             Get.find<UserController>().fetchNotificationCount();
+          }
+          if (index == 2) {
+            // Order index
+            Get.find<OrdersController>().orderItemUnreadConvoLoad();
           }
         },
       ),

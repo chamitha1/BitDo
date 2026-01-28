@@ -561,14 +561,13 @@ class _PostAdsPageState extends State<PostAdsPage> {
       });
 
       String publishType = '';
-      // if (id.isNotEmpty) {
-      //   //todo has a issue here
-      //   publishType = status == '1' ? '3' : '2';
-      // } else {
-      //   publishType = saveDraft ? "0" : "1";
-      // }
-      //todo: temp below
-      publishType = saveDraft ? "0" : "1";
+      if (id.isNotEmpty) {
+        //todo has a issue here
+        // publishType = status == '1' ? '3' : '2';
+        publishType = saveDraft ? "0" : "2";
+      } else {
+        publishType = saveDraft ? "0" : "1";
+      }
 
       final params = {
         "publishType": publishType,
@@ -603,7 +602,6 @@ class _PostAdsPageState extends State<PostAdsPage> {
         // OPEN HOUR
         "displayTime": openHour == 'any'
             ? []
-            //todo check
             : timeSlots
                   .map(
                     (e) => {

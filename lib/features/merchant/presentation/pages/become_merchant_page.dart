@@ -59,7 +59,7 @@ class BecomeMerchantPage extends StatelessWidget {
               child: Column(
                 children: [
                   const SizedBox(height: 50),
-                  // 🟢 ICON
+                  //   ICON
                   Container(
                     width: 80,
                     height: 80,

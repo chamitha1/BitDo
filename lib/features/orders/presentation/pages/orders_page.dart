@@ -148,7 +148,7 @@ class _OrdersPageState extends State<OrdersPage> with WidgetsBindingObserver {
           ? (orderItem.sellerPhoto ?? '')
           : (orderItem.buyerPhoto ?? ''),
       isCertified: Get.find<UserController>().user.value?.merchantStatus == '1',
-      hasUnreadMessages: false,
+      hasUnreadMessages: orderItem.unReadCount != null && orderItem.unReadCount! > 0,
       onTap: () => Get.to(
         () => OrderDetailsPage(orderId: orderItem.id?.toString() ?? ''),
       ),

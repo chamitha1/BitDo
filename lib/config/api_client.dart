@@ -1,10 +1,12 @@
 import 'dart:ui';
 import 'dart:convert';
 import 'package:BitOwi/config/config.dart';
+import 'package:BitOwi/config/routes.dart';
 import 'package:BitOwi/core/storage/storage_service.dart';
 import 'package:BitOwi/utils/app_logger.dart';
+import 'package:BitOwi/utils/im_util.dart';
 import 'package:dio/dio.dart';
-import 'package:get/get.dart';
+import 'package:get/route_manager.dart';
 
 class ApiClient {
   static final Dio dio =
@@ -56,14 +58,58 @@ class ApiClient {
               AppLogger.d("------------API Response------------");
               AppLogger.d("URI: ${response.requestOptions.uri}");
               AppLogger.d("Code: ${response.statusCode}");
-              return handler.next(response);
+              // return handler.next(response);
+
+              if (isSuccess(response)) {
+                return handler.next(response);
+              }
+              String errorMsg = getErrorMsg(response);
+              return handler.reject(
+                DioException(
+                  requestOptions: response.requestOptions,
+                  error: errorMsg,
+                  response: response,
+                ),
+              );
             },
-            onError: (DioException e, handler) {
-              AppLogger.d("------------API Error------------");
-              AppLogger.d("URI: ${e.requestOptions.uri}");
-              AppLogger.d("Msg: ${e.message}");
+            onError: (DioException e, handler) async {
+              final statusCode = e.response?.statusCode;
+              final data = e.response?.data;
+
+              bool isSessionExpired = false;
+
+              // 1) HTTP unauthorized
+              if (statusCode == 401) {
+                isSessionExpired = true;
+              }
+
+              // 2) Some APIs return 200 but include code inside body
+              if (data is Map && (data['code'] == 401 || data['code'] == '401')) {
+                isSessionExpired = true;
+              }
+
+              if (isSessionExpired) {
+                // clear local session
+                await StorageService.removeToken();
+                await IMUtil.logoutIMUser();
+
+                // avoid navigation loop
+                if (Get.currentRoute != Routes.login) {
+                  Get.offAllNamed(Routes.login);
+
+                  // optional message
+                  Get.snackbar(
+                    'Session Expired',
+                    'You have been logged out because your account was used on another device.',
+                    snackPosition: SnackPosition.BOTTOM,
+                  );
+                }
+              }
+
               return handler.next(e);
             },
+
+
           ),
         );
 
@@ -75,4 +121,43 @@ class ApiClient {
       return null;
     }
   }
+}
+
+bool isSuccess(Response<dynamic> response) {
+  return response.statusCode == 200 && response.data['code'] == '200';
+}
+
+bool _isAuthError(String errorCode, String code) {
+  if (code == '300') {
+    return true;
+  }
+  switch (errorCode) {
+    // token error
+    case '300000':
+    // token expires
+    case '300001':
+    // Token cannot be empty
+    case '300002':
+    // User authentication failed
+    case 'A50004':
+      return true;
+    default:
+      return false;
+  }
+}
+
+String getErrorMsg(Response<dynamic> response) {
+  if (response.statusCode != 200) {
+    return "Network timeout, please try again";
+  }
+  String errorCode = response.data['errorCode'];
+  String code = response.data['code'];
+  if (_isAuthError(errorCode, code)) {
+    StorageService.removeToken();
+    IMUtil.logoutIMUser();
+    Get.toNamed(Routes.login);
+    // EventBusUtil.fireUserLogout();
+    return "Your login has expired, please log in again";
+  }
+  return response.data['errorMsg'] ?? "Network timeout, please try again";
 }

@@ -1,6 +1,10 @@
+import 'package:BitOwi/features/p2p/presentation/widgets/download_app_bottom_sheet.dart';
+import 'package:BitOwi/features/profile/presentation/pages/chat.dart';
+import 'package:BitOwi/utils/im_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:BitOwi/core/widgets/common_image.dart';
+import 'package:tencent_cloud_chat_uikit/ui/utils/platform.dart';
 
 enum OrderStatus {
   pending,
@@ -42,6 +46,7 @@ class OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("🚀🚀🚀🚀  hasUnreadMessages :${hasUnreadMessages}");
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -95,11 +100,12 @@ class OrderCard extends StatelessWidget {
                   children: [
                     _buildStatusBadge(),
                     // Only show chat icon for pending order and arbitration
-                    if (status == OrderStatus.pending ||
-                        status == OrderStatus.arbitration) ...[
-                      const SizedBox(width: 12),
-                      _buildChatIcon(),
-                    ],
+                    // if (status == OrderStatus.pending ||
+                    //     status == OrderStatus.arbitration) ...[
+                    //   const SizedBox(width: 12),
+                    //   _buildChatIcon(context, orderNo),
+                    // ],
+                    if (hasUnreadMessages) _buildChatIcon(context, orderNo),
                   ],
                 ),
               ],
@@ -257,29 +263,63 @@ class OrderCard extends StatelessWidget {
     );
   }
 
-  Widget _buildChatIcon() {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        SvgPicture.asset(
-          'assets/icons/orders/messages.svg',
-          width: 20,
-          height: 20,
-        ),
-        if (hasUnreadMessages)
-          Positioned(
-            right: -2,
-            top: -2,
-            child: Container(
-              width: 8,
-              height: 8,
-              decoration: const BoxDecoration(
-                color: Color(0xFFE74C3C),
-                shape: BoxShape.circle,
+  Widget _buildChatIcon(BuildContext context, String id) {
+    return GestureDetector(
+      onTap: () async {
+        if (PlatformUtils().isMobile) {
+          // 🔹 Build group conversation ID
+          final String groupId = 'group_$id';
+
+          // 🔹 Fetch conversation from IM SDK
+          final res = await IMUtil.sdkInstance
+              .getConversationManager()
+              .getConversation(conversationID: groupId);
+
+          if (res.code == 0) {
+            final conversation = res.data;
+            if (conversation != null && context.mounted) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      Chat(selectedConversation: conversation),
+                ),
+              );
+            }
+          }
+        } else {
+          // DownloadModal.showModal(context);
+          await showModalBottomSheet(
+            context: context,
+            backgroundColor: Colors.transparent,
+            isScrollControlled: true,
+            builder: (_) => const DownloadAppBottomSheet(),
+          );
+        }
+      },
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          SvgPicture.asset(
+            'assets/icons/orders/messages.svg',
+            width: 20,
+            height: 20,
+          ),
+          if (hasUnreadMessages) // no need anyway enabled
+            Positioned(
+              right: -2,
+              top: -2,
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFE74C3C),
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 

@@ -51,6 +51,7 @@ TradeOrderItem _$TradeOrderItemFromJson(Map<String, dynamic> json) =>
       status: _dynamicToInt(json['status']),
       createDatetime: _dynamicToInt(json['createDatetime']),
       adsId: _dynamicToInt(json['adsId']),
+      unReadCount: _dynamicToInt(json['unReadCount']),
     );
 
 Map<String, dynamic> _$TradeOrderItemToJson(TradeOrderItem instance) =>
@@ -74,4 +75,5 @@ Map<String, dynamic> _$TradeOrderItemToJson(TradeOrderItem instance) =>
       'status': instance.status,
       'createDatetime': instance.createDatetime,
       'adsId': instance.adsId,
+      'unReadCount': instance.unReadCount,
     };
