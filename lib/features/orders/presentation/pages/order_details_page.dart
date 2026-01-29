@@ -12,7 +12,9 @@ import 'package:BitOwi/core/widgets/custom_snackbar.dart';
 import 'package:BitOwi/features/orders/presentation/widgets/order_card.dart';
 import 'package:BitOwi/features/orders/presentation/widgets/action_confirmation_bottom_sheet.dart';
 import 'package:BitOwi/features/orders/presentation/widgets/notify_payment_dialog.dart';
+import 'package:BitOwi/features/orders/presentation/widgets/confirm_release_dialog.dart';
 import 'package:BitOwi/features/orders/presentation/widgets/rate_experience_bottom_sheet.dart';
+
 import 'package:BitOwi/features/orders/utils/order_helper.dart';
 import 'package:BitOwi/models/trade_order_detail_res.dart';
 import 'package:BitOwi/features/auth/presentation/controllers/user_controller.dart';
@@ -907,28 +909,52 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         );
 
       case OrderStatus.pendingReleased:
-        //outlined button
-        return SizedBox(
-          width: double.infinity,
-          child: OutlinedButton(
-            onPressed: _showArbitrationBottomSheet,
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              side: const BorderSide(color: Color(0xFF1D5DE5), width: 2),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+        return Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: _showArbitrationBottomSheet,
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  side: const BorderSide(color: Color(0xFF1D5DE5), width: 2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Request for Arbitration',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1D5DE5),
+                    fontFamily: 'Inter',
+                  ),
+                ),
               ),
             ),
-            child: const Text(
-              'Request for Arbitration',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF1D5DE5),
-                fontFamily: 'Inter',
+            const SizedBox(width: 16),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: _showConfirmReleaseDialog,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1D5DE5),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Go Release',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                    fontFamily: 'Inter',
+                  ),
+                ),
               ),
             ),
-          ),
+          ],
         );
 
       case OrderStatus.cryptoReleased:
@@ -967,6 +993,34 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       case OrderStatus.cancelled:
       case OrderStatus.arbitration:
         return const SizedBox.shrink();
+    }
+  }
+
+  void _showConfirmReleaseDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => ConfirmReleaseDialog(
+        onConfirm: (pin) {
+          _handleReleaseOrder(pin);
+        },
+      ),
+    );
+  }
+
+  Future<void> _handleReleaseOrder(String pin) async {
+    _showLoadingDialog();
+    try {
+      await P2PApi.releaseOrder(widget.orderId, pin);
+      _hideLoadingDialog();
+      CustomSnackbar.showSuccess(
+        title: "Success",
+        message: "Order released successfully",
+      );
+      _fetchOrderDetail();
+    } catch (e) {
+      _hideLoadingDialog();
+      CustomSnackbar.showError(title: "Error", message: e.toString());
     }
   }
 }
